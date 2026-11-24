@@ -23,7 +23,11 @@ class IngestManager:
             for r in roots:
                 if not os.path.isdir(r):
                     raise FileNotFoundError(f"not a folder: {r}")
-                if os.path.commonpath([os.path.abspath(self.library), r]) == r:
+                try:
+                    inside = os.path.commonpath([os.path.abspath(self.library), r]) == r
+                except ValueError:                       # different drives on Windows: cannot be inside
+                    inside = False
+                if inside:
                     raise ValueError("the library folder must not be inside a source folder")
             if storage not in ("ssd", "hdd"):
                 raise ValueError("storage must be 'ssd' or 'hdd'")

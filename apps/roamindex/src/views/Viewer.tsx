@@ -9,7 +9,7 @@ const TIME_SOURCE: Record<string, string> = {
 };
 const GPS_SOURCE: Record<string, string> = {
   exif: "camera (EXIF GPS)", container: "video file", sidecar_geoData: "Google Takeout sidecar",
-  sidecar_geoDataExif: "Google Takeout sidecar (EXIF copy)", manual: "added by you in RoamIndex",
+  sidecar_geoDataExif: "Google Takeout sidecar (EXIF copy)", manual: "added by you in Backthen",
 };
 
 /** Formats the webview can usually play directly; others fall back to frame previews + "open in player". */

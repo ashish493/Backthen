@@ -1,11 +1,47 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, fmtInt, mediaUrl, type Asset, type Filters } from "../api";
-import { Grid, Icon, Sentinel, usePaged } from "../components";
+import { Grid, Icon, Sentinel, SkeletonGrid, usePaged } from "../components";
+import { Memories, WorldStrip, useJourneys, type MemoryOpen } from "./Memories";
 import { Viewer } from "./Viewer";
 
 export type SimilarReq = { asset: Asset; frame?: number } | null;
 
 const EXAMPLES = ["sunset over the sea", "a temple", "street food", "mountains in fog", "a train", "people dancing", "snow"];
+const PAUSE_MS = 400;                                  // search when typing pauses this long
+const RECENT_KEY = "backthen.recentSearches";          // kept in this computer's browser storage only
+const RECENT_MAX = 8;
+
+function loadRecent(): string[] {
+  try { const v = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); return Array.isArray(v) ? v.filter((s) => typeof s === "string") : []; }
+  catch { return []; }
+}
+function saveRecent(xs: string[]) { try { localStorage.setItem(RECENT_KEY, JSON.stringify(xs)); } catch { /* storage unavailable */ } }
+
+const monthLabel = (m: string) => {
+  const [y, mo] = m.split("-").map(Number);
+  return new Date(Date.UTC(y, mo - 1, 1)).toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+};
+
+/** Decoration for the home hero: a dotted flight route with a small plane gliding along it, over a faint map-dot field. */
+function FlightPath() {
+  const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const d = "M 40 190 C 160 60, 320 40, 430 110 S 650 170, 770 50";
+  return (
+    <svg className="flightpath" viewBox="0 0 800 220" preserveAspectRatio="xMaxYMid meet" aria-hidden>
+      <path className="route" d={d} />
+      <circle className="town" cx="40" cy="190" r="4" /><circle className="town" cx="430" cy="110" r="4" /><circle className="town" cx="770" cy="50" r="4" />
+      <g className="plane">
+        <path d="M14 0 L4 -2.4 L-2 -12 L-5.2 -12 L-2 -2.4 L-10 -2 L-13 -6 L-14.8 -6 L-12.8 0 L-14.8 6 L-13 6 L-10 2 L-2 2.4 L-5.2 12 L-2 12 L4 2.4 Z" />
+        {!still && <animateMotion dur="14s" repeatCount="indefinite" rotate="auto" path={d} keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.45 0 0.55 1" />}
+      </g>
+    </svg>
+  );
+}
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+};
 
 export function FilterBar({ f, setF }: { f: Filters; setF: (f: Filters) => void }) {
   const [from, setFrom] = useState(f.from || "");
@@ -41,17 +77,36 @@ export function FilterBar({ f, setF }: { f: Filters; setF: (f: Filters) => void 
   );
 }
 
-export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnMap }: {
+export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnMap, onHome }: {
+  onHome: () => void;
   similar: SimilarReq; setSimilar: (s: SimilarReq) => void; filters: Filters; setFilters: (f: Filters) => void;
   onShowOnMap: (a: Asset) => void;
 }) {
-  const initial = new URLSearchParams(location.search).get("q") || "";
+  const [initial] = useState(() => {                   // development: ?q= applies to the first visit only
+    const v = new URLSearchParams(location.search).get("q") || "";
+    if (v) history.replaceState(null, "", location.pathname + location.search.replace(/([?&])q=[^&]*&?/, "$1"));
+    return v;
+  });
   const [input, setInput] = useState(initial);
   const [q, setQ] = useState(initial);
   const [open, setOpen] = useState<number | null>(null);
+  const [recent, setRecent] = useState<string[]>(loadRecent);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Ctrl+K or "/" focuses the search box from anywhere in this view (not while typing in another field)
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if (document.querySelector(".overlay")) return;            // the viewer is open
+      const typing = e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+      if ((e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) {
+        e.preventDefault(); inputRef.current?.focus(); inputRef.current?.select();
+      }
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, []);
 
   // library-aware suggestions: queries with the strongest matches in this library (fixed examples as fallback)
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -60,6 +115,22 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
       .catch(() => setSuggestions(EXAMPLES));
   }, []);
   useEffect(() => { if (similar) { setOpen(null); } }, [similar]);
+
+  // search as you pause typing
+  useEffect(() => {
+    const t = input.trim();
+    if (t === q) return;
+    const id = setTimeout(() => { setSimilar(null); setQ(t); }, PAUSE_MS);
+    return () => clearTimeout(id);
+  }, [input]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const remember = (t: string) => {
+    if (!t) return;
+    const xs = [t, ...recent.filter((r) => r.toLowerCase() !== t.toLowerCase())].slice(0, RECENT_MAX);
+    setRecent(xs); saveRecent(xs);
+  };
+  const run = (t: string) => { setInput(t); setSimilar(null); setQ(t.trim()); remember(t.trim()); };
+  const submit = () => run(input);
 
   const key = JSON.stringify([q, filters, similar?.asset.asset_id, similar?.frame]);
   const load = useCallback((offset: number) => {
@@ -73,8 +144,18 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
     if (o !== null && items.length > Number(o) && open === null) setOpen(Number(o));
   }, [items.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const submit = () => { setSimilar(null); setQ(input.trim()); };
+  const journeys = useJourneys();
+  const [opened, setOpened] = useState<MemoryOpen | null>(null);
+  const [moreChips, setMoreChips] = useState(false);
   const mode = similar ? "similar" : q.trim() ? "search" : "browse";
+  const filtered = Object.values(filters).some((v) => v !== undefined && v !== "" && v !== false);
+  const home = mode === "browse" && !filtered;
+  // a Memories card opened: exactly one month, nothing else
+  const datesOnly = mode === "browse"
+    && Object.entries(filters).every(([k, v]) => k === "from" || k === "to" || v === undefined || v === "" || v === false);
+  const memoryLabel = !datesOnly ? null
+    : opened && filters.from === opened.from && filters.to === opened.to ? opened.label
+    : filters.from && filters.from === filters.to && /^\d{4}-\d{2}$/.test(filters.from) ? monthLabel(filters.from) : null;
   const caption = useMemo(() => {
     if (error) return <span className="error">{error}</span>;
     if (total === null) return busy ? "Searching…" : "";
@@ -84,45 +165,108 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
       {meta?.text !== undefined && meta.text !== q && meta.text && <span className="hint"> · searched for "{meta.text}"</span>}</>;
   }, [error, total, busy, meta, mode, q]);
 
-  return (
-    <div className="view">
-      <div className="searchbar">
-        <div className="searchbox">
-          <Icon.search />
-          <input ref={inputRef} value={input} placeholder="Describe what you're looking for — e.g. a beach at sunset, type:video year:2019"
-            onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} />
-          {input && <button className="btn" style={{ padding: "2px 8px", border: 0 }} onClick={() => { setInput(""); setQ(""); setSimilar(null); }}>×</button>}
-        </div>
-        <button className="btn primary" onClick={submit}>Search</button>
+  const searchbar = (
+    <div className="searchbar">
+      <div className="searchbox">
+        <Icon.search />
+        <input ref={inputRef} value={input} aria-label="Search"
+          placeholder={home ? "Describe a moment — a beach at sunset, horses in a field…" : "Describe what you're looking for — e.g. a beach at sunset, type:video year:2019"}
+          onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} />
+        {input
+          ? <button className="clear" aria-label="Clear search" onClick={() => { setInput(""); setQ(""); setSimilar(null); }}><Icon.close /></button>
+          : <kbd title="Focus search from anywhere">Ctrl K</kbd>}
       </div>
-      <FilterBar f={filters} setF={setFilters} />
-      {!similar && suggestions.length > 0 && (
-        <div className="suggest" aria-label="Suggested searches">
-          <span className="hint">Suggested for your library:</span>
-          {suggestions.map((e) => (
-            <button key={e} className={`chip ${q === e ? "on" : ""}`}
-              onClick={() => { setInput(e); setSimilar(null); setQ(e); }}>{e}</button>
+      {!home && <button className="btn primary" onClick={submit}>Search</button>}
+    </div>
+  );
+
+  // on the home screen: one short row each, the rest behind "more"
+  const nRecent = home && !moreChips ? 4 : RECENT_MAX, nTry = home && !moreChips ? 6 : 50;
+  const hidden = Math.max(0, recent.length - nRecent) + Math.max(0, suggestions.length - nTry);
+  const chips = !similar && (
+    <div className="suggest-wrap">
+      {recent.length > 0 && (
+        <div className="suggest" aria-label="Recent searches">
+          <span className="hint">Recent</span>
+          {recent.slice(0, nRecent).map((e) => (
+            <button key={e} className={`chip recent ${q === e ? "on" : ""}`} onClick={() => run(e)}><Icon.clock />{e}</button>
           ))}
+          <button className="linkbtn" onClick={() => { setRecent([]); saveRecent([]); }}>Clear</button>
         </div>
       )}
-      {similar && (
-        <div className="row" style={{ margin: "8px 0" }}>
-          <img src={similar.frame != null ? mediaUrl("thumb", similar.asset.asset_id) : mediaUrl("thumb", similar.asset.asset_id)}
-            style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6 }} alt="" />
-          <span>Similar to this {similar.asset.media_type}{similar.frame != null ? " moment" : ""}</span>
-          <button className="chip" onClick={() => setSimilar(null)}>Back <span className="x">×</span></button>
+      {suggestions.length > 0 && (
+        <div className="suggest" aria-label="Suggested searches">
+          <span className="hint">Try</span>
+          {suggestions.slice(0, nTry).map((e) => (
+            <button key={e} className={`chip ${q === e ? "on" : ""}`} onClick={() => run(e)}>{e}</button>
+          ))}
+          {home && (hidden > 0 || moreChips) && (
+            <button className="linkbtn" onClick={() => setMoreChips(!moreChips)}>{moreChips ? "Fewer" : `+${hidden} more`}</button>
+          )}
         </div>
       )}
-      <div className="meta-line">{caption}</div>
+    </div>
+  );
+
+  const results = (
+    <>
       {!busy && total === 0 && (
         <div className="empty">
-          {mode === "browse" && !Object.values(filters).some(Boolean)
+          {mode === "browse" && !filtered
             ? <>The library is empty. Add a folder in <b>Library</b> to start.</>
             : <>Nothing matches. Try fewer filters or other words.</>}
         </div>
       )}
-      <Grid items={items} onOpen={setOpen} showScore={mode !== "browse"} groupByMonth={mode === "browse"} />
+      {busy && items.length === 0 ? <SkeletonGrid /> : (
+        <Grid items={items} onOpen={setOpen} showScore={mode !== "browse"} groupByMonth={mode === "browse"} />
+      )}
       <Sentinel onVisible={more} />
+    </>
+  );
+
+  return (
+    <div className="view">
+      {home ? (
+        <>
+          <section className="hero">
+            <FlightPath />
+            <div className="eyebrow">{greeting()}</div>
+            <h1 className="display">What would you like to find?</h1>
+            <p className="lede">Search {total ? fmtInt(total) : "your"} photos and videos in your own words. Everything stays on this computer.</p>
+            {searchbar}
+            {chips}
+          </section>
+          <WorldStrip journeys={journeys} />
+          <Memories journeys={journeys} onOpen={(m) => { setOpened(m); setFilters({ from: m.from, to: m.to }); }} />
+          <div className="sectionhead">
+            <h2 className="display">All photos and videos</h2>
+            <FilterBar f={filters} setF={setFilters} />
+          </div>
+          {results}
+        </>
+      ) : (
+        <>
+          {!home && (
+            <div className="backrow">
+              <button className="backbtn" onClick={onHome}><span aria-hidden>←</span> Home</button>
+              {memoryLabel && <span className="backtitle">Memories · <b>{memoryLabel}</b></span>}
+            </div>
+          )}
+          {searchbar}
+          <FilterBar f={filters} setF={setFilters} />
+          {chips}
+          {similar && (
+            <div className="row" style={{ margin: "8px 0" }}>
+              <img src={mediaUrl("thumb", similar.asset.asset_id)}
+                style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }} alt="" />
+              <span>Similar to this {similar.asset.media_type}{similar.frame != null ? " moment" : ""}</span>
+              <button className="chip" onClick={() => setSimilar(null)}>Back <span className="x">×</span></button>
+            </div>
+          )}
+          <div className="meta-line">{caption}</div>
+          {results}
+        </>
+      )}
       {open !== null && (
         <Viewer list={items} index={open} onIndex={(i) => { setOpen(i); if (i > items.length - 10) more(); }}
           onClose={() => setOpen(null)} onSimilar={(a, frame) => { setOpen(null); setSimilar({ asset: a, frame }); }}

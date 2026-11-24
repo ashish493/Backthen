@@ -257,6 +257,27 @@ def test_api_search_and_media(server, engine, library):
     assert req(port, "/thumb/../../etc")[0] in (403, 404)
 
 
+def test_api_glimpses_and_fresh_thumbs(server, engine, library):
+    port, _ = server
+    st, _, b = req(port, "/api/ingest/glimpses?n=4")
+    items = json.loads(b)["items"]
+    assert st == 200 and 0 < len(items) <= 4 and all(i["media_type"] in ("photo", "video") for i in items)
+    assert all(req(port, f"/thumb/{i['asset_id']}")[0] == 200 for i in items)
+    # an item a running ingest has just written is not in the loaded catalogue yet: its thumbnail comes from the manifest
+    from roamengine import server as srv
+    api = srv.Api.__new__(srv.Api)
+    api.library, api.engine = os.path.abspath(library[1]), engine
+    aid = items[0]["asset_id"]
+    i = engine.cat.index.pop(aid)
+    try:
+        path = api.thumb_path(aid)
+        assert path and os.path.exists(path)
+        with pytest.raises(KeyError):
+            api.thumb_path("f" * 32)
+    finally:
+        engine.cat.index[aid] = i
+
+
 def test_api_labels_roundtrip(server, engine):
     port, _ = server
     st, _, b = req(port, "/api/labels/queries", method="POST", body={"text": "a plain solid blue colour"})

@@ -18,20 +18,33 @@ export const Icon = {
   close: P("M6 6l12 12M18 6 6 18"),
   pin: P("M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11zM12 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"),
   refresh: P("M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"),
+  clock: P("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2"),
+  sun: P("M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"),
+  moon: P("M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"),
+  monitor: P("M3 4h18v12H3zM8 20h8M12 16v4"),
+  lock: P("M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4"),
+  sparkle: P("M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"),
 };
+
+/** Placeholder tiles while the first page of results loads. */
+export function SkeletonGrid({ n = 18 }: { n?: number }) {
+  return <div className="grid" aria-hidden>{Array.from({ length: n }, (_, i) => <div key={i} className="tile skeleton" />)}</div>;
+}
 
 // ---------------------------------------------------------------- tile + grid
 export function Tile({ a, onOpen, showScore, children, className }: {
   a: Asset; onOpen: () => void; showScore?: boolean; children?: ReactNode; className?: string;
 }) {
   const [broken, setBroken] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const moment = a.moments?.[0]?.timestamp_s;
   return (
     <div className={`tile ${className || ""}`} role="button" tabIndex={0} onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
       title={a.capture_time ? new Date(a.capture_time_is_utc ? a.capture_time : a.capture_time + "Z").toLocaleString() : "No date"}>
       {a.has_thumb && !broken
-        ? <img loading="lazy" decoding="async" src={mediaUrl("thumb", a.asset_id)} onError={() => setBroken(true)} alt="" />
+        ? <img loading="lazy" decoding="async" src={mediaUrl("thumb", a.asset_id)} onError={() => setBroken(true)} alt=""
+            className={loaded ? "loaded" : ""} onLoad={() => setLoaded(true)} />
         : <div className="noimg">{a.format?.toUpperCase() || "no preview"}</div>}
       {a.media_type === "video" && (
         <span className="badge"><Icon.play />{moment != null && a.score !== undefined ? `at ${fmtDuration(moment)}` : fmtDuration(a.duration_s)}</span>

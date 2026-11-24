@@ -12,13 +12,17 @@ import mimetypes
 import os
 import re
 import secrets
+import sqlite3
+import subprocess
 import sys
 import threading
 import traceback
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import __version__
+import numpy as np
+
+from . import __version__, journeys
 from .engine import Engine, SearchFilters
 from .evaluation import Labels, evaluate
 from .ingest_manager import IngestManager
@@ -29,6 +33,30 @@ ALLOWED_ORIGINS = {"http://tauri.localhost", "https://tauri.localhost", "tauri:/
 ASSET_RE = r"([0-9a-f]{8,64})"
 
 
+def guess_storage(path):
+    """'ssd' or 'hdd' for the drive holding `path` (Windows: bus type and media type of the physical disk).
+    USB drives count as 'hdd': one sequential reader is right for both USB hard drives and most USB sticks.
+    Anything unknown also gives 'hdd', the safe choice (slower on an SSD, never thrashes a hard drive)."""
+    drive = os.path.splitdrive(os.path.abspath(path))[0].rstrip(":") if path else ""
+    if os.name != "nt" or len(drive) != 1 or not drive.isalpha():
+        return dict(storage="hdd", reason="unknown drive")
+    ps = (f"$d = Get-Partition -DriveLetter {drive} -ErrorAction Stop | Get-Disk; "
+          "$p = Get-PhysicalDisk | Where-Object DeviceId -eq $d.Number; \"$($d.BusType)|$($p.MediaType)\"")
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
+                           text=True, timeout=15, creationflags=subprocess.CREATE_NO_WINDOW)
+        bus, media = (r.stdout.strip().split("|") + ["", ""])[:2]
+    except (OSError, subprocess.TimeoutExpired):
+        return dict(storage="hdd", reason="unknown drive")
+    if bus.upper() == "USB":
+        return dict(storage="hdd", reason="external USB drive")
+    if media.upper() == "SSD" or bus.upper() == "NVME":
+        return dict(storage="ssd", reason="internal SSD")
+    if media.upper() == "HDD":
+        return dict(storage="hdd", reason="hard drive")
+    return dict(storage="hdd", reason="unknown drive type")
+
+
 class Api:
     """Routing table and handlers; independent of the HTTP plumbing so tests can call it directly."""
 
@@ -37,6 +65,7 @@ class Api:
         self.engine = Engine(self.library, text_device=text_device)
         self.labels = Labels(self.library)
         self._gazetteer = None
+        self._journeys = (None, None)
         self.ingest = IngestManager(self.library, python=python)
         self.routes = [
             ("GET", r"/api/health$", self.health),
@@ -52,6 +81,9 @@ class Api:
             ("GET", r"/api/ingest$", lambda p, b: self.ingest.status()),
             ("POST", r"/api/ingest$", self.ingest_start),
             ("POST", r"/api/ingest/cancel$", lambda p, b: self.ingest.cancel()),
+            ("GET", r"/api/journeys$", lambda p, b: self.journeys()),
+            ("GET", r"/api/storage-guess$", lambda p, b: guess_storage(p.get("path", ""))),
+            ("GET", r"/api/ingest/glimpses$", lambda p, b: dict(items=self.glimpses(_int(p, "n", 24, 100)))),
             ("GET", r"/api/labels/queries$", lambda p, b: dict(queries=self.labels.queries())),
             ("POST", r"/api/labels/queries$", self.add_query),
             ("DELETE", r"/api/labels/queries/(\d+)$", self.delete_query),
@@ -130,14 +162,12 @@ class Api:
         return dict(cleared=self.engine.clear_place([str(a) for a in ids]))
 
     def geocode(self, p, b):
-        from .geocode import Gazetteer, search_online
+        from .geocode import search_online
         q, n = p.get("q", ""), _int(p, "n", 8, 20)
         if p.get("online") in ("1", "true"):
             return dict(results=search_online(q, n), source="osm",
                         attribution="© OpenStreetMap contributors (nominatim.openstreetmap.org)")
-        if self._gazetteer is None:
-            self._gazetteer = Gazetteer()
-        return dict(results=self._gazetteer.search(q, n), source="geonames", attribution="GeoNames (CC BY 4.0)")
+        return dict(results=self.gazetteer().search(q, n), source="geonames", attribution="GeoNames (CC BY 4.0)")
 
     def place_suggest(self, p, b, aid):
         return dict(suggestions=self.engine.place_suggestions(aid))
@@ -146,12 +176,69 @@ class Api:
         return evaluate(self.engine, self.labels)
 
     # --- binary endpoints
+    def gazetteer(self):
+        if self._gazetteer is None:
+            from .geocode import Gazetteer
+            self._gazetteer = Gazetteer()
+        return self._gazetteer
+
+    def journeys(self):
+        """Trips and "your world" stats; recomputed only when the catalogue or the added places change."""
+        self.engine.maybe_reload()
+        cat = self.engine.cat
+        key = (id(cat), len(cat.asset_ids), float(np.nansum(cat.lat)), float(np.nansum(cat.lon)))
+        if self._journeys[0] != key:
+            self._journeys = (key, journeys.compute(cat, self.gazetteer()))
+        return self._journeys[1]
+
+    def _manifest(self):
+        """Read-only view of the manifest, which an ingest run may be writing right now (WAL: readers never block it)."""
+        path = os.path.join(self.library, "manifest.sqlite")
+        if not os.path.exists(path):
+            return None
+        return sqlite3.connect(f"file:{urllib.parse.quote(path.replace(os.sep, '/'))}?mode=ro", uri=True, timeout=2)
+
+    def glimpses(self, n):
+        """Random items that already have a thumbnail, including ones indexed moments ago by a running ingest
+        (not yet in the search catalogue). For the slideshow shown while indexing; ids and dates only."""
+        db = self._manifest()
+        if db is None:
+            return []
+        try:
+            rows = db.execute("SELECT asset_id, media_type, capture_time_utc, capture_time_local FROM assets "
+                              "WHERE thumbnail_ref IS NOT NULL ORDER BY random() LIMIT ?", (n,)).fetchall()
+        except sqlite3.Error:                            # schema not created yet by a first run
+            return []
+        finally:
+            db.close()
+        return [dict(asset_id=a, media_type=t, capture_time=u or l, capture_time_is_utc=bool(u)) for a, t, u, l in rows]
+
     def thumb_path(self, aid):
         c = self.engine.cat
-        ref = c.thumb[c.index[aid]]
+        i = c.index.get(aid)
+        if i is None:                                    # indexed after the catalogue was loaded (ingest running)
+            return self._fresh_thumb(aid)
+        ref = c.thumb[i]
         if not ref:
             return None
         path = os.path.normpath(os.path.join(self.library, ref))
+        return path if path.startswith(self.library + os.sep) and os.path.exists(path) else None
+
+    def _fresh_thumb(self, aid):
+        db = self._manifest()
+        if db is None:
+            raise KeyError(aid)
+        try:
+            row = db.execute("SELECT thumbnail_ref FROM assets WHERE asset_id = ?", (aid,)).fetchone()
+        except sqlite3.Error:
+            row = None
+        finally:
+            db.close()
+        if not row:
+            raise KeyError(aid)
+        if not row[0]:
+            return None
+        path = os.path.normpath(os.path.join(self.library, row[0]))
         return path if path.startswith(self.library + os.sep) and os.path.exists(path) else None
 
     def original(self, aid):

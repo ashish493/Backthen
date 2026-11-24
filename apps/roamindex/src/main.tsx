@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
+import "@fontsource-variable/fraunces";
 import "./styles.css";
 
 // Touchpad pinch reaches the page as ctrl+wheel (WebView2 only delivers it with zoomHotkeysEnabled, see

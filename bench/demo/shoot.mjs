@@ -40,8 +40,19 @@ async function waitFor(expr, ms = 15000) {
   console.log("timeout waiting for", expr); return false;
 }
 
-const steps = (process.env.SHOTS ?? "search,video,timeline,map,places").split(",");
+const steps = (process.env.SHOTS ?? "home,home-dark,search,video,timeline,map,places,welcome,indexing").split(",");
 await waitFor(`document.querySelector("nav button") !== null`);
+await js(`localStorage.clear()`);                                                   // no recent searches or theme choice
+for (const dark of [false, true]) {
+  if (!steps.includes(dark ? "home-dark" : "home")) continue;
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: dark ? "dark" : "light" }] });
+  await send("Page.reload", { ignoreCache: true });
+  await waitFor(`document.querySelectorAll(".postcard img").length > 3 && document.querySelector(".worldstrip") !== null`);
+  await wait(3500);                                                                 // count-up and postcard entrance
+  await js(`document.activeElement?.blur()`);
+  await shot(dark ? "home-dark" : "home");
+}
+await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "light" }] });
 if (steps.includes("search")) {
   await nav("Search");
   await type('input[placeholder^="Describe"]', process.env.Q_SEARCH ?? "waterfall");
@@ -77,5 +88,22 @@ if (steps.includes("places")) {
   await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
   await wait(2500);                                                                    // globe flies to the pin
   await shot("places");
+}
+const base = new URL((await js("location.href")));
+for (const k of ["view", "q", "onboarding", "ingestdemo"]) base.searchParams.delete(k);
+if (steps.includes("welcome")) {                                        // first run: full-screen onboarding
+  const u = new URL(base); u.searchParams.set("onboarding", "1");
+  await send("Page.navigate", { url: u.toString() });
+  await waitFor(`document.querySelector(".onboard .spinglobe") !== null`);
+  await wait(2400);                                                    // the plane part-way along its first route
+  await shot("welcome");
+}
+if (steps.includes("indexing")) {                                       // first indexing run: slideshow with sample progress
+  const u = new URL(base);
+  u.searchParams.set("onboarding", "1"); u.searchParams.set("ingestdemo", "1");
+  await send("Page.navigate", { url: u.toString() });
+  await waitFor(`document.querySelectorAll(".ingestshow .photo").length > 0`);
+  await wait(9300);                                                    // mid-way through a later slide
+  await shot("indexing");
 }
 ws.close();

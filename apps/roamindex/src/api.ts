@@ -106,7 +106,7 @@ export async function engineInfo(): Promise<EngineInfo> {
   const q = new URLSearchParams(location.search);
   const port = Number(q.get("port"));
   const tok = q.get("token") || "";
-  if (!port || !tok) return { status: "failed", library: "", python: "", error: "Open this page from the RoamIndex app, or add ?port=&token= of a running `roamengine serve`." };
+  if (!port || !tok) return { status: "failed", library: "", python: "", error: "Open this page from the Backthen app, or add ?port=&token= of a running `roamengine serve`." };
   connect(port, tok);
   return { status: "ready", port, token: tok, library: "", python: "" };
 }
@@ -160,6 +160,9 @@ export const api = {
   suggestions: (n = 12) => call<{ items: { text: string; strength: number }[] }>("GET", "/api/suggestions", { n }),
   ingestStatus: () => call<IngestStatus>("GET", "/api/ingest"),
   ingestStart: (roots: string[], storage: "ssd" | "hdd") => call<IngestStatus>("POST", "/api/ingest", {}, { roots, storage }),
+  journeys: () => call<Journeys>("GET", "/api/journeys"),
+  storageGuess: (path: string) => call<{ storage: "ssd" | "hdd"; reason: string }>("GET", "/api/storage-guess", { path }),
+  glimpses: (n = 24) => call<{ items: { asset_id: string; media_type: string; capture_time: string | null; capture_time_is_utc: boolean }[] }>("GET", "/api/ingest/glimpses", { n }),
   ingestCancel: () => call<IngestStatus>("POST", "/api/ingest/cancel", {}, {}),
   queries: () => call<{ queries: { query_id: number; text: string; judged: number; relevant: number }[] }>("GET", "/api/labels/queries"),
   addQuery: (text: string) => call<{ query_id: number }>("POST", "/api/labels/queries", {}, { text }),
@@ -177,6 +180,9 @@ export const api = {
   placeSuggestions: (id: string) => call<{ suggestions: PlaceSuggestion[] }>("GET", `/api/places/suggest/${id}`),
 };
 
+export type Trip = { title: string; country: string | null; start: string; end: string; days: number; count: number; lat: number; lon: number; cover: string[] };
+export type World = { photos: number; videos: number; video_hours: number; years: number[]; countries: number; places: number; located: number; trips: number; pins: { lat: number; lon: number }[] };
+export type Journeys = { trips: Trip[]; world: World };
 export type GeoResult = { name: string; label: string; lat: number; lon: number; population: number | null; source: "geonames" | "osm" };
 export type RecentPlace = { name: string | null; lat: number; lon: number; count: number };
 export type PlaceSuggestion = { asset_id: string; lat: number; lon: number; dt_s: number; source: string | null; name: string | null };

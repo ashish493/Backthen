@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { open as pickFolder } from "@tauri-apps/plugin-dialog";
 import { api, fmtDuration, fmtInt, getConfig, inTauri, setConfig, type AppConfig, type EngineInfo, type IngestStatus, type LibraryStats } from "../api";
 import { Icon, Stat } from "../components";
+import { IngestShow } from "./IngestShow";
 
 const pct = (a: number, b: number) => (b ? `${Math.round((100 * a) / b)}%` : "—");
 
@@ -50,6 +51,9 @@ export function LibraryView({ stats, refresh, engine, onEngine }: {
   return (
     <div className="view">
       <h1>Library</h1>
+      {running && ing && <IngestShow ing={ing} />}
+      {!running && !inTauri() && new URLSearchParams(location.search).has("ingestdemo") &&   /* development: preview the slideshow */
+        <IngestShow ing={{ running: true, phase: "ingesting", total: 12480, committed: 5310, eta_s: 1820 } as IngestStatus} />}
       {s && !s.empty && (
         <div className="cards">
           <Stat k="Items" v={fmtInt(s.assets)} s={`${fmtInt(s.files)} files (${fmtInt(s.files - s.assets)} duplicate copies)`} />
@@ -57,10 +61,22 @@ export function LibraryView({ stats, refresh, engine, onEngine }: {
           <Stat k="Videos" v={fmtInt(s.videos)} s={`${fmtInt(s.frames - s.photos)} searchable video frames`} />
           <Stat k="With a date" v={pct(s.with_time, s.assets)} s={s.time_range ? `${s.time_range[0].slice(0, 4)} – ${s.time_range[1].slice(0, 4)}` : undefined} />
           <Stat k="With a location" v={pct(s.with_gps, s.assets)} s={`${fmtInt(s.with_gps)} items`} />
-          <Stat k="Could not read" v={fmtInt(errors)} s={missing ? `${fmtInt(missing)} files missing on disk` : "corrupt or unsupported files"} />
+          <Stat k="Could not read" v={fmtInt(errors)} s={missing ? `${fmtInt(missing)} ${missing === 1 ? "file" : "files"} missing on disk` : "corrupt or unsupported files"} />
         </div>
       )}
-      {s?.empty && <div className="panel">This library is empty. Add a folder below to index it.</div>}
+      {s?.empty && !running && (
+        <section className="welcome">
+          <div className="eyebrow">Welcome to Backthen</div>
+          <h2>Find any photo or video by describing it</h2>
+          <p className="lede">Point Backthen at a folder or drive. It looks at every photo and video once, on this computer, so you can later
+            search for "a birthday cake" or "waterfall in the mist" and jump to the exact moment in a video.</p>
+          <ol className="steps">
+            <li className={!running && !folder.trim() ? "now" : "done"}><span>1</span><div><b>Choose a folder</b><small>Your photos, a phone backup or a Google Takeout export.</small></div></li>
+            <li className={running ? "now" : ""}><span>2</span><div><b>Let it index</b><small>Files are only read, never changed. Stop any time; it resumes.</small></div></li>
+            <li><span>3</span><div><b>Search in your own words</b><small>Results in a fraction of a second, with no internet needed.</small></div></li>
+          </ol>
+        </section>
+      )}
 
       <h2>Add or update folders</h2>
       <div className="panel stack">

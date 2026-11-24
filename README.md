@@ -3,7 +3,7 @@
 **Search your own photo and video archive in plain words, privately, on a laptop.**
 Type "waterfall in the mist" or "birthday cake" and get matching photos and the exact moments inside videos, ranked in about 30 ms. Everything (indexing, search, the map) runs on your machine. No uploads, no cloud, no account.
 
-![Search](docs/screenshots/search.png)
+![Backthen home: search, your world, and trips as postcards](docs/screenshots/home.png)
 
 Backthen is three pieces:
 
@@ -11,7 +11,7 @@ Backthen is three pieces:
 |---|---|---|
 | **RoamIngest** | Reads a large mixed archive once, extracts frames, metadata and CLIP embeddings into a versioned SQLite manifest. Resumable, kill-safe, deterministic. | [`packages/roam-ingest`](packages/roam-ingest) |
 | **RoamEngine** | Local search engine and HTTP API: natural-language search, similar items, time and place filters, video moments, retrieval evaluation. | [`packages/roam-engine`](packages/roam-engine) |
-| **RoamIndex** | Desktop app (Tauri 2 + React): search, viewer, timeline, offline 3D globe, adding places by hand, indexing with progress. | [`apps/roamindex`](apps/roamindex) |
+| **RoamIndex** | The Backthen desktop app (Tauri 2 + React): first-run onboarding, home with trips and Memories, search, viewer, timeline, offline 3D globe, adding places by hand, indexing with a live slideshow. | [`apps/roamindex`](apps/roamindex) |
 
 ## Screenshots
 
@@ -19,6 +19,8 @@ All screenshots use a demo library of 77 CC0 photos from Wikimedia Commons, with
 
 | | |
 |---|---|
+| ![Welcome](docs/screenshots/welcome.png) **First run:** a full-screen welcome with a turning globe; choose or drop a folder, the drive type (USB hard drive or internal SSD) is detected for you. | ![Indexing](docs/screenshots/indexing.png) **Indexing slideshow:** the photos found so far fade past, one travel-nostalgia line per photo ("Collecting postcards…"), with the percentage and time left. |
+| ![Search](docs/screenshots/search.png) **Search in your own words:** results as you pause typing, recent searches kept on this computer, `Ctrl K` from anywhere. | ![Dark mode](docs/screenshots/home-dark.png) **Your world and trips:** trips are found from dates and GPS alone (offline, GeoNames) and shown as postcards; the strip counts years, countries, trips, photos and videos. Light or dark, or follow Windows. |
 | ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** wheel or pinch to zoom, drag to turn; opens framed on where your pins are. No map tiles are downloaded. |
 | ![Timeline](docs/screenshots/timeline.png) **Timeline:** items per month on a continuous axis; undated items listed separately. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline gazetteer of 172k places) or by clicking the globe. Originals and their dates are never modified. |
 
