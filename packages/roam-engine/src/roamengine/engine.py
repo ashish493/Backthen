@@ -4,8 +4,10 @@ Exact (brute-force) cosine search over every frame embedding: at 74k frames x 51
 product of about 10 ms on the CPU, so no approximate index is needed yet (ADR-009).
 A video's score is its best frame's score; its `moments` are its best frames, with timestamps.
 """
+import collections
 import dataclasses
 import datetime as dt
+import os
 import re
 import threading
 import time
@@ -42,6 +44,10 @@ class SearchFilters:
         b = lambda k: None if f(k) is None else str(f(k)).lower() in ("1", "true", "yes")  # noqa: E731
         return cls(media_type=f("type"), date_from=f("from"), date_to=f("to"), has_gps=b("gps"), has_time=b("dated"),
                    near=near, bbox=bbox, manual_place=b("manual"))
+
+
+def _year(sec):
+    return dt.datetime.fromtimestamp(float(sec), dt.timezone.utc).year if np.isfinite(sec) else 0
 
 
 def _parse_bound(s, end):
@@ -281,6 +287,15 @@ class Engine:
     def text_vector(self, text):
         return self.text.encode([text])[0]
 
+    def fixed(self, texts):
+        """Vectors for the app's fixed prompts, from the on-disk prompt cache (encoded once per model, ever)."""
+        c = self.cat
+        pc = getattr(self, "_prompts", None)
+        if pc is None or pc[0] != c.model_id:
+            from .text import PromptCache
+            pc = self._prompts = (c.model_id, PromptCache(os.path.join(c.library, "cache"), c.model_id))
+        return pc[1].get(list(texts), lambda t: self.text.encode(t))
+
     def suggestions(self, n=12):
         """Queries from SUGGESTION_POOL that match this library best: ranked by the mean score of each query's 10 best
         assets, so every suggested chip leads to strong results. Cached until the catalogue reloads."""
@@ -291,7 +306,7 @@ class Engine:
         key = (id(c), n)
         if getattr(self, "_sugg_key", None) == key:
             return self._sugg
-        Q = self.text.encode(SUGGESTION_POOL)                               # (q, dim), one batch
+        Q = self.fixed(SUGGESTION_POOL)                                     # (q, dim), cached on disk
         with self._lock:
             fs = c.vectors @ Q.T                                            # (frames, q)
             best = np.maximum.reduceat(fs, c.f_start[c.emb_idx], axis=0)    # (assets with frames, q)
@@ -303,13 +318,196 @@ class Engine:
         self._sugg_key, self._sugg = key, out
         return out
 
+    # ------------------------------------------------------------------ stage 1: CLIPScores with the app's own text
+    def stage1(self):
+        """Per asset, from its CLIP vector alone (videos: best frame), cached per catalogue:
+        quality     similarity to keeper-like prompts minus clutter prompts (screenshots, documents, blur)
+        people      'friends posing together / a family photo' minus 'a crowd of strangers / tourists'
+        has_people  a posed group or a crowd scores above 'no people' (decides who the face model looks at)
+        NaN / False for assets without a vector. Image vectors exist since indexing, so this is a few dot products;
+        the prompt vectors come from the on-disk cache."""
+        self.maybe_reload()
+        c = self.cat
+        if getattr(self, "_s1_key", None) == id(c):
+            return self._s1
+        n = len(c.asset_ids)
+        out = dict(quality=np.full(n, np.nan, np.float32), people=np.full(n, np.nan, np.float32),
+                   has_people=np.zeros(n, bool), presence=np.full(n, np.nan, np.float32),
+                   place=np.full(n, np.nan, np.float32))
+        if c.model_id is not None and len(c.emb_idx):
+            sets = [COVER_GOOD, COVER_BAD, PEOPLE_POSED, PEOPLE_CROWD, PEOPLE_NONE, PLACE_GOOD, PLACE_BAD]
+            try:
+                V = self.fixed([t for st in sets for t in st])
+            except Exception:                            # no text model available: no preference
+                V = None
+            if V is not None:
+                mean, k = [], 0
+                for st in sets:
+                    mean.append(V[k:k + len(st)].mean(0)); k += len(st)
+                unit = lambda x: x / (np.linalg.norm(x) + 1e-9)
+                D = np.stack([mean[0] - mean[1], unit(mean[2]), unit(mean[3]), unit(mean[4]),
+                              mean[5] - mean[6]]).astype(np.float32)
+                with self._lock:
+                    best = np.maximum.reduceat(c.vectors @ D.T, c.f_start[c.emb_idx], axis=0)
+                out["quality"][c.emb_idx] = best[:, 0]
+                out["people"][c.emb_idx] = best[:, 1] - best[:, 2]
+                presence = np.maximum(best[:, 1], best[:, 2]) - best[:, 3]
+                out["has_people"][c.emb_idx] = presence > 0
+                out["presence"][c.emb_idx] = presence
+                out["place"][c.emb_idx] = best[:, 4]
+        self._s1_key, self._s1 = id(c), out
+        return out
+
+    def cover_scores(self):
+        """Cover quality per asset (stage 1)."""
+        return self.stage1()["quality"]
+
+    def people_features(self):
+        """(known, strangers, crowd) per asset from the face pass; NaN for photos not looked at yet. None when off."""
+        w = getattr(self, "faces", None)
+        return w.features() if w is not None else None
+
+    def memory_scores(self, idx):
+        """Stage 1 (quality + posed people) everywhere; where the face model has looked at a photo, also recurring
+        people (up) and prominent strangers and crowds (down)."""
+        idx = np.asarray(idx, dtype=np.int64)
+        s1 = self.stage1()
+        out = _z(s1["quality"][idx].astype(np.float64)) + 0.7 * _z(s1["people"][idx].astype(np.float64))
+        f = self.people_features()
+        if f is not None and len(idx):
+            known, strangers, crowd = (a[idx].astype(np.float64) for a in f)
+            seen = np.isfinite(known)
+            if seen.any():
+                face = np.zeros(len(idx))
+                face[seen] = 1.0 * _z(known[seen]) - 0.8 * _z(strangers[seen]) - 0.5 * crowd[seen]
+                out = out + face
+        return out
+
+    def _candidates(self, idx, prefer_photos=True):
+        c = self.cat
+        idx = np.array([i for i in idx if c.thumb[i]], dtype=np.int64)
+        if prefer_photos and len(idx) and (~c.is_video[idx]).any():
+            idx = idx[~c.is_video[idx]]
+        sc = self.cover_scores()[idx] if len(idx) else np.zeros(0)
+        return idx[np.isfinite(sc) & (c.f_count[idx] > 0)] if np.isfinite(sc).any() else idx
+
+    def face_candidates(self, idx, k=20):
+        """The photos of a group worth showing the face model: the top k by stage-1 memory score among those CLIP
+        thinks have people in them."""
+        idx = self._candidates(idx)
+        if not len(idx):
+            return idx
+        idx = idx[self.stage1()["has_people"][idx]]
+        return idx[np.argsort(-self.memory_scores(idx))[:k]] if len(idx) else idx
+
+    def pick_covers(self, idx, k=3, prefer_photos=True, avoid=()):
+        """Up to k cover assets from these asset indices: memory score, typical of the group (close to its mean
+        vector), and not near-duplicates of each other or of `avoid`."""
+        c = self.cat
+        idx = self._candidates(idx, prefer_photos)
+        if not len(idx) or k <= 0:
+            return []
+        if not np.isfinite(self.cover_scores()[idx]).any():
+            return idx[:k].tolist()
+        v = c.vectors[c.f_start[idx]]
+        m = v.mean(0)
+        m /= np.linalg.norm(m) + 1e-9
+        typical = v @ m
+        rank = self.memory_scores(idx) + 0.5 * _z(typical)
+        taken = [c.vectors[c.f_start[a]] for a in avoid]
+        out = []
+        for j in np.argsort(-rank):
+            if idx[j] in avoid:
+                continue
+            if all(float(v[j] @ u) < 0.92 for u in taken):
+                out.append(j)
+                taken.append(v[j])
+            if len(out) == k:
+                break
+        return idx[out].tolist()
+
+    def place_best(self, idx, town_vec, direction=None, k=100):
+        """The photo that best defines a place -- the place, not the people in it. Pool: the top k by a place score
+        (landmarks, scenery, streets and buildings, minus portraits, selfies and clutter). Rank: CLIPScore with the
+        place's name, what sets the place apart from the rest of the library, place score; people count against a
+        photo (CLIP's people signal everywhere, and every face found once the face model has looked)."""
+        c = self.cat
+        idx = self._candidates(idx)
+        if not len(idx):
+            return None
+        s1 = self.stage1()
+        pq = np.nan_to_num(s1["place"][idx], nan=-9)
+        top = idx[np.argsort(-pq)[:k]]
+        v = c.vectors[c.f_start[top]]
+        presence = np.nan_to_num(s1["presence"][top])
+        sd = np.nanstd(s1["presence"]) or 1.0
+        # people count against a photo only when CLIP actually sees them (presence > 0); photos without anyone are
+        # not ranked by how strongly they lack people
+        score = _z(v @ town_vec) + 0.4 * _z(np.nan_to_num(s1["place"][top])) - 1.0 * np.maximum(presence, 0) / sd
+        if direction is not None:
+            score += 0.5 * _z(v @ direction)
+        f = self.people_features()
+        if f is not None:
+            faces = np.nan_to_num(f[0][top]) + np.nan_to_num(f[1][top])      # anyone the face model saw, known or not
+            score -= 1.0 * (faces > 0) + 0.5 * np.minimum(faces, 2)
+        return int(top[int(np.argmax(score))])
+
+    def town_vectors(self, keys):
+        """CLIP text vectors describing each place itself: 'a famous landmark in {town}, {country}' and 'the scenery
+        of {town}, {country}', averaged (cached on disk, so ~0 ms after the first time)."""
+        if not keys:
+            return None
+        V = self.fixed([p for t, ctry in keys for p in (f"a famous landmark in {t}, {ctry}", f"the scenery of {t}, {ctry}")])
+        T = V.reshape(len(keys), 2, -1).mean(1)
+        return (T / (np.linalg.norm(T, axis=1, keepdims=True) + 1e-9)).astype(np.float32)
+
+    def town_covers(self, towns):
+        """towns: {(town, country): asset indices} -> {(town, country): cover asset index or None}."""
+        c = self.cat
+        keys = list(towns)
+        if not keys or c.model_id is None or not len(c.emb_idx):
+            return {k: (self.pick_covers(towns[k], 1) or [None])[0] for k in keys}
+        T = self.town_vectors(keys)
+        lib_mean = c.vectors[c.f_start[c.emb_idx]].mean(0)
+        out = {}
+        for j, key in enumerate(keys):
+            ids = np.asarray(towns[key])
+            ids = ids[c.f_count[ids] > 0]
+            d = c.vectors[c.f_start[ids]].mean(0) - lib_mean if len(ids) > 1 else None
+            out[key] = self.place_best(ids, T[j], None if d is None else d / (np.linalg.norm(d) + 1e-9))
+        return out
+
+    def trip_covers(self, idx, town_vec=None):
+        """Three postcard slots: the best photo with one of your people (once the face model has looked), the photo
+        that best defines the trip's main place, then the best of the rest; no near-duplicates between them."""
+        idx = np.asarray(idx, dtype=np.int64)
+        chosen = []
+        f = self.people_features()
+        if f is not None and len(idx):
+            known = f[0][idx]
+            chosen += self.pick_covers(idx[np.nan_to_num(known) > 0], 1)
+        if town_vec is not None and len(idx):
+            located = idx[np.isfinite(self.cat.lat[idx])]
+            best = self.place_best([i for i in located if i not in chosen], town_vec) if len(located) else None
+            if best is not None:
+                chosen += self.pick_covers([best], 1, avoid=chosen)
+        chosen += self.pick_covers(idx, 3 - len(chosen), avoid=chosen)
+        return chosen[:3]
 
     # ------------------------------------------------------------------ browsing
     def browse(self, filters=None, k=200, offset=0, order="desc"):
         self.maybe_reload()
+        if order == "best":                              # nicest covers first (Memories, Rediscover)
+            score = self.cover_scores()
         with self._lock:
             c = self.cat
             idx = np.flatnonzero(self.mask(filters))
+            if order == "best":
+                sc = self.memory_scores(idx) if len(idx) else score[idx]
+                sc = sc - np.where(c.is_video[idx], 0.3, 0.0)
+                o = np.lexsort((c.asset_ids[idx].astype(str), -np.where(np.isfinite(sc), sc, -np.inf)))
+                sel = idx[o][offset:offset + k]
+                return dict(total=int(len(idx)), offset=offset, items=[c.summary(i) for i in sel])
             t = c.t[idx]
             key = np.where(np.isfinite(t), t, -np.inf if order == "desc" else np.inf)
             o = np.lexsort((c.asset_ids[idx].astype(str), -key if order == "desc" else key))
@@ -335,13 +533,27 @@ class Engine:
     def points(self, filters=None, limit=20000):
         """Assets with GPS: compact arrays for a map layer."""
         self.maybe_reload()
+        sc = self.cover_scores()                         # before taking the lock (it may encode text)
         with self._lock:
             c = self.cat
             m = self.mask(filters) & np.isfinite(c.lat)
             idx = np.flatnonzero(m)[:limit]
             return dict(total=int(m.sum()), asset_ids=c.asset_ids[idx].tolist(),
                         lat=np.round(c.lat[idx], 5).tolist(), lon=np.round(c.lon[idx], 5).tolist(),
-                        video=c.is_video[idx].astype(int).tolist())
+                        video=c.is_video[idx].astype(int).tolist(),
+                        # capture year (0 = undated) for the map's time slider; 1 = has a thumbnail for photo pins
+                        year=[_year(x) for x in c.t[idx]], thumb=[1 if c.thumb[i] else 0 for i in idx],
+                        cover=self._cover_rank(idx, sc))
+
+    def _cover_rank(self, idx, sc):
+        """Cover score as a 0-100 percentile within the library (photos above videos), for picking map pin photos."""
+        if not np.isfinite(sc).any():
+            return [0] * len(idx)
+        ok = np.isfinite(sc)
+        ranks = np.zeros(len(sc))
+        ranks[ok] = np.argsort(np.argsort(sc[ok])) / max(1, ok.sum() - 1) * 100
+        r = ranks[idx] - np.where(self.cat.is_video[idx], 30, 0)
+        return np.clip(np.round(r), 0, 100).astype(int).tolist()
 
     def asset(self, asset_id):
         self.maybe_reload()
@@ -359,6 +571,15 @@ class Engine:
             return out
 
 
+def _z(x):
+    """Standard score, NaN-safe; all-equal or empty input gives zeros."""
+    x = np.asarray(x, dtype=np.float64)
+    if not len(x):
+        return x
+    sd = np.nanstd(x)
+    return np.nan_to_num((x - np.nanmean(x)) / sd) if sd > 0 else np.zeros(len(x))
+
+
 def haversine_km(lat1, lon1, lat2, lon2):
     with np.errstate(invalid="ignore"):
         p1, p2 = np.radians(lat1), np.radians(lat2)
@@ -371,6 +592,29 @@ def haversine_km(lat1, lon1, lat2, lon2):
 def _ts(x):
     return None if np.isnan(x) else round(float(x), 3)
 
+
+# "Good cover" score: how much a photo looks like a keeper rather than clutter, from its CLIP vector alone
+COVER_GOOD = [
+    "a beautiful photograph", "a scenic travel photo of a landscape", "a happy photo of friends and family",
+    "a photo of a famous landmark", "a colourful photo of a city street", "a photo of delicious food on a table",
+    "a cute photo of a pet", "a portrait photo of a person", "a birthday party or celebration",
+]
+COVER_BAD = [
+    "a screenshot of a phone screen", "a photo of a document, receipt or printed text", "a blurry, dark, out of focus photo",
+    "a meme with text", "a photo of a computer screen or whiteboard", "a photo of a QR code or barcode",
+]
+
+# stage-1 people prompts: posed photos of your group vs crowds of strangers vs no people (checked on CC0 photos)
+PEOPLE_POSED = ["friends posing together for a photo", "a selfie of a group of friends smiling at the camera",
+                "a family photo"]
+PEOPLE_CROWD = ["a crowd of strangers", "many tourists in the background", "people walking in a busy street"]
+PEOPLE_NONE = ["a landscape with no people", "a photo of food", "a photo of a building with no people"]
+
+# stage-1 place prompts: what makes a photo show a place rather than the people in it (map pins, place slots)
+PLACE_GOOD = ["a famous landmark", "a scenic view of a landscape", "a city skyline", "a historic building",
+              "a street in a town", "a view of a beach, mountain or lake"]
+PLACE_BAD = ["a portrait photo of a person", "a selfie", "people posing for a photo", "a close-up of a face",
+             "a screenshot of a phone screen", "a photo of a document, receipt or printed text"]
 
 SUGGESTION_POOL = [
     "a beach at sunset", "waves on a sandy beach", "mountains in the mist", "a waterfall in a forest", "a lake",

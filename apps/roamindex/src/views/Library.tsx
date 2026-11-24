@@ -78,6 +78,8 @@ export function LibraryView({ stats, refresh, engine, onEngine }: {
         </section>
       )}
 
+      {s && !s.empty && <FacesLine />}
+
       <h2>Add or update folders</h2>
       <div className="panel stack">
         <div className="hint">
@@ -187,5 +189,38 @@ function Settings({ engine, onEngine }: { engine: EngineInfo; onEngine: (e: Engi
         {msg && <div className="hint">{msg}</div>}
       </div>
     </>
+  );
+}
+
+
+/** Progress of the background face pass that makes memory covers people-aware. Counts only; faces stay local. */
+function FacesLine() {
+  const [f, setF] = useState<Awaited<ReturnType<typeof api.facesStatus>> | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const tick = () => api.facesStatus().then((x) => alive && setF(x)).catch(() => {});
+    tick();
+    const id = setInterval(tick, 3000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
+  if (!f || f.state === "off") return null;
+  const pct = f.total ? Math.floor((100 * f.done) / f.total) : 0;
+  const text = f.state === "waiting" ? "Will look for the people in your photos shortly."
+    : f.state === "downloading" ? "Getting the face models (a one-time 38 MB download from OpenCV)…"
+    : f.state === "scanning" ? `Finding people in your photos… ${pct}% (${fmtInt(f.done)} of ${fmtInt(f.total)})`
+    : f.state === "clustering" ? "Grouping faces into people…"
+    : f.state === "error" ? `Could not look for people this time (${f.error ?? "error"}); it will try again later.`
+    : f.people > 0
+      ? `${fmtInt(f.people)} ${f.people === 1 ? "person who keeps" : "people who keep"} coming back in your photos (from ${fmtInt(f.faces)} ${f.faces === 1 ? "face" : "faces"}). Memories favour them over strangers.`
+      : `No one appears often enough yet to count as one of your people (${fmtInt(f.faces)} ${f.faces === 1 ? "face" : "faces"} found). Memories use photo quality and places.`;
+  return (
+    <div className="facesline">
+      <Icon.similar />
+      <div>
+        <div>{text}</div>
+        {f.state === "scanning" && <div className="progress"><div style={{ width: `${pct}%` }} /></div>}
+        <div className="hint">Faces are found on the thumbnails in your library folder and never leave this computer.</div>
+      </div>
+    </div>
   );
 }

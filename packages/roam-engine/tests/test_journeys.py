@@ -31,6 +31,9 @@ def test_home_is_not_a_trip_and_a_trip_is_found():
     w = r["world"]
     assert w["countries"] == 2 and w["videos"] == 1 and w["photos"] == 44 and w["trips"] == 1
     assert len(w["pins"]) == 2
+    cl = {c["name"]: c for c in w["countries_list"]}
+    assert set(cl) == {"Germany", "Portugal"} and cl["Germany"]["count"] == 30
+    assert cl["Portugal"]["towns"][0]["name"] == "Lisbon" and cl["Portugal"]["towns"][0]["cover"]
 
 
 def test_small_or_empty_library():

@@ -338,3 +338,14 @@ def test_suggestions(engine):
     st = [i["strength"] for i in r["items"]]
     assert st == sorted(st, reverse=True)
     assert engine.suggestions(n=8) is r                    # cached until the catalogue changes
+
+
+def test_cover_scores_and_picks(engine):
+    sc = engine.cover_scores()
+    c = engine.cat
+    assert len(sc) == len(c.asset_ids) and np.isfinite(sc[c.emb_idx]).all()
+    picks = engine.pick_covers(np.arange(len(c.asset_ids)), k=3)
+    assert 1 <= len(picks) <= 3 and len(set(picks)) == len(picks) and all(c.thumb[i] for i in picks)
+    best = engine.browse(None, k=500, order="best")
+    assert best["total"] == len(c.asset_ids) and len(best["items"]) == len(c.asset_ids)
+    assert engine.points(None)["cover"] and max(engine.points(None)["cover"]) <= 100

@@ -618,3 +618,80 @@ h2.display { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
 @media (prefers-reduced-motion: reduce) {
   .postcard, .postcard:hover { transform: none; }
 }
+
+/* ================================================================ map: places panel, replay, time slider */
+.mapview .mapwrap { grid-template-columns: 1fr 380px; }
+.side { padding-right: 4px; }
+.places, .triplist { display: flex; flex-direction: column; gap: 8px; }
+.country { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; animation: rise 0.4s ease backwards; }
+.countryhead { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; padding: 10px 12px; cursor: pointer; text-align: left; color: var(--text); }
+.countryhead:hover { background: var(--panel-2); }
+.coverstack { position: relative; width: 58px; height: 44px; flex: none; }
+.coverstack img { position: absolute; top: 2px; width: 40px; height: 40px; object-fit: cover; border-radius: 8px; border: 2px solid var(--paper); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18); }
+.coverstack img:nth-child(1) { left: 0; transform: rotate(-6deg); z-index: 3; }
+.coverstack img:nth-child(2) { left: 9px; transform: rotate(4deg); z-index: 2; }
+.coverstack img:nth-child(3) { left: 18px; transform: rotate(9deg); z-index: 1; }
+.cname { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cname b { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+.cname small { color: var(--muted); font-size: 12px; }
+.ccount { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; font-weight: 600; }
+.towns { display: flex; flex-direction: column; padding: 0 8px 8px; }
+.town { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 6px 6px; border-radius: 9px; cursor: pointer; color: var(--text); text-align: left; }
+.town:hover { background: var(--accent-2); }
+.town img, .town .noimg { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; background: var(--tile); border: 2px solid var(--paper); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+.town span { flex: 1; }
+.town small { color: var(--faint); font-variant-numeric: tabular-nums; }
+
+.replaycard {
+  position: absolute; left: 18px; bottom: 18px; width: 300px; background: var(--paper); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 10px 0; box-shadow: 0 6px 10px rgba(60, 40, 20, 0.12), 0 22px 44px rgba(60, 40, 20, 0.22);
+  transform: rotate(-1.5deg); animation: landcard 0.6s cubic-bezier(.2, .8, .3, 1.2) both; z-index: 5;
+}
+@keyframes landcard { from { opacity: 0; transform: translateY(30px) rotate(-6deg) scale(0.92); } to { opacity: 1; transform: rotate(-1.5deg); } }
+.replaycard .mosaic { height: 170px; border-radius: 3px; overflow: hidden; }
+.replaymeta { display: flex; flex-direction: column; gap: 2px; padding: 10px 4px 12px; }
+.replaymeta small { color: var(--muted); font-size: 12px; }
+
+.timeslider {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(8px); border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 16px 6px 6px; box-shadow: var(--shadow); width: min(520px, 70%); z-index: 4;
+}
+.timeslider input[type="range"] { flex: 1; accent-color: var(--accent); }
+.playbtn { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-text); display: grid; place-items: center; cursor: pointer; flex: none; }
+.playbtn svg { width: 14px; height: 14px; }
+.yearlabel { font-family: var(--font-display); font-weight: 600; font-size: 15px; min-width: 78px; text-align: right; font-variant-numeric: tabular-nums; }
+.map .legend { display: none; }
+
+.tripline { display: flex; gap: 12px; align-items: flex-start; padding: 8px 10px; border-radius: 10px; color: var(--faint); position: relative; }
+.tripline::before { content: ""; position: absolute; left: 15px; top: 24px; bottom: -10px; width: 2px; background: var(--line); }
+.tripline:last-child::before { display: none; }
+.tripline b { display: block; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+.tripline small { font-size: 12px; }
+.tripdot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); background: var(--panel); margin-top: 5px; flex: none; z-index: 1; }
+.tripline.done { color: var(--muted); }
+.tripline.done .tripdot { background: var(--amber); border-color: var(--amber); }
+.tripline.on { color: var(--text); background: var(--accent-2); }
+.tripline.on .tripdot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
+
+/* ---------------------------------------------------------------- face pass status (Library) */
+.facesline { display: flex; gap: 12px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; margin-top: 14px; }
+.facesline > svg { width: 20px; height: 20px; color: var(--accent); flex: none; margin-top: 2px; }
+.facesline > div { flex: 1; }
+.facesline .progress { margin: 8px 0 4px; }
+
+/* ---------------------------------------------------------------- "Loading memories…" pill */
+.memhead { display: flex; align-items: center; gap: 14px; }
+.memhead h2 { margin: 0 0 10px; }
+.loadingpill {
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 5px 12px 5px 10px; border-radius: 8px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(60, 40, 20, 0.08);
+  color: var(--muted); font-size: 13px; font-weight: 600; animation: viewin 0.3s ease both;
+}
+.loadingpill .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); animation: pulse 1.2s ease-in-out infinite; }
+.loadingpill .dots::after { content: "…"; display: inline-block; width: 1.2em; animation: dots 1.4s steps(4, end) infinite; overflow: hidden; vertical-align: bottom; }
+@keyframes pulse { 50% { transform: scale(0.6); opacity: 0.5; } }
+@keyframes dots { from { width: 0; } to { width: 1.2em; } }
+
+/* covers that change while Memories refine fade in */
+.postcard .mosaic img { animation: fadein 0.6s ease both; }

@@ -6,6 +6,7 @@ import icon from "./icon.png";
 import { EvaluateView } from "./views/Evaluate";
 import { LibraryView } from "./views/Library";
 import { MapView } from "./views/MapView";
+import { prefetchHome } from "./views/Memories";
 import { Onboarding } from "./views/Onboarding";
 import { PlacesView } from "./views/Places";
 import { SearchView, type SimilarReq } from "./views/Search";
@@ -75,7 +76,7 @@ export function App() {
   }, [engine.status]);
 
   const refresh = useCallback(() => { api.library().then(setStats).catch(() => {}); }, []);
-  useEffect(() => { if (engine.status === "ready") refresh(); }, [engine.status, engine.port, refresh]);
+  useEffect(() => { if (engine.status === "ready") { refresh(); prefetchHome(); } }, [engine.status, engine.port, refresh]);
   // first run: a full-screen onboarding until something is indexed. It stays up through the whole first indexing
   // run (the library stops being empty part-way) until the user moves on. ?onboarding=1 previews it (development).
   const [onboard, setOnboard] = useState<boolean | null>(() => (!inTauri() && new URLSearchParams(location.search).has("onboarding")) || null);

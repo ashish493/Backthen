@@ -7,6 +7,7 @@ Security model (single local user):
 On start it prints one JSON line {"event": "ready", "port": ..., "token": ...} to stdout.
 """
 import argparse
+import datetime as dt
 import json
 import mimetypes
 import os
@@ -22,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import numpy as np
 
-from . import __version__, journeys
+from . import __version__, journeys, memories
 from .engine import Engine, SearchFilters
 from .evaluation import Labels, evaluate
 from .ingest_manager import IngestManager
@@ -65,7 +66,9 @@ class Api:
         self.engine = Engine(self.library, text_device=text_device)
         self.labels = Labels(self.library)
         self._gazetteer = None
-        self._journeys = (None, None)
+        self._home = None                                # see home(): trips, memory cards, town covers
+        self._home_lock = threading.Lock()
+        self._disk = None                                # the last home screen from disk, until home() is ready
         self.ingest = IngestManager(self.library, python=python)
         self.routes = [
             ("GET", r"/api/health$", self.health),
@@ -82,6 +85,8 @@ class Api:
             ("POST", r"/api/ingest$", self.ingest_start),
             ("POST", r"/api/ingest/cancel$", lambda p, b: self.ingest.cancel()),
             ("GET", r"/api/journeys$", lambda p, b: self.journeys()),
+            ("GET", r"/api/memories$", lambda p, b: self.memories()),
+            ("GET", r"/api/faces/status$", lambda p, b: self.faces_status()),
             ("GET", r"/api/storage-guess$", lambda p, b: guess_storage(p.get("path", ""))),
             ("GET", r"/api/ingest/glimpses$", lambda p, b: dict(items=self.glimpses(_int(p, "n", 24, 100)))),
             ("GET", r"/api/labels/queries$", lambda p, b: dict(queries=self.labels.queries())),
@@ -120,9 +125,6 @@ class Api:
 
     def timeline(self, p, b):
         return self.engine.timeline(SearchFilters.from_params(p))
-
-    def points(self, p, b):
-        return self.engine.points(SearchFilters.from_params(p))
 
     def asset(self, p, b, aid):
         return self.engine.asset(aid)
@@ -182,14 +184,134 @@ class Api:
             self._gazetteer = Gazetteer()
         return self._gazetteer
 
-    def journeys(self):
-        """Trips and "your world" stats; recomputed only when the catalogue or the added places change."""
-        self.engine.maybe_reload()
+    # --- home screen and map: trips, memory cards, town covers
+    def _home_key(self):
         cat = self.engine.cat
-        key = (id(cat), len(cat.asset_ids), float(np.nansum(cat.lat)), float(np.nansum(cat.lon)))
-        if self._journeys[0] != key:
-            self._journeys = (key, journeys.compute(cat, self.gazetteer()))
-        return self._journeys[1]
+        return (id(cat), len(cat.asset_ids), float(np.nansum(cat.lat)), float(np.nansum(cat.lon)),
+                dt.date.today().strftime("%Y-%m"))
+
+    def _faces(self):
+        return getattr(self.engine, "faces", None)
+
+    def home(self, wait=True):
+        """Everything the home screen and the map need. Built once per library state (normally by the warm-up
+        thread at start); when the face pass learns something, only the covers are re-chosen (milliseconds).
+        wait=False returns None instead of blocking while it is first built (callers then serve the disk copy)."""
+        self.engine.maybe_reload()
+        key = self._home_key()
+        h = self._home
+        if h is None or h["key"] != key:
+            if not wait and self._disk is not None:
+                return None
+            with self._home_lock:
+                h = self._home
+                if h is None or h["key"] != key:
+                    h = self._home = self._build_home(key)
+        w = self._faces()
+        fv = w.version if w is not None else 0
+        if h["fv"] != fv:
+            with self._home_lock:
+                if h["fv"] != fv:
+                    self._fill_covers(h)
+                    h["fv"] = fv
+                    if w is None or not w.busy():
+                        self._save_disk(h)
+        return h
+
+    def _build_home(self, key):
+        e, cat = self.engine, self.engine.cat
+        st = journeys.structure(cat, self.gazetteer())
+        h = dict(key=key, st=st, cards=memories.cards(cat, st["trips"]), fv=None,
+                 town_vec=dict(zip(st["town_keys"], e.town_vectors(st["town_keys"])))
+                 if st["town_keys"] and cat.model_id else {})
+        w = self._faces()
+        self._fill_covers(h)
+        h["fv"] = w.version if w is not None else 0
+        self._request_faces(h)
+        self._save_disk(h)
+        return h
+
+    def _fill_covers(self, h):
+        e, cat, st = self.engine, self.engine.cat, h["st"]
+        town_covers = e.town_covers(st["towns"])
+        trip_cov = [e.trip_covers(t["_members"], h["town_vec"].get(t["_town"])) for t in st["trips"]]
+        by_key = {f"t{t['start']}": c for t, c in zip(st["trips"], trip_cov)}
+        for c in h["cards"]:
+            ids = by_key.get(c["key"]) if c["kind"] == "trip" else e.pick_covers(c["_members"], 3)
+            c["cover"] = [str(cat.asset_ids[i]) for i in ids or []]
+        h["journeys"] = journeys.public(st, cat, trip_cov, town_covers)
+        h["towns"] = [dict(name=k[0], country=k[1],
+                           cover=str(cat.asset_ids[town_covers[k]]) if town_covers.get(k) is not None else None)
+                      for k in st["town_keys"]]
+
+    def _request_faces(self, h):
+        """Queue the face model on candidates only: the first cards' top 20 now, a few people photos per month next
+        (who recurs), then the other cards' and the towns' candidates."""
+        w = self._faces()
+        if w is None:
+            return
+        e, cat = self.engine, self.engine.cat
+        ids = lambda arr: [str(cat.asset_ids[i]) for i in arr]
+        for n, c in enumerate(h["cards"]):
+            w.request(ids(e.face_candidates(c["_members"], 20)), 0 if n < memories.FIRST else 2)
+        for members in memories.months(cat).values():
+            w.request(ids(e.face_candidates(members, 5)), 1)
+        q, has = e.cover_scores(), e.stage1()["has_people"]
+        for members in h["st"]["towns"].values():
+            top = members[np.argsort(-np.nan_to_num(q[members], nan=-9))[:20]]
+            w.request(ids(top[has[top]]), 2)
+
+    def _disk_path(self):
+        return os.path.join(self.library, "cache", "home.json")
+
+    def _disk_key(self):
+        cat, pl = self.engine.cat, os.path.join(self.library, "places.sqlite")
+        return json.loads(json.dumps([cat.stamp, os.path.getmtime(pl) if os.path.exists(pl) else 0, cat.model_id,
+                                      dt.date.today().strftime("%Y-%m")]))
+
+    def _save_disk(self, h):
+        try:
+            os.makedirs(os.path.dirname(self._disk_path()), exist_ok=True)
+            tmp = self._disk_path() + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(dict(key=self._disk_key(), journeys=h["journeys"], cards=memories.public(h["cards"]),
+                               towns=h["towns"]), f)
+            os.replace(tmp, self._disk_path())
+        except OSError:
+            pass
+
+    def load_disk_home(self):
+        """The home screen as last computed, if it still belongs to this library state: shown at once on launch."""
+        try:
+            with open(self._disk_path(), encoding="utf-8") as f:
+                d = json.load(f)
+            if d.get("key") == self._disk_key():
+                self._disk = d
+        except (OSError, ValueError):
+            pass
+
+    def journeys(self):
+        h = self.home(wait=False)
+        return self._disk["journeys"] if h is None else h["journeys"]
+
+    def memories(self):
+        h = self.home(wait=False)
+        w = self._faces()
+        if h is None:
+            return dict(cards=self._disk["cards"], version=-1, refining=True)
+        return dict(cards=memories.public(h["cards"]), version=h["fv"], refining=bool(w is not None and w.busy()))
+
+    def points(self, p, b):
+        h = self.home()
+        out = self.engine.points(SearchFilters.from_params(p))
+        cat, town_of = self.engine.cat, h["st"]["town_of"]
+        out["town"] = [int(town_of[cat.index[a]]) for a in out["asset_ids"]]
+        out["towns"] = h["towns"]
+        return out
+
+    def faces_status(self):
+        w = getattr(self.engine, "faces", None)
+        return dict(w.status) if w is not None else dict(state="off")
 
     def _manifest(self):
         """Read-only view of the manifest, which an ingest run may be writing right now (WAL: readers never block it)."""
@@ -401,8 +523,19 @@ class Handler(BaseHTTPRequestHandler):
                 left -= len(chunk)
 
 
-def serve(library, port=0, token=None, text_device="cpu", python=None, ready=print):
+def serve(library, port=0, token=None, text_device="cpu", python=None, ready=print, faces=False):
     api = Api(library, text_device=text_device, python=python)
+    if faces:                                            # background face pass for people-aware covers
+        from .faces import FaceWorker
+        api.engine.faces = FaceWorker(api.engine, api.library).start()
+
+    def warm_home():                                     # home screen ready before the user gets there
+        api.load_disk_home()
+        try:
+            api.home()
+        except Exception:                                # an empty library or no model yet: built on demand
+            pass
+    threading.Thread(target=warm_home, daemon=True, name="warm-home").start()
     token = token or secrets.token_urlsafe(24)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     httpd.daemon_threads = True
@@ -420,11 +553,13 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--token", default=os.environ.get("ROAM_TOKEN"))
     ap.add_argument("--text-device", default="cpu")
+    ap.add_argument("--no-faces", action="store_true",
+                    help="do not look for faces (people-aware covers); faces are found on thumbnails and stay local")
     ap.add_argument("--exit-with-parent", action="store_true",
                     help="exit when stdin closes (the desktop app holds our stdin open while it runs)")
     a = ap.parse_args(argv)
     os.makedirs(a.library, exist_ok=True)
-    httpd = serve(a.library, a.port, a.token, a.text_device)
+    httpd = serve(a.library, a.port, a.token, a.text_device, faces=not a.no_faces)
     if a.exit_with_parent:
         threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start()
     try:

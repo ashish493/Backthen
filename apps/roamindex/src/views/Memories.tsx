@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, fmtInt, mediaUrl, type Asset, type Journeys, type World } from "../api";
+import { api, fmtInt, mediaUrl, type Journeys, type MemoryCard, type Memories, type World } from "../api";
 import { SpinGlobe } from "../SpinGlobe";
 
 export type MemoryOpen = { from: string; to: string; label: string };
@@ -25,53 +25,57 @@ export function useJourneys() {
 }
 export function forgetJourneys() { journeysCache = null; }
 
-/** Postcards to revisit: detected trips first, then this month in earlier years, then the busiest months. */
-export function Memories({ journeys, onOpen }: { journeys: Journeys | null; onOpen: (m: MemoryOpen) => void }) {
-  const [cards, setCards] = useState<Card[] | null>(null);
+/** The memory cards, shared across visits to Home: the last answer shows at once, then refreshes. */
+let memoriesCache: Memories | null = null;
+let memoriesInflight: Promise<Memories> | null = null;
+function fetchMemories() {
+  return (memoriesInflight ||= api.memories().then((m) => { memoriesCache = m; return m; })
+    .finally(() => { memoriesInflight = null; }));
+}
+/** Warm the home screen as soon as the engine is up (App calls this). */
+export function prefetchHome() { fetchMemories().catch(() => {}); journeysCache ||= api.journeys().catch((e) => { journeysCache = null; throw e; }); }
+
+function present(c: MemoryCard): Card {
+  if (c.kind === "trip") {
+    const days = c.days ?? 1;
+    return { key: c.key, kind: c.kind, title: c.title ?? "A trip", cover: c.cover, stamp: stampOf(c.from),
+      sub: `${c.country && c.country !== c.title ? c.country + " · " : ""}${days} ${days === 1 ? "day" : "days"} · ${fmtInt(c.count)} items`,
+      open: { from: c.from, to: c.to, label: c.title ?? "A trip" } };
+  }
+  const m = c.month ?? c.from;
+  const n = c.years_ago ?? 0;
+  return c.kind === "ago"
+    ? { key: c.key, kind: c.kind, title: n === 1 ? "A year ago" : `${n} years ago`, sub: `${monthName(m)} · ${fmtInt(c.count)} items`,
+        stamp: stampOf(m), cover: c.cover, open: { from: m, to: m, label: monthName(m) } }
+    : { key: c.key, kind: c.kind, title: monthName(m), sub: `${fmtInt(c.count)} photos and videos`, stamp: stampOf(m),
+        cover: c.cover, open: { from: m, to: m, label: monthName(m) } };
+}
+
+/** Postcards to revisit: detected trips first, then this month in earlier years, then the busiest months. The engine
+ *  answers at once with covers chosen by CLIPScore, then keeps refining them (the face model looks at each card's
+ *  best candidates, the first four first); while it does, this refreshes every few seconds and changed covers fade in. */
+export function Memories({ onOpen }: { onOpen: (m: MemoryOpen) => void }) {
+  const [data, setData] = useState<Memories | null>(memoriesCache);
 
   useEffect(() => {
-    if (!journeys) return;
-    let alive = true;
-    api.timeline({}).then(async (tl) => {
-      const now = new Date();
-      const thisYear = now.getFullYear(), thisMonth = now.getMonth() + 1;
-      const out: (Omit<Card, "cover"> & { cover?: string[] })[] = [];
-      const tripMonths = new Set<string>();
-      for (const t of journeys.trips) {
-        tripMonths.add(t.start.slice(0, 7));
-        out.push({ key: `t${t.start}`, kind: "trip", title: t.title,
-          sub: `${t.country && t.country !== t.title ? t.country + " · " : ""}${t.days} ${t.days === 1 ? "day" : "days"} · ${fmtInt(t.count)} items`,
-          stamp: stampOf(t.start), open: { from: t.start, to: t.end, label: t.title }, cover: t.cover });
-      }
-      for (const m of [...tl.months].reverse()) {
-        const [y, mo] = m.month.split("-").map(Number);
-        if (mo === thisMonth && y < thisYear && !tripMonths.has(m.month)) {
-          const n = thisYear - y;
-          out.push({ key: `a${m.month}`, kind: "ago", title: n === 1 ? "A year ago" : `${n} years ago`,
-            sub: `${monthName(m.month)} · ${fmtInt(m.count)} items`, stamp: stampOf(m.month),
-            open: { from: m.month, to: m.month, label: monthName(m.month) } });
-        }
-      }
-      const busiest = tl.months.filter((m) => m.count >= 3 && !tripMonths.has(m.month) && !out.some((c) => c.key === `a${m.month}`))
-        .sort((a, b) => b.count - a.count).slice(0, Math.max(0, 10 - out.length)).sort((a, b) => b.month.localeCompare(a.month));
-      for (const m of busiest) {
-        out.push({ key: `m${m.month}`, kind: "month", title: monthName(m.month), sub: `${fmtInt(m.count)} photos and videos`,
-          stamp: stampOf(m.month), open: { from: m.month, to: m.month, label: monthName(m.month) } });
-      }
-      const full = await Promise.all(out.slice(0, 12).map(async (c) => {
-        if (c.cover?.length) return c as Card;
-        const p = await api.browse({ from: c.open.from, to: c.open.to }, 3).catch(() => ({ items: [] as Asset[] }));
-        return { ...c, cover: p.items.filter((a) => a.has_thumb).map((a) => a.asset_id) } as Card;
-      }));
-      if (alive) setCards(full.filter((c) => c.cover.length > 0));
-    }).catch(() => alive && setCards([]));
-    return () => { alive = false; };
-  }, [journeys]);
+    let alive = true, timer = 0;
+    const tick = () => fetchMemories().then((m) => {
+      if (!alive) return;
+      setData(m);
+      if (m.refining) timer = window.setTimeout(tick, 3000);
+    }).catch(() => { if (alive) setData((d) => d ?? { cards: [], version: 0, refining: false }); });
+    tick();
+    return () => { alive = false; clearTimeout(timer); };
+  }, []);
 
+  const cards = data ? data.cards.map(present).filter((c) => c.cover.length > 0) : null;
   if (cards === null) {
     return (
       <section className="memsection">
-        <h2 className="display">Memories</h2>
+        <div className="memhead">
+          <h2 className="display">Memories</h2>
+          <span className="loadingpill" role="status"><span className="pulse" aria-hidden />Loading memories<span className="dots" aria-hidden /></span>
+        </div>
         <div className="memories" aria-hidden>{Array.from({ length: 4 }, (_, i) => <div key={i} className="postcard skeleton" />)}</div>
       </section>
     );

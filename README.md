@@ -21,7 +21,7 @@ All screenshots use a demo library of 77 CC0 photos from Wikimedia Commons, with
 |---|---|
 | ![Welcome](docs/screenshots/welcome.png) **First run:** a full-screen welcome with a turning globe; choose or drop a folder, the drive type (USB hard drive or internal SSD) is detected for you. | ![Indexing](docs/screenshots/indexing.png) **Indexing slideshow:** the photos found so far fade past, one travel-nostalgia line per photo ("Collecting postcards…"), with the percentage and time left. |
 | ![Search](docs/screenshots/search.png) **Search in your own words:** results as you pause typing, recent searches kept on this computer, `Ctrl K` from anywhere. | ![Dark mode](docs/screenshots/home-dark.png) **Your world and trips:** trips are found from dates and GPS alone (offline, GeoNames) and shown as postcards; the strip counts years, countries, trips, photos and videos. Light or dark, or follow Windows. |
-| ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** wheel or pinch to zoom, drag to turn; opens framed on where your pins are. No map tiles are downloaded. |
+| ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** photo pins, your trips as flight routes, "Replay my travels" flies trip to trip with a postcard at each stop, a year slider shows where you were over time, and "Your places" lists countries and towns. No map tiles are downloaded. |
 | ![Timeline](docs/screenshots/timeline.png) **Timeline:** items per month on a continuous axis; undated items listed separately. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline gazetteer of 172k places) or by clicking the globe. Originals and their dates are never modified. |
 
 ## How it works
@@ -67,6 +67,27 @@ Default: **OpenCLIP ViT-B/32, LAION-2B** (`laion2b_s34b_b79k`, 512-d). CLIP embe
 
 - The pipeline loses nothing: with the default model it matches plain OpenCLIP on the same files and the published OpenCLIP numbers (Flickr R@1 0.662 vs 0.667 plain vs 0.668 published; COCO 0.394 / 0.394 / 0.393) ([details](results/EXP_PUBLIC_RETRIEVAL.md)).
 - Full tables with R@5, R@10, MRR and nDCG@10: [`results/EXP_MODEL_COMPARE.md`](results/EXP_MODEL_COMPARE.md).
+
+### Cover photos: places and people
+
+Covers are chosen in two stages, so the expensive part runs on very few photos:
+
+1. **CLIPScore with the app's own text, every photo, in milliseconds.** Image vectors exist since indexing, so
+   scoring is a few dot products; the text vectors of the app's prompts are cached on disk (encoded once, ever).
+   *Quality*: close to "a beautiful photograph", far from "a screenshot", "a receipt", "a blurry photo". *People*:
+   "friends posing together" versus "a crowd of strangers". *Place*: "a famous landmark in {town}, {country}" and
+   "the scenery of {town}, {country}", applied to each town's 100 best *place* photos (landmarks, scenery, streets;
+   portraits and selfies excluded), with people counting against a photo; map pins and the places panel show the
+   winner, so a pin shows the place, not the people in it.
+2. **Faces, only on the top candidates.** A background pass (OpenCV YuNet + SFace on the library thumbnails) looks
+   first at the 20 best photos of the four newest memory cards, then a few people photos per month (to learn who
+   keeps coming back), then the other cards and towns: on a 48,569-item library that is 1,270 photos instead of
+   all of them. Recurring people raise a photo, prominent strangers and crowds lower it; each trip postcard takes
+   one photo with your people, one that defines the place, and one more.
+
+Memories appear at once (from a disk copy, 17 ms on that library) and refine in place. Face data stays in the
+library folder; the two models (38 MB) are downloaded once from OpenCV's model zoo. `roamengine serve --no-faces`
+turns faces off.
 
 ## Benchmarks
 
@@ -153,6 +174,7 @@ Tests: `pytest packages/roam-ingest` and `pytest packages/roam-engine` (syntheti
 
 - [OpenCLIP](https://github.com/mlfoundations/open_clip) and the model authors: LAION, Apple DFN, DataComp.
 - [GeoNames](https://www.geonames.org/) place data (CC BY 4.0), bundled for offline place search.
+- Face detection and recognition: [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) (Apache-2.0) from the OpenCV model zoo, downloaded on first use.
 - [Natural Earth](https://www.naturalearthdata.com/) via world-atlas for the globe outlines (public domain).
 - Demo images and videos: Wikimedia Commons contributors, CC0 ([list](docs/screenshots/ATTRIBUTION.md)).
 - Public benchmarks: Flickr30k, MS-COCO, MSR-VTT (used for evaluation only; not redistributed).

@@ -161,6 +161,8 @@ export const api = {
   ingestStatus: () => call<IngestStatus>("GET", "/api/ingest"),
   ingestStart: (roots: string[], storage: "ssd" | "hdd") => call<IngestStatus>("POST", "/api/ingest", {}, { roots, storage }),
   journeys: () => call<Journeys>("GET", "/api/journeys"),
+  memories: () => call<Memories>("GET", "/api/memories"),
+  facesStatus: () => call<{ state: string; done: number; total: number; faces: number; people: number; error?: string }>("GET", "/api/faces/status"),
   storageGuess: (path: string) => call<{ storage: "ssd" | "hdd"; reason: string }>("GET", "/api/storage-guess", { path }),
   glimpses: (n = 24) => call<{ items: { asset_id: string; media_type: string; capture_time: string | null; capture_time_is_utc: boolean }[] }>("GET", "/api/ingest/glimpses", { n }),
   ingestCancel: () => call<IngestStatus>("POST", "/api/ingest/cancel", {}, {}),
@@ -181,8 +183,12 @@ export const api = {
 };
 
 export type Trip = { title: string; country: string | null; start: string; end: string; days: number; count: number; lat: number; lon: number; cover: string[] };
-export type World = { photos: number; videos: number; video_hours: number; years: number[]; countries: number; places: number; located: number; trips: number; pins: { lat: number; lon: number }[] };
+export type Town = { name: string; count: number; lat: number; lon: number; cover: string | null };
+export type World = { countries_list?: { name: string; count: number; towns: Town[] }[]; photos: number; videos: number; video_hours: number; years: number[]; countries: number; places: number; located: number; trips: number; pins: { lat: number; lon: number }[] };
 export type Journeys = { trips: Trip[]; world: World };
+export type MemoryCard = { key: string; kind: "trip" | "ago" | "month"; from: string; to: string; count: number; cover: string[];
+  title?: string; country?: string | null; days?: number; years_ago?: number; month?: string };
+export type Memories = { cards: MemoryCard[]; version: number; refining: boolean };
 export type GeoResult = { name: string; label: string; lat: number; lon: number; population: number | null; source: "geonames" | "osm" };
 export type RecentPlace = { name: string | null; lat: number; lon: number; count: number };
 export type PlaceSuggestion = { asset_id: string; lat: number; lon: number; dt_s: number; source: string | null; name: string | null };

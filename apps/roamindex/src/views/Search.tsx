@@ -237,7 +237,7 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
             {chips}
           </section>
           <WorldStrip journeys={journeys} />
-          <Memories journeys={journeys} onOpen={(m) => { setOpened(m); setFilters({ from: m.from, to: m.to }); }} />
+          <Memories onOpen={(m) => { setOpened(m); setFilters({ from: m.from, to: m.to }); }} />
           <div className="sectionhead">
             <h2 className="display">All photos and videos</h2>
             <FilterBar f={filters} setF={setFilters} />

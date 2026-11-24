@@ -42,3 +42,45 @@ class TextEncoder:
                     self._cache.clear()
                 self._cache[texts[i]] = v
         return np.stack(out).astype(np.float32)
+
+
+class PromptCache:
+    """Text vectors for the app's own fixed prompts (cover and people prompts, suggestion chips, town names), stored
+    next to the library so each is encoded once per model instead of once per launch (encoding costs ~20 ms per
+    prompt on the CPU, and these never change). Typed search text is never stored here."""
+
+    def __init__(self, folder, model_id):
+        import os
+        import re
+        self.path = os.path.join(folder, f"prompts-{re.sub(r'[^A-Za-z0-9._-]+', '_', model_id)}.npz")
+        self._lock = threading.Lock()
+        self._mem = None
+
+    def _load(self):
+        if self._mem is None:
+            try:
+                with np.load(self.path, allow_pickle=False) as z:
+                    self._mem = dict(zip(z["texts"].tolist(), z["vecs"].astype(np.float32)))
+            except (OSError, KeyError, ValueError):
+                self._mem = {}
+        return self._mem
+
+    def get(self, texts, encode):
+        """Vectors for texts (n, dim); `encode(list) -> array` runs only for texts not cached yet."""
+        with self._lock:
+            mem = self._load()
+            todo = [t for t in dict.fromkeys(texts) if t not in mem]
+        if todo:
+            vecs = np.concatenate([encode(todo[i:i + 256]) for i in range(0, len(todo), 256)])
+            with self._lock:
+                for t, v in zip(todo, vecs):
+                    mem[t] = np.asarray(v, np.float32)
+                self._save()
+        return np.stack([mem[t] for t in texts]).astype(np.float32) if texts else np.zeros((0, 0), np.float32)
+
+    def _save(self):
+        import os
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        tmp = self.path[:-4] + ".tmp.npz"
+        np.savez(tmp, texts=np.array(list(self._mem)), vecs=np.stack(list(self._mem.values())))
+        os.replace(tmp, self.path)
