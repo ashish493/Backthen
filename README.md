@@ -21,7 +21,7 @@ All screenshots use a demo library of 77 CC0 photos from Wikimedia Commons, with
 |---|---|
 | ![Welcome](docs/screenshots/welcome.png) **First run:** a full-screen welcome with a turning globe; choose or drop a folder, the drive type (USB hard drive or internal SSD) is detected for you. | ![Indexing](docs/screenshots/indexing.png) **Indexing slideshow:** the photos found so far fade past, one travel-nostalgia line per photo ("Collecting postcards…"), with the percentage and time left. |
 | ![Search](docs/screenshots/search.png) **Search in your own words:** results as you pause typing, recent searches kept on this computer, `Ctrl K` from anywhere. | ![Dark mode](docs/screenshots/home-dark.png) **Your world and trips:** trips are found from dates and GPS alone (offline, GeoNames) and shown as postcards; the strip counts years, countries, trips, photos and videos. Light or dark, or follow Windows. |
-| ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** photo pins, your trips as flight routes, "Replay my travels" flies trip to trip with a postcard at each stop, a year slider shows where you were over time, and "Your places" lists countries and towns. No map tiles are downloaded. |
+| ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** zoomed out, places with 100+ photos show their defining photo and from 21 a count; zoomed into a region, every place with 21+ shows its photo; fewer is a dot (this demo has ~15 per place, so its screenshot uses lower thresholds); your trips as flight routes, "Replay my travels" flies trip to trip with a postcard at each stop, a year slider shows where you were over time, and "Your places" lists countries and towns. No map tiles are downloaded. |
 | ![Timeline](docs/screenshots/timeline.png) **Timeline:** items per month on a continuous axis; undated items listed separately. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline gazetteer of 172k places) or by clicking the globe. Originals and their dates are never modified. |
 
 ## How it works
@@ -82,10 +82,13 @@ Covers are chosen in two stages, so the expensive part runs on very few photos:
 2. **Faces, only on the top candidates.** A background pass (OpenCV YuNet + SFace on the library thumbnails) looks
    first at the 20 best photos of the four newest memory cards, then a few people photos per month (to learn who
    keeps coming back), then the other cards and towns: on a 48,569-item library that is 1,270 photos instead of
-   all of them. Recurring people raise a photo, prominent strangers and crowds lower it; each trip postcard takes
-   one photo with your people, one that defines the place, and one more.
+   all of them. Recurring people raise a photo, prominent strangers and crowds lower it; each postcard leads with
+   the whole group (the largest headcount that repeats across the memory's photos, so nobody is left out), then
+   a photo that defines the place, then one more.
 
-Memories appear at once (from a disk copy, 17 ms on that library) and refine in place. Face data stays in the
+Memories are *shared* moments: a trip is 3+ days away from home (a day out is not a trip), a card is kept only if
+one of its best photos shows two or more people, and no day appears on two cards; a postcard's photos come from
+different days where it can. Memories appear at once (from a disk copy, 17 ms on that library) and refine in place. Face data stays in the
 library folder; the two models (38 MB) are downloaded once from OpenCV's model zoo. `roamengine serve --no-faces`
 turns faces off.
 

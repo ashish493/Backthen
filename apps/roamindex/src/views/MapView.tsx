@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, fmtInt, mediaUrl, type Asset, type Filters, type Trip } from "../api";
+import { api, fmtInt, inTauri, mediaUrl, type Asset, type Filters, type Trip } from "../api";
 import { Grid, Icon } from "../components";
 import { Globe, type GlobeHandle, type GlobePick, type GlobePoints, type LonLat } from "../Globe";
 import { useJourneys } from "./Memories";
@@ -27,6 +27,9 @@ export function MapView({ focus, onSimilar }: { focus: Asset | null; onSimilar: 
   const globe = useRef<GlobeHandle>(null);
   const replayToken = useRef(0);
   const journeys = useJourneys();
+  // development preview only (ignored in the app): lower pin thresholds for the small CC0 demo library's screenshot
+  const dev = !inTauri() ? new URLSearchParams(location.search) : null;
+  const photoMin = Number(dev?.get("pinmin")) || undefined, numberMin = Number(dev?.get("numbermin")) || undefined;
 
   useEffect(() => { api.points({ type }).then(setPts).catch(() => setPts(null)); }, [type]);
   useEffect(() => { if (pick) choose(pick, pickLabel); }, [type]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -120,6 +123,7 @@ export function MapView({ focus, onSimilar }: { focus: Asset | null; onSimilar: 
       <div className="mapwrap">
         <div className="map">
           <Globe ref={globe} points={shown} fitKey={type} onPick={(p) => { stopReplay(); choose(p); }} photoPins
+            photoMin={photoMin} numberMin={numberMin}
             routes={routeStops.length > 1 ? routeStops : null} routeDone={replay ? replay.i : -1}
             ring={pick ? { lat: pick.lat, lon: pick.lon, km: pick.radiusKm } : null} />
           <div className="mapctl">

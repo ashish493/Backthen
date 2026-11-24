@@ -39,6 +39,7 @@ GREEDY_SIM = 0.45         # SFace same-person cosine on LFW is 0.363; start stri
 MERGE_SIM = 0.40
 RECUR_DAYS, RECUR_MONTHS, TOP_PEOPLE = 6, 3, 30
 STRANGER_AREA = 0.01      # unknown faces below 1% of the image are ignored
+GROUP_AREA = 0.005        # a face counts as one of the people *in* a photo from 0.5% of its area (memories: 2+ = shared)
 CROWD = 6
 
 
@@ -223,21 +224,25 @@ def recurring(labels, face_t):
 
 
 def features(n_assets, face_asset, area, labels, important):
-    """Per asset arrays (known, strangers, crowd) from faces mapped to asset indices (face_asset)."""
+    """Per asset arrays (known, strangers, crowd, group) from faces mapped to asset indices (face_asset); group is
+    the number of people in the photo (faces of at least GROUP_AREA), known or not."""
     known = np.zeros(n_assets, np.float32)
     strangers = np.zeros(n_assets, np.float32)
     unknown_n = np.zeros(n_assets, np.int32)
+    group = np.zeros(n_assets, np.float32)
     top = max(important.values()) if important else 1.0
     for a, ar, l in zip(face_asset, area, labels):
         if a < 0:
             continue
+        if ar >= GROUP_AREA:
+            group[a] += 1
         if l in important:
             known[a] += important[l] / top * min(1.0, ar / 0.02)
         else:
             unknown_n[a] += 1
             if ar >= STRANGER_AREA:
                 strangers[a] += min(1.5, ar / 0.02)
-    return known, strangers, (unknown_n >= CROWD).astype(np.float32)
+    return known, strangers, (unknown_n >= CROWD).astype(np.float32), group
 
 
 # ---------------------------------------------------------------------------------------------- background pass
@@ -266,6 +271,7 @@ class FaceWorker:
         self._model_factory = model_factory or (lambda: FaceModel(ensure_models()))
         self.start_delay, self.interval = start_delay, interval
         self.calls = 0                                   # face-model runs (thumbnails looked at), for tests and stats
+        self.ready = False                               # people features are known (loaded or computed this run)
 
     # -------------------------------------------------------------- queue
     def request(self, asset_ids, priority):
@@ -283,8 +289,51 @@ class FaceWorker:
             return any(p < below for p in self._pending.values())
 
     def start(self):
+        self._scanned = self.store.scanned()             # before anyone asks: never queue a photo already looked at
+        self._load_people()                              # last run's results: covers are final from the first second
         threading.Thread(target=self._loop, daemon=True, name="faces").start()
         return self
+
+    # -------------------------------------------------------------- results kept between runs
+    # Re-grouping all stored faces takes seconds on a large library; until it finished, covers fell back to CLIPScores
+    # only and then switched. The results are saved after every re-grouping and loaded at start when the face store
+    # hasn't changed since, so a launch with nothing new to look at shows the final covers at once.
+    def _people_path(self):
+        return os.path.join(self.library, "cache", "people.npz")
+
+    def _store_counts(self):
+        with self.store._db() as db:
+            return [int(db.execute("SELECT count(*) FROM faces").fetchone()[0]),
+                    int(db.execute("SELECT count(*) FROM scanned").fetchone()[0])]
+
+    def _load_people(self):
+        try:
+            with np.load(self._people_path(), allow_pickle=False) as z:
+                if z["counts"].tolist() != self._store_counts():
+                    return False
+                by_id = dict(zip(z["ids"].tolist(), map(tuple, z["feats"].astype(float).tolist())))
+                people = int(z["people"])
+        except (OSError, KeyError, ValueError):
+            return False
+        with self._lock:
+            self._by_id = by_id
+            self.version += 1
+            self.ready = True
+            self._from_cache = True
+        self.status.update(faces=self._store_counts()[0], people=people, state="idle")
+        return True
+
+    def _save_people(self, people):
+        try:
+            path = self._people_path()
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            ids = list(self._by_id)
+            feats = np.array([self._by_id[a] for a in ids], np.float32).reshape(-1, 4)
+            tmp = path[:-4] + ".tmp.npz"
+            np.savez(tmp, ids=np.array(ids), feats=feats, counts=np.array(self._store_counts()), people=people)
+            os.replace(tmp, path)
+        except OSError:
+            pass
 
     def stop(self):
         self._stop.set()
@@ -295,9 +344,11 @@ class FaceWorker:
     def _loop(self):
         if self._stop.wait(self.start_delay):
             return
-        self._scanned = self.store.scanned()
-        if self._scanned:                                # features from an earlier run, before anything new
+        if not self._scanned:
+            self._scanned = self.store.scanned()
+        if self._scanned and not getattr(self, "_from_cache", False):   # results not saved, or faces changed since
             self._safe(self._regroup)
+        self.ready = True
         model = None
         background_for = None
         while not self._stop.is_set():
@@ -385,22 +436,24 @@ class FaceWorker:
             lab[order] = cluster(vec[order], seed[order])
         face_t = np.array([cat.t[a] if a >= 0 else np.nan for a in fa])
         imp = recurring(lab, face_t)
-        known, strangers, crowd = features(len(cat.asset_ids), fa, area, lab, imp)
+        known, strangers, crowd, group = features(len(cat.asset_ids), fa, area, lab, imp)
         scanned = self._scanned or self.store.scanned()
         by_id = {}
         for aid in scanned:
             i = cat.index.get(aid)
             if i is not None:
-                by_id[aid] = (float(known[i]), float(strangers[i]), float(crowd[i]))
+                by_id[aid] = (float(known[i]), float(strangers[i]), float(crowd[i]), float(group[i]))
         with self._lock:
             self._by_id = by_id
             self.version += 1
             self._last_regroup = time.monotonic()
+            self.ready = True
+        self._save_people(len(imp))
         self.status.update(faces=len(ids), people=len(imp), state="scanning" if self._pending else "idle")
 
     # -------------------------------------------------------------- results
     def features(self):
-        """(known, strangers, crowd) aligned with the current catalogue, NaN where not looked at yet.
+        """(known, strangers, crowd, group) aligned with the current catalogue, NaN where not looked at yet.
         Built from results keyed by asset id: a catalogue reload costs a dictionary pass, never a re-grouping."""
         cat = self.engine.cat
         with self._lock:
@@ -409,12 +462,12 @@ class FaceWorker:
                 return self._aligned[1]
             by_id = self._by_id
         n = len(cat.asset_ids)
-        arr = np.full((3, n), np.nan, np.float32)
+        arr = np.full((4, n), np.nan, np.float32)
         for aid, v in by_id.items():
             i = cat.index.get(aid)
             if i is not None:
                 arr[:, i] = v
-        out = (arr[0], arr[1], arr[2])
+        out = (arr[0], arr[1], arr[2], arr[3])
         with self._lock:
             self._aligned = (key, out)
         return out

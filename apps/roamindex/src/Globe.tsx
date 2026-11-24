@@ -31,18 +31,26 @@ const SPHERE = { type: "Sphere" } as GeoPermissibleObjects;
 const RAD = Math.PI / 180;
 const EARTH_KM = 6371.0088;
 const MAX_K = 3000;
-const PHOTO_PINS = 5;                                  // photo bubbles per view; the rest show counts
+const PHOTO_MIN = 100;                                 // map pins, zoomed out: a photo from 100 photos, a number from 21;
+const NUMBER_MIN = 21;                                 // zoomed into a region: a photo from 21; always a dot for 20 or fewer
+const REGION_K = 8;                                    // "zoomed into a region": about 1,500 km or less across the map
 
 // photo pins: thumbnails decoded once and kept for the session (a few hundred at most are on screen)
 const thumbs = new Map<string, HTMLImageElement | null>();
+const thumbTries = new Map<string, number>();
 function thumb(id: string, onReady: () => void): HTMLImageElement | null {
   const have = thumbs.get(id);
   if (have !== undefined) return have && have.complete && have.naturalWidth ? have : null;
+  const n = thumbTries.get(id) ?? 0;
   const img = new Image();
   img.decoding = "async";
   img.onload = onReady;
-  img.onerror = () => thumbs.set(id, null);
-  img.src = mediaUrl("thumb", id);
+  img.onerror = () => {                            // a busy engine can drop a request: try again a few times
+    thumbTries.set(id, n + 1);
+    if (n + 1 < 4) setTimeout(() => { thumbs.delete(id); onReady(); }, 500 * (n + 1));
+    else thumbs.set(id, null);
+  };
+  img.src = mediaUrl("thumb", id, n ? { r: n } : {});
   thumbs.set(id, img);
   return null;
 }
@@ -110,7 +118,11 @@ export const Globe = forwardRef<GlobeHandle, {
   photoPins?: boolean;             // bubbles show a photo from that place, with a count badge
   routes?: LonLat[] | null;        // travel route: great-circle arcs between consecutive stops
   routeDone?: number;              // arcs already flown (drawn solid); the rest dashed; -1: all solid
-}>(function Globe({ points, ring, marker, onPick, fitKey, clusterZoom = true, photoPins = false, routes = null, routeDone = -1 }, ref) {
+  photoMin?: number;               // zoomed out: photo pins from this many photos (default 100)
+  numberMin?: number;              // numbered bubbles from this many (default 21), and zoomed into a region photo
+                                   // pins from this many too; fewer: a plain dot
+}>(function Globe({ points, ring, marker, onPick, fitKey, clusterZoom = true, photoPins = false, routes = null, routeDone = -1,
+  photoMin = PHOTO_MIN, numberMin = NUMBER_MIN }, ref) {
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const view = useRef<View>({ lon: 20, lat: 15, k: 1 });
@@ -118,8 +130,8 @@ export const Globe = forwardRef<GlobeHandle, {
   const anim = useRef<number | null>(null);
   const frame = useRef<number | null>(null);
   const clusters = useRef<{ x: number; y: number; r: number; idx: number[] }[]>([]);
-  const props = useRef({ points, ring, marker, photoPins, routes, routeDone });
-  props.current = { points, ring, marker, photoPins, routes, routeDone };
+  const props = useRef({ points, ring, marker, photoPins, routes, routeDone, photoMin, numberMin });
+  props.current = { points, ring, marker, photoPins, routes, routeDone, photoMin, numberMin };
   const flight = useRef<{ from: LonLat; to: LonLat; e: number } | null>(null);
   const fitted = useRef<string | null>(null);
   const redrawRef = useRef<() => void>(() => {});
@@ -203,7 +215,11 @@ export const Globe = forwardRef<GlobeHandle, {
         .sort((a, b) => b.n - a.n);
       // spacing: with photo pins on, bubbles keep room for a photo; numbered bubbles are drawn at their usual size
       const numbered = (n: number) => (n === 1 ? 8 : Math.min(22, 9 + 6.4 * Math.log10(n)) + 3);
-      const rad = (n: number) => photo ? Math.min(38, 21 + 5 * Math.log10(n)) + 3 : numbered(n);
+      const nMin = props.current.numberMin;
+      const pMin = v.k >= REGION_K ? nMin : props.current.photoMin;   // zoomed in: every place of 21+ shows its photo
+      const dot = 8;
+      const rad = (n: number) => !photo ? numbered(n)
+        : n >= pMin ? Math.min(38, 21 + 5 * Math.log10(n)) + 3 : n >= nMin ? numbered(n) : dot;
       const merged: typeof list = [];
       for (const b of list) {
         const m = merged.find((o) => Math.hypot(o.x - b.x, o.y - b.y) < rad(o.n) + rad(b.n) - 4);
@@ -214,9 +230,9 @@ export const Globe = forwardRef<GlobeHandle, {
       }
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.font = "600 11px system-ui, -apple-system, 'Segoe UI', sans-serif";
-      // only the PHOTO_PINS biggest bubbles in view carry a photo: the cover of the place that dominates the bubble
+      // photo pins carry the cover of the place that dominates the bubble (the engine's place pick)
       // (chosen by the engine: CLIPScore with the town's name among its best photos); the rest stay numbered
-      const withPhoto = new Set(photo ? [...merged].sort((a, b) => b.n - a.n).slice(0, PHOTO_PINS) : []);
+      const withPhoto = new Set(photo ? merged.filter((b) => b.n >= pMin) : []);
       const coverOf = (idx: number[]): string | null => {
         if (pts.town && pts.towns) {
           const count = new Map<number, number>();
@@ -258,8 +274,8 @@ export const Globe = forwardRef<GlobeHandle, {
           out.push({ x, y, r: r + 3, idx: b.idx });
           continue;
         }
-        if (b.n === 1) {
-          ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        if (b.n === 1 || (photo && b.n < nMin)) {                  // one photo, or a handful: a plain dot
+          ctx.beginPath(); ctx.arc(x, y, b.n === 1 ? 5 : 6.5, 0, 2 * Math.PI);
           ctx.fillStyle = allVideo ? col.video : col.accent; ctx.fill();
           ctx.lineWidth = 1.5; ctx.strokeStyle = col.panel; ctx.stroke();
           out.push({ x, y, r: 8, idx: b.idx });

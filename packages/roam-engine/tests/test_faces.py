@@ -43,7 +43,8 @@ def test_features_reward_known_and_penalise_prominent_strangers():
     face_asset = np.array([0, 0, 1, 2, 2, 2, 2, 2, 2, 3])
     area = np.array([0.03, 0.002, 0.03, *[0.003] * 6, 0.05])
     labels = np.array([5, -1, -1, *[-1] * 6, 9])
-    known, strangers, crowd = faces.features(5, face_asset, area, labels, {5: 2.0, 9: 1.0})
+    known, strangers, crowd, group = faces.features(5, face_asset, area, labels, {5: 2.0, 9: 1.0})
+    assert list(group) == [1, 1, 0, 1, 0]                       # faces under 0.5% of the photo are not "in" it
     assert known[0] == 1.0 and strangers[0] == 0                 # person 5 large; the tiny face is ignored
     assert known[1] == 0 and strangers[1] > 1                    # one prominent stranger
     assert crowd[2] == 1 and strangers[2] == 0                   # six tiny unknown faces: a crowd, not a portrait

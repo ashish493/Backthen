@@ -375,7 +375,7 @@ class Engine:
         out = _z(s1["quality"][idx].astype(np.float64)) + 0.7 * _z(s1["people"][idx].astype(np.float64))
         f = self.people_features()
         if f is not None and len(idx):
-            known, strangers, crowd = (a[idx].astype(np.float64) for a in f)
+            known, strangers, crowd = (a[idx].astype(np.float64) for a in f[:3])
             seen = np.isfinite(known)
             if seen.any():
                 face = np.zeros(len(idx))
@@ -400,6 +400,21 @@ class Engine:
         idx = idx[self.stage1()["has_people"][idx]]
         return idx[np.argsort(-self.memory_scores(idx))[:k]] if len(idx) else idx
 
+    def shared(self, members):
+        """Is this a shared memory? True if one of its best photos (face_candidates) shows two or more people, False
+        once all of those have been checked and none does, None while some are not checked yet. Without the face
+        pass, CLIP decides: a candidate that looks like a posed group rather than a crowd."""
+        cands = self.face_candidates(members, 20)
+        if not len(cands):
+            return False
+        f = self.people_features()
+        if f is None:
+            return bool((np.nan_to_num(self.stage1()["people"][cands], nan=-1) > 0).any())
+        group = f[3][cands]
+        if (np.nan_to_num(group) >= 2).any():
+            return True
+        return False if np.isfinite(group).all() else None
+
     def pick_covers(self, idx, k=3, prefer_photos=True, avoid=()):
         """Up to k cover assets from these asset indices: memory score, typical of the group (close to its mean
         vector), and not near-duplicates of each other or of `avoid`."""
@@ -415,15 +430,20 @@ class Engine:
         typical = v @ m
         rank = self.memory_scores(idx) + 0.5 * _z(typical)
         taken = [c.vectors[c.f_start[a]] for a in avoid]
+        day = lambda i: int(c.t[i] // 86400) if np.isfinite(c.t[i]) else -1
+        used_days = {day(a) for a in avoid}
         out = []
-        for j in np.argsort(-rank):
-            if idx[j] in avoid:
-                continue
-            if all(float(v[j] @ u) < 0.92 for u in taken):
-                out.append(j)
-                taken.append(v[j])
-            if len(out) == k:
-                break
+        # first pass: one photo per day (a trip's postcard shows different days); second pass fills up if needed
+        for spread in (True, False):
+            for j in np.argsort(-rank):
+                if len(out) == k:
+                    break
+                if idx[j] in avoid or j in out or (spread and day(idx[j]) in used_days):
+                    continue
+                if all(float(v[j] @ u) < 0.92 for u in taken):
+                    out.append(j)
+                    taken.append(v[j])
+                    used_days.add(day(idx[j]))
         return idx[out].tolist()
 
     def place_best(self, idx, town_vec, direction=None, k=100):
@@ -477,13 +497,46 @@ class Engine:
             out[key] = self.place_best(ids, T[j], None if d is None else d / (np.linalg.norm(d) + 1e-9))
         return out
 
+    def group_photo(self, members):
+        """The photo of the whole group. The group size is the largest headcount that repeats: at least two of the
+        memory's photos show that many people or more (crowds aside), so a one-off photo with strangers doesn't set
+        it. Among photos with exactly that many people (or one more), the best by memory score. None when faces are
+        not known yet or no headcount of two or more repeats. Headcount = faces of at least 0.5% of the photo.
+        Videos count too (their thumbnail is the frame whose faces were counted); a photo wins a tie."""
+        f = self.people_features()
+        if f is None:
+            return None
+        idx = self._candidates(members, prefer_photos=False)
+        if not len(idx):
+            return None
+        g, crowd = f[3][idx], np.nan_to_num(f[2][idx]) > 0
+        seen = np.isfinite(g) & ~crowd
+        heads, ids = g[seen].astype(int), idx[seen]
+        n = next((n for n in sorted(set(heads.tolist()), reverse=True) if n >= 2 and (heads >= n).sum() >= 2), 0)
+        if not n:
+            return None
+        pool = ids[(heads >= n) & (heads <= n + 1)]
+        photos = pool[~self.cat.is_video[pool]]
+        pool = photos if len(photos) else pool                   # a video only when no photo shows the whole group
+        return int(pool[int(np.argmax(self.memory_scores(pool)))])
+
+    def memory_covers(self, members, k=3):
+        """Covers for a month card: the whole group first (when there is one), then the best of the rest."""
+        gp = self.group_photo(members)
+        chosen = [gp] if gp is not None else []
+        return chosen + self.pick_covers(members, k - len(chosen), avoid=chosen)
+
     def trip_covers(self, idx, town_vec=None):
-        """Three postcard slots: the best photo with one of your people (once the face model has looked), the photo
-        that best defines the trip's main place, then the best of the rest; no near-duplicates between them."""
+        """Three postcard slots: the whole group (the largest headcount that repeats; before faces are known, the
+        best photo with one of your people), the photo that best defines the trip's main place, then the best of
+        the rest; no near-duplicates between them."""
         idx = np.asarray(idx, dtype=np.int64)
         chosen = []
         f = self.people_features()
-        if f is not None and len(idx):
+        gp = self.group_photo(idx) if len(idx) else None
+        if gp is not None:
+            chosen.append(gp)
+        elif f is not None and len(idx):
             known = f[0][idx]
             chosen += self.pick_covers(idx[np.nan_to_num(known) > 0], 1)
         if town_vec is not None and len(idx):

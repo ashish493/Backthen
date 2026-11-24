@@ -37,13 +37,15 @@ export function Tile({ a, onOpen, showScore, children, className }: {
 }) {
   const [broken, setBroken] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [tries, setTries] = useState(0);                // a busy engine can drop a request: retry before giving up
+  const failed = () => (tries < 3 ? window.setTimeout(() => setTries((t) => t + 1), 400 * (tries + 1)) : setBroken(true));
   const moment = a.moments?.[0]?.timestamp_s;
   return (
     <div className={`tile ${className || ""}`} role="button" tabIndex={0} onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
       title={a.capture_time ? new Date(a.capture_time_is_utc ? a.capture_time : a.capture_time + "Z").toLocaleString() : "No date"}>
       {a.has_thumb && !broken
-        ? <img loading="lazy" decoding="async" src={mediaUrl("thumb", a.asset_id)} onError={() => setBroken(true)} alt=""
+        ? <img loading="lazy" decoding="async" src={mediaUrl("thumb", a.asset_id, tries ? { r: tries } : {})} onError={failed} alt=""
             className={loaded ? "loaded" : ""} onLoad={() => setLoaded(true)} />
         : <div className="noimg">{a.format?.toUpperCase() || "no preview"}</div>}
       {a.media_type === "video" && (

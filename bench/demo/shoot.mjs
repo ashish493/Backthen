@@ -1,5 +1,7 @@
 // Screenshots of the RoamIndex UI for the README, driven over the Chrome DevTools Protocol (Node 20+, global WebSocket).
-// Needs: `roamengine serve --library <demo lib> --port 8766 --token demo`, the built UI served on 127.0.0.1:1420
+// Needs: `roamengine serve --library <demo lib> --port 8766 --token demo --memories-solo-ok`, the built UI on 127.0.0.1:1420
+// (--memories-solo-ok: the CC0 demo photos have almost no people, so without it Memories would keep only shared
+// memories -- a photo with two or more people -- and the demo row would be empty; the other rules still apply)
 // (`npx vite preview --port 1420`), and Edge/Chrome started with --remote-debugging-port=9226 on that URL.
 // usage: node bench/demo/shoot.mjs OUT_DIR
 import fs from "node:fs";
@@ -76,7 +78,15 @@ if (steps.includes("video")) {
   await wait(500);
 }
 if (steps.includes("timeline")) { await nav("Timeline"); await wait(1500); await shot("timeline"); }
-if (steps.includes("map")) { await nav("Map"); await wait(3000); await shot("map"); }
+if (steps.includes("map")) {
+  // zoomed out the app shows a photo on map bubbles of 100+ photos and a number from 21 (zoomed into a region, a photo
+  // from 21), a dot below; every place in the small CC0
+  // demo library has 13-20 photos, so this screenshot lowers the thresholds (?pinmin / ?numbermin, preview only)
+  const u = new URL(await js("location.href")); u.searchParams.set("view", "map"); u.searchParams.set("pinmin", "10"); u.searchParams.set("numbermin", "3");
+  await send("Page.navigate", { url: u.toString() }); await wait(4000); await shot("map");
+  u.searchParams.delete("pinmin"); u.searchParams.delete("numbermin"); u.searchParams.delete("view");
+  await send("Page.navigate", { url: u.toString() }); await wait(2500);
+}
 if (steps.includes("places")) {
   await nav("Add places");
   await wait(2500);

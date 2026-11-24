@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { api, fmtInt, mediaUrl, type Journeys, type MemoryCard, type Memories, type World } from "../api";
+import { api, fmtInt, inTauri, type Journeys, type MemoryCard, type Memories, type World } from "../api";
 import { SpinGlobe } from "../SpinGlobe";
+import { MemoryPhotos, PolaroidLoader } from "./Polaroid";
 
 export type MemoryOpen = { from: string; to: string; label: string };
 type Card = { key: string; kind: "trip" | "ago" | "month"; title: string; sub: string; stamp: [string, string];
@@ -56,41 +57,54 @@ function present(c: MemoryCard): Card {
  *  best candidates, the first four first); while it does, this refreshes every few seconds and changed covers fade in. */
 export function Memories({ onOpen }: { onOpen: (m: MemoryOpen) => void }) {
   const [data, setData] = useState<Memories | null>(memoriesCache);
+  const [revealed, setRevealed] = useState(0);                     // cards whose first photos are on screen
+  const veilPreview = !inTauri() && new URLSearchParams(location.search).has("veil");     // development preview
 
+  const ticker = useRef<() => void>(() => {});
   useEffect(() => {
     let alive = true, timer = 0;
-    const tick = () => fetchMemories().then((m) => {
+    const tick = () => { clearTimeout(timer); fetchMemories().then((m) => {
       if (!alive) return;
       setData(m);
-      if (m.refining) timer = window.setTimeout(tick, 3000);
-    }).catch(() => { if (alive) setData((d) => d ?? { cards: [], version: 0, refining: false }); });
+      if (m.refining || m.provisional) timer = window.setTimeout(tick, 1500);
+    }).catch(() => { if (alive) setData((d) => d ?? { cards: [], version: 0, refining: false }); }); };
+    ticker.current = tick;
     tick();
     return () => { alive = false; clearTimeout(timer); };
   }, []);
 
   const cards = data ? data.cards.map(present).filter((c) => c.cover.length > 0) : null;
-  if (cards === null) {
+  useEffect(() => { if (revealed > 0 && revealed === Math.min(data?.cards.length ?? 0, 4)) ticker.current(); },  // ask again
+    [revealed]); // eslint-disable-line react-hooks/exhaustive-deps                                               // right then
+  if (cards === null || (cards.length === 0 && data?.refining)) {          // nothing settled yet: still looking
     return (
       <section className="memsection">
         <div className="memhead">
           <h2 className="display">Memories</h2>
           <span className="loadingpill" role="status"><span className="pulse" aria-hidden />Loading memories<span className="dots" aria-hidden /></span>
         </div>
-        <div className="memories" aria-hidden>{Array.from({ length: 4 }, (_, i) => <div key={i} className="postcard skeleton" />)}</div>
+        <div className="memories" aria-hidden>{Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="postcard" style={{ ["--tilt" as string]: `${[-1.6, 1.2, -0.8, 1.8][i]}deg`, ["--i" as string]: i }}>
+            <PolaroidLoader index={i} />
+            <div className="postmeta"><span className="ghostline" /><span className="ghostline short" /></div>
+          </div>))}
+        </div>
       </section>
     );
   }
   if (cards.length === 0) return null;
+  // the veil: after the first photos are in, while the engine still looks for each memory's whole-group photo
+  const firstIn = revealed >= Math.min(cards.length, 4);
+  const veil = veilPreview || (!!data?.refining && firstIn);
   return (
     <section className="memsection">
       <h2 className="display">Memories</h2>
+      <div className="memrow">
       <div className="memories">
         {cards.map((c, i) => (
           <button key={c.key} className={`postcard ${c.kind}`} style={{ ["--tilt" as string]: `${[-1.6, 1.2, -0.8, 1.8, -1.2][i % 5]}deg`, ["--i" as string]: i }}
             onClick={() => onOpen(c.open)} title={`Show ${c.open.label}`}>
-            <div className={`mosaic n${c.cover.length}`}>
-              {c.cover.map((id) => <img key={id} src={mediaUrl("thumb", id)} alt="" loading="lazy" />)}
-            </div>
+            <MemoryPhotos ids={c.cover} index={i} onShown={() => setRevealed((n) => n + 1)} />
             <div className="stamp" aria-hidden><b>{c.stamp[0]}</b><span>{c.stamp[1]}</span></div>
             <div className="postmeta">
               {c.kind !== "month" && <span className={`memtag ${c.kind}`}>{c.kind === "trip" ? "Trip" : "On this month"}</span>}
@@ -100,7 +114,43 @@ export function Memories({ onOpen }: { onOpen: (m: MemoryOpen) => void }) {
           </button>
         ))}
       </div>
+      <RefineVeil on={veil} checked={data?.checked} total={data?.total} />
+      </div>
     </section>
+  );
+}
+
+/** "Getting everyone in the picture": an almost transparent veil over the row while the engine checks each memory's
+ *  candidates for the photo with the whole group; the improved covers then develop in place. */
+function RefineVeil({ on, checked, total }: { on: boolean; checked?: number; total?: number }) {
+  const line = total && checked !== undefined && checked < total
+    ? `Checked ${checked} of ${total} memories for your whole group`
+    : "Picking the shot where nobody's left out";
+  return (
+    <div className={`refineveil ${on ? "on" : ""}`} role="status" aria-hidden={!on}>
+      <div className="veilchip">
+        <GroupFinder />
+        <div><b>Getting everyone in the picture…</b><small>{line}</small></div>
+      </div>
+    </div>
+  );
+}
+
+/** A viewfinder: little people step into frame one by one, then the shutter flashes. */
+function GroupFinder() {
+  return (
+    <svg className="groupfinder" viewBox="0 0 64 44" aria-hidden>
+      <rect className="gf-flash" x="2" y="2" width="60" height="40" rx="6" />
+      <path className="gf-frame" d="M4 13V4h9M51 4h9v9M60 31v9h-9M13 40H4v-9" />
+      {[16, 27, 38, 49].map((x, k) => (
+        <g key={k} transform={`translate(${x} 36)`}>
+          <g className="gf-person" style={{ ["--k" as string]: k }}>
+            <circle cx="0" cy="-15" r="4.2" />
+            <rect x="-4.8" y="-10" width="9.6" height="12" rx="4.5" />
+          </g>
+        </g>
+      ))}
+    </svg>
   );
 }
 

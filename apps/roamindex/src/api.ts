@@ -188,7 +188,7 @@ export type World = { countries_list?: { name: string; count: number; towns: Tow
 export type Journeys = { trips: Trip[]; world: World };
 export type MemoryCard = { key: string; kind: "trip" | "ago" | "month"; from: string; to: string; count: number; cover: string[];
   title?: string; country?: string | null; days?: number; years_ago?: number; month?: string };
-export type Memories = { cards: MemoryCard[]; version: number; refining: boolean };
+export type Memories = { cards: MemoryCard[]; version: number; refining: boolean; provisional?: boolean; checked?: number; total?: number };
 export type GeoResult = { name: string; label: string; lat: number; lon: number; population: number | null; source: "geonames" | "osm" };
 export type RecentPlace = { name: string | null; lat: number; lon: number; count: number };
 export type PlaceSuggestion = { asset_id: string; lat: number; lon: number; dt_s: number; source: string | null; name: string | null };

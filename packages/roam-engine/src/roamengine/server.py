@@ -32,6 +32,7 @@ from .media import PHOTO_MIME, VIDEO_MIME, frame_jpeg, preview_jpeg
 ALLOWED_ORIGINS = {"http://tauri.localhost", "https://tauri.localhost", "tauri://localhost",
                    "http://localhost:1420", "http://127.0.0.1:1420"}
 ASSET_RE = r"([0-9a-f]{8,64})"
+HOME_RULES = 2        # bump when the rules for trips or memory cards change: an older disk copy is then not shown
 
 
 def guess_storage(path):
@@ -69,6 +70,7 @@ class Api:
         self._home = None                                # see home(): trips, memory cards, town covers
         self._home_lock = threading.Lock()
         self._disk = None                                # the last home screen from disk, until home() is ready
+        self.memories_solo_ok = False                    # True: keep memories without 2+ people (demo screenshots)
         self.ingest = IngestManager(self.library, python=python)
         self.routes = [
             ("GET", r"/api/health$", self.health),
@@ -214,30 +216,35 @@ class Api:
                 if h["fv"] != fv:
                     self._fill_covers(h)
                     h["fv"] = fv
-                    if w is None or not w.busy():
+                    if w is None or (w.ready and not w.busy()):
                         self._save_disk(h)
         return h
 
     def _build_home(self, key):
         e, cat = self.engine, self.engine.cat
         st = journeys.structure(cat, self.gazetteer())
-        h = dict(key=key, st=st, cards=memories.cards(cat, st["trips"]), fv=None,
+        h = dict(key=key, st=st, cands=memories.candidates(cat, st["trips"]), cards=[], fv=None,
+                 day_of=np.where(np.isfinite(cat.t), cat.t // 86400, -1).astype(np.int64),
                  town_vec=dict(zip(st["town_keys"], e.town_vectors(st["town_keys"])))
                  if st["town_keys"] and cat.model_id else {})
         w = self._faces()
         self._fill_covers(h)
         h["fv"] = w.version if w is not None else 0
         self._request_faces(h)
-        self._save_disk(h)
+        if w is None or w.ready:                         # never replace a good disk copy with CLIP-only covers
+            self._save_disk(h)
         return h
 
     def _fill_covers(self, h):
         e, cat, st = self.engine, self.engine.cat, h["st"]
         town_covers = e.town_covers(st["towns"])
         trip_cov = [e.trip_covers(t["_members"], h["town_vec"].get(t["_town"])) for t in st["trips"]]
-        by_key = {f"t{t['start']}": c for t, c in zip(st["trips"], trip_cov)}
+        # the row: shared memories only (unless --memories-solo-ok), and never the same day on two cards
+        shared = (lambda m: True) if self.memories_solo_ok else e.shared
+        h["cards"] = memories.select(h["cands"], h["day_of"], shared)
         for c in h["cards"]:
-            ids = by_key.get(c["key"]) if c["kind"] == "trip" else e.pick_covers(c["_members"], 3)
+            ids = (e.trip_covers(c["_members"], h["town_vec"].get(c["_town"])) if c["kind"] == "trip"
+                   else e.memory_covers(c["_members"], 3))
             c["cover"] = [str(cat.asset_ids[i]) for i in ids or []]
         h["journeys"] = journeys.public(st, cat, trip_cov, town_covers)
         h["towns"] = [dict(name=k[0], country=k[1],
@@ -252,8 +259,10 @@ class Api:
             return
         e, cat = self.engine, self.engine.cat
         ids = lambda arr: [str(cat.asset_ids[i]) for i in arr]
-        for n, c in enumerate(h["cards"]):
+        for n, c in enumerate(h["cands"]):                # every candidate card: the shared check needs them
             w.request(ids(e.face_candidates(c["_members"], 20)), 0 if n < memories.FIRST else 2)
+        for c in h["cands"][:memories.MAX_CARDS + 4]:   # more people photos per card: find the whole-group shot
+            w.request(ids(e.face_candidates(c["_members"], 60)), 2)
         for members in memories.months(cat).values():
             w.request(ids(e.face_candidates(members, 5)), 1)
         q, has = e.cover_scores(), e.stage1()["has_people"]
@@ -267,7 +276,7 @@ class Api:
     def _disk_key(self):
         cat, pl = self.engine.cat, os.path.join(self.library, "places.sqlite")
         return json.loads(json.dumps([cat.stamp, os.path.getmtime(pl) if os.path.exists(pl) else 0, cat.model_id,
-                                      dt.date.today().strftime("%Y-%m")]))
+                                      dt.date.today().strftime("%Y-%m"), HOME_RULES, self.memories_solo_ok]))
 
     def _save_disk(self, h):
         try:
@@ -297,9 +306,12 @@ class Api:
     def memories(self):
         h = self.home(wait=False)
         w = self._faces()
-        if h is None:
-            return dict(cards=self._disk["cards"], version=-1, refining=True)
-        return dict(cards=memories.public(h["cards"]), version=h["fv"], refining=bool(w is not None and w.busy()))
+        if h is None:                                    # the saved row (only ever saved when final): show it, check again
+            n = len(self._disk["cards"])
+            return dict(cards=self._disk["cards"], version=-1, checked=n, total=n, refining=False, provisional=True)
+        checked = sum(1 for c in h["cards"] if c["_checked"])
+        return dict(cards=memories.public(h["cards"]), version=h["fv"], checked=checked, total=len(h["cards"]), provisional=False,
+                    refining=bool(w is not None and (w.busy() or checked < len(h["cards"]) or not w.ready)))
 
     def points(self, p, b):
         h = self.home()
@@ -523,8 +535,17 @@ class Handler(BaseHTTPRequestHandler):
                 left -= len(chunk)
 
 
-def serve(library, port=0, token=None, text_device="cpu", python=None, ready=print, faces=False):
+class _Server(ThreadingHTTPServer):
+    daemon_threads = True
+    # The home screen asks for ~40 thumbnails at once. Python's default listen backlog is 5: while start-up work keeps
+    # the accept loop busy, further connections were refused and the app showed broken images.
+    request_queue_size = 128
+
+
+def serve(library, port=0, token=None, text_device="cpu", python=None, ready=print, faces=False,
+          memories_solo_ok=False):
     api = Api(library, text_device=text_device, python=python)
+    api.memories_solo_ok = memories_solo_ok
     if faces:                                            # background face pass for people-aware covers
         from .faces import FaceWorker
         api.engine.faces = FaceWorker(api.engine, api.library).start()
@@ -537,8 +558,7 @@ def serve(library, port=0, token=None, text_device="cpu", python=None, ready=pri
             pass
     threading.Thread(target=warm_home, daemon=True, name="warm-home").start()
     token = token or secrets.token_urlsafe(24)
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    httpd.daemon_threads = True
+    httpd = _Server(("127.0.0.1", port), Handler)
     Handler.api, Handler.token, Handler.port = api, token, httpd.server_address[1]
     if api.engine.cat.model_id:
         threading.Thread(target=lambda: api.engine.text, daemon=True).start()  # warm the text model
@@ -555,11 +575,14 @@ def main(argv=None):
     ap.add_argument("--text-device", default="cpu")
     ap.add_argument("--no-faces", action="store_true",
                     help="do not look for faces (people-aware covers); faces are found on thumbnails and stay local")
+    ap.add_argument("--memories-solo-ok", action="store_true",
+                    help="keep memories without a photo of two or more people (the CC0 demo library has almost none)")
     ap.add_argument("--exit-with-parent", action="store_true",
                     help="exit when stdin closes (the desktop app holds our stdin open while it runs)")
     a = ap.parse_args(argv)
     os.makedirs(a.library, exist_ok=True)
-    httpd = serve(a.library, a.port, a.token, a.text_device, faces=not a.no_faces)
+    httpd = serve(a.library, a.port, a.token, a.text_device, faces=not a.no_faces,
+                  memories_solo_ok=a.memories_solo_ok)
     if a.exit_with_parent:
         threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start()
     try:

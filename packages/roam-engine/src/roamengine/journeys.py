@@ -14,6 +14,7 @@ import numpy as np
 AWAY_KM = 80.0
 MAX_GAP_DAYS = 3.0
 MIN_ITEMS = 6
+MIN_TRIP_DAYS = 3      # a day or two away is a day out, not a trip
 MAX_TRIPS = 12
 
 
@@ -107,6 +108,8 @@ def structure(cat, gazetteer):
             runs.append(cur)
         for run in runs:
             t0, t1 = float(cat.t[run[0]]), float(cat.t[run[-1]])
+            if int((t1 - t0) // 86400) + 1 < MIN_TRIP_DAYS:
+                continue
             span = dated & (cat.t >= t0) & (cat.t <= t1)
             members = np.flatnonzero(span)
             if len(members) < MIN_ITEMS:

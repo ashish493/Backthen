@@ -38,3 +38,10 @@ def test_home_is_not_a_trip_and_a_trip_is_found():
 
 def test_small_or_empty_library():
     assert journeys.compute(fake_cat([(T0, 52.52, 13.40, 0)]), Gazetteer())["trips"] == []
+
+
+def test_a_day_out_is_not_a_trip():
+    home = [(T0 + d * DAY * 7, 52.52, 13.40, 0) for d in range(30)]
+    dayout = [(T0 + 42.5 * DAY + h * 3600 * 4, 38.72, -9.14, 0) for h in range(10)]       # 36 hours away
+    r = journeys.compute(fake_cat(home + dayout), Gazetteer())
+    assert r["trips"] == [] and r["world"]["trips"] == 0
