@@ -1,0 +1,189 @@
+{
+ "exact": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 349.92,
+    "video_embeddings": 1901,
+    "frames_decoded": 120481,
+    "seeks": 32,
+    "probes": 0,
+    "video_decode_s": 1141.1,
+    "process_read_gb": 18.976,
+    "disk_mb_s": 48.8,
+    "cpu": 43.1,
+    "nvdec": 18.8,
+    "peak_rss_mib": 4592,
+    "errors": {}
+   }
+  ]
+ },
+ "exact_prefetch": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 295.87,
+    "video_embeddings": 1901,
+    "frames_decoded": 120481,
+    "seeks": 32,
+    "probes": 0,
+    "video_decode_s": 457.0,
+    "process_read_gb": 17.244,
+    "disk_mb_s": 58.7,
+    "cpu": 58.5,
+    "nvdec": 17.6,
+    "peak_rss_mib": 4067,
+    "errors": {}
+   }
+  ],
+  "quality": {
+   "label": "B_exact_prefetch_vs_exact",
+   "videos": 197,
+   "fwd_coverage_macro_median": 1.0,
+   "fwd_coverage_macro_p5": 0.9999,
+   "fwd_coverage_worst_video_median": 0.9999,
+   "videos_with_median_fwd_below_095": 0,
+   "share_videos_median_fwd_ge_095": 1.0,
+   "bwd_coverage_macro_median": 1.0,
+   "bwd_coverage_macro_p5": 0.9999,
+   "displacement_s_macro_median": 0.0126,
+   "displacement_s_p95_of_video_max": 0.033,
+   "displacement_s_max": 0.046,
+   "retention_macro_mean": 0.9983,
+   "retention_worst": 0.7778,
+   "redundancy_macro_median": 0.8801,
+   "redundancy_macro_p5": 0.7711,
+   "same_index_identical_embeddings": 1.0,
+   "same_index_same_pts": 1.0,
+   "gate_a_share_ge_095": true,
+   "gate_b_macro_p5_ge_090": true,
+   "gate_pass": true
+  }
+ },
+ "smart": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 274.43,
+    "video_embeddings": 1901,
+    "frames_decoded": 40913,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 856.4,
+    "process_read_gb": 14.508,
+    "disk_mb_s": 47.5,
+    "cpu": 32.9,
+    "nvdec": 10.4,
+    "peak_rss_mib": 3979,
+    "errors": {}
+   }
+  ],
+  "quality": {
+   "label": "B_smart_vs_exact",
+   "videos": 197,
+   "fwd_coverage_macro_median": 1.0,
+   "fwd_coverage_macro_p5": 0.9999,
+   "fwd_coverage_worst_video_median": 0.9999,
+   "videos_with_median_fwd_below_095": 0,
+   "share_videos_median_fwd_ge_095": 1.0,
+   "bwd_coverage_macro_median": 1.0,
+   "bwd_coverage_macro_p5": 0.9999,
+   "displacement_s_macro_median": 0.0126,
+   "displacement_s_p95_of_video_max": 0.033,
+   "displacement_s_max": 0.046,
+   "retention_macro_mean": 0.9983,
+   "retention_worst": 0.7778,
+   "redundancy_macro_median": 0.8801,
+   "redundancy_macro_p5": 0.7711,
+   "same_index_identical_embeddings": 1.0,
+   "same_index_same_pts": 1.0,
+   "gate_a_share_ge_095": true,
+   "gate_b_macro_p5_ge_090": true,
+   "gate_pass": true
+  }
+ },
+ "keyframe": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 191.07,
+    "video_embeddings": 1830,
+    "frames_decoded": 1906,
+    "seeks": 1906,
+    "probes": 0,
+    "video_decode_s": 540.3,
+    "process_read_gb": 8.844,
+    "disk_mb_s": 48.3,
+    "cpu": 16.8,
+    "nvdec": 2.9,
+    "peak_rss_mib": 3063,
+    "errors": {}
+   }
+  ],
+  "quality": {
+   "label": "B_keyframe_vs_exact",
+   "videos": 197,
+   "fwd_coverage_macro_median": 0.9228,
+   "fwd_coverage_macro_p5": 0.863,
+   "fwd_coverage_worst_video_median": 0.6819,
+   "videos_with_median_fwd_below_095": 143,
+   "share_videos_median_fwd_ge_095": 0.2741,
+   "bwd_coverage_macro_median": 0.9285,
+   "bwd_coverage_macro_p5": 0.8741,
+   "displacement_s_macro_median": 0.4916,
+   "displacement_s_p95_of_video_max": 1.152,
+   "displacement_s_max": 6.432,
+   "retention_macro_mean": 0.9695,
+   "retention_worst": 0.1875,
+   "redundancy_macro_median": 0.8801,
+   "redundancy_macro_p5": 0.7711,
+   "same_index_identical_embeddings": 0.1095,
+   "same_index_same_pts": 0.1095,
+   "gate_a_share_ge_095": false,
+   "gate_b_macro_p5_ge_090": false,
+   "gate_pass": false
+  }
+ },
+ "adaptive0.5": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 257.93,
+    "video_embeddings": 1902,
+    "frames_decoded": 34931,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 782.2,
+    "process_read_gb": 13.895,
+    "disk_mb_s": 51.0,
+    "cpu": 34.3,
+    "nvdec": 9.3,
+    "peak_rss_mib": 4142,
+    "errors": {}
+   }
+  ],
+  "quality": {
+   "label": "B_adaptive0.5_vs_exact",
+   "videos": 197,
+   "fwd_coverage_macro_median": 0.9999,
+   "fwd_coverage_macro_p5": 0.9288,
+   "fwd_coverage_worst_video_median": 0.8956,
+   "videos_with_median_fwd_below_095": 8,
+   "share_videos_median_fwd_ge_095": 0.9594,
+   "bwd_coverage_macro_median": 0.9999,
+   "bwd_coverage_macro_p5": 0.929,
+   "displacement_s_macro_median": 0.0175,
+   "displacement_s_p95_of_video_max": 0.496,
+   "displacement_s_max": 0.5,
+   "retention_macro_mean": 0.9989,
+   "retention_worst": 0.8889,
+   "redundancy_macro_median": 0.8801,
+   "redundancy_macro_p5": 0.7711,
+   "same_index_identical_embeddings": 0.617,
+   "same_index_same_pts": 0.617,
+   "gate_a_share_ge_095": true,
+   "gate_b_macro_p5_ge_090": true,
+   "gate_pass": true
+  }
+ }
+}

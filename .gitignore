@@ -1,0 +1,43 @@
+# Personal media and anything derived from it never goes into version control
+Dataset/
+out/
+synthetic/
+
+# Environment and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Safety net: media, databases and model files anywhere in the tree
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+*.heif
+*.gif
+*.nef
+*.dng
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.3gp
+*.m4v
+*.webm
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.npy
+*.pt
+*.bin
+
+# Scratch reports from quick one-off checks
+results/_*.json
+
+# App icons (generated artwork, not media)
+!apps/roamindex/app-icon.png
+!apps/roamindex/src/icon.png
+!apps/roamindex/src-tauri/icons/*.png
+!docs/screenshots/*.png

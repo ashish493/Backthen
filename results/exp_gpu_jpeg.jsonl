@@ -1,0 +1,19 @@
+{"kind": "quality", "n": 124, "gpu_model_psnr_min": 49.11303468042671, "gpu_model_psnr_median": 51.52956988258407, "gpu_cos_min": 0.9820433259010315, "gpu_cos_median": 0.9987291097640991, "gpu_knn1": 0.9516129032258065, "gpu_knn5": 0.9548387096774194, "cpu_draft_knn1": 0.9838709677419355, "cpu_draft_knn5": 0.970967741935484, "control_knn1": 0.9838709677419355, "control_knn5": 0.9758064516129032, "gate_pass_psnr": true, "gate_pass_knn": false}
+{"variant": "cpu_draft16", "photos_per_s": 113.09642201887641, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 8.77127660001861, "peak_vram_mib": 2124.03662109375}
+{"variant": "gpu_nvjpeg_B8", "photos_per_s": 18.826795628593565, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 52.690857200010214, "peak_vram_mib": 2124.03662109375}
+{"variant": "gpu_nvjpeg_B16", "photos_per_s": 18.906988986965338, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 52.46737070000381, "peak_vram_mib": 2142.4775390625}
+{"variant": "gpu_nvjpeg_B32", "photos_per_s": 18.914437041432695, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 52.44671030002064, "peak_vram_mib": 2661.7119140625}
+{"variant": "hybrid_B16+W8", "photos_per_s": 102.07770840471427, "gpu_share": 0.11290322580645161, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 9.71808650001185, "peak_vram_mib": 2661.7119140625}
+{"variant": "hybrid_B16+W12", "photos_per_s": 113.42616479771472, "gpu_share": 0.0967741935483871, "kind": "throughput", "rep": 0, "n": 992, "wall_s": 8.745777500007534, "peak_vram_mib": 2661.7119140625}
+{"variant": "cpu_draft16", "photos_per_s": 114.9906586899013, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 8.626787699991837, "peak_vram_mib": 2661.7119140625}
+{"variant": "gpu_nvjpeg_B8", "photos_per_s": 18.566529676004624, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 53.42947859998094, "peak_vram_mib": 2661.7119140625}
+{"variant": "gpu_nvjpeg_B16", "photos_per_s": 18.861669066661353, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 52.593436800001655, "peak_vram_mib": 2661.7119140625}
+{"variant": "gpu_nvjpeg_B32", "photos_per_s": 18.920478012900983, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 52.429965000017546, "peak_vram_mib": 2670.84765625}
+{"variant": "hybrid_B16+W8", "photos_per_s": 103.75165677143669, "gpu_share": 0.12903225806451613, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 9.561293099977775, "peak_vram_mib": 2670.84765625}
+{"variant": "hybrid_B16+W12", "photos_per_s": 112.51810668119388, "gpu_share": 0.09274193548387097, "kind": "throughput", "rep": 1, "n": 992, "wall_s": 8.816358800017042, "peak_vram_mib": 2670.84765625}
+{"variant": "cpu_draft16", "photos_per_s": 117.08769568600238, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 8.472282200003974, "peak_vram_mib": 2670.84765625}
+{"variant": "gpu_nvjpeg_B8", "photos_per_s": 18.654723807172942, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 53.17687950000982, "peak_vram_mib": 2670.84765625}
+{"variant": "gpu_nvjpeg_B16", "photos_per_s": 18.8141249910959, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 52.726342600013595, "peak_vram_mib": 2670.84765625}
+{"variant": "gpu_nvjpeg_B32", "photos_per_s": 18.93539476563104, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 52.38866219998454, "peak_vram_mib": 2670.84765625}
+{"variant": "hybrid_B16+W8", "photos_per_s": 101.75866046206204, "gpu_share": 0.11290322580645161, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 9.74855600000592, "peak_vram_mib": 2670.84765625}
+{"variant": "hybrid_B16+W12", "photos_per_s": 115.83739759727652, "gpu_share": 0.0967741935483871, "kind": "throughput", "rep": 2, "n": 992, "wall_s": 8.563728299981449, "peak_vram_mib": 2670.84765625}

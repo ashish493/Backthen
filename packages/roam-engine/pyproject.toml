@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roamengine"
+version = "0.1.0"
+description = "Local search engine over RoamIngest manifest v1: natural-language, similar-image, time/place filters, video moments."
+requires-python = ">=3.11"
+dependencies = ["numpy", "roamingest>=0.1.0"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+roamengine = "roamengine.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["gpu: needs CUDA"]

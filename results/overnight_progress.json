@@ -1,0 +1,128 @@
+{
+ "A_serial_cold": {
+  "status": "ok",
+  "seconds": 83,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:03:07"
+ },
+ "A_serial_warm": {
+  "status": "ok",
+  "seconds": 83,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:04:30"
+ },
+ "A_opt_cold_r0": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:05:23"
+ },
+ "A_opt_cold_r1": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:06:16"
+ },
+ "A_opt_cold_r2": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:07:10"
+ },
+ "A_opt_warm_r0": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:08:03"
+ },
+ "A_opt_warm_r1": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:08:56"
+ },
+ "A_opt_warm_r2": {
+  "status": "ok",
+  "seconds": 53,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:09:49"
+ },
+ "S7_gpu_jpeg": {
+  "status": "ok",
+  "seconds": 590,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:19:39"
+ },
+ "B_hdd_mixed_r0": {
+  "status": "ok",
+  "seconds": 366,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:25:45"
+ },
+ "B_hdd_phased_r0": {
+  "status": "ok",
+  "seconds": 312,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:30:57"
+ },
+ "B_hdd_readers4": {
+  "status": "ok",
+  "seconds": 305,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:36:02"
+ },
+ "B_serial": {
+  "status": "ok",
+  "seconds": 547,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:45:09"
+ },
+ "B_hdd_mixed_r1": {
+  "status": "ok",
+  "seconds": 343,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:50:52"
+ },
+ "B_hdd_phased_r1": {
+  "status": "ok",
+  "seconds": 332,
+  "stderr_tail": "",
+  "finished": "2026-11-21 02:56:24"
+ },
+ "AB_hdd_mixed": {
+  "status": "ok",
+  "seconds": 340,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:02:04"
+ },
+ "C_movies": {
+  "status": "ok",
+  "seconds": 231,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:05:55"
+ },
+ "B_hdd_prefetch_r0": {
+  "status": "ok",
+  "seconds": 292,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:13:08"
+ },
+ "B_hdd_mixed_r2": {
+  "status": "ok",
+  "seconds": 336,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:18:44"
+ },
+ "B_hdd_prefetch_r1": {
+  "status": "ok",
+  "seconds": 284,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:23:28"
+ },
+ "B_hdd_prefetch_r2": {
+  "status": "ok",
+  "seconds": 295,
+  "stderr_tail": "",
+  "finished": "2026-11-21 03:28:23"
+ }
+}

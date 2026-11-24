@@ -1,0 +1,34 @@
+{
+ "all_files": {
+  "files": 422,
+  "gib": 11.5,
+  "preview_ok": 422,
+  "demosaic_fallback": 0,
+  "errors": 0,
+  "preview_long_edge_px": {
+   "p5": 6048,
+   "p50": 6048
+  },
+  "preview_decode_ms_p50": 43.1
+ },
+ "sample": 100,
+ "demosaic_ms_p50": {
+  "half": 817,
+  "full": 1844
+ },
+ "cosine_vs_full": {
+  "preview": {
+   "p5": 0.895,
+   "p50": 0.95
+  },
+  "half": {
+   "p5": 0.998,
+   "p50": 0.999
+  }
+ },
+ "knn10_overlap_vs_full": {
+  "preview": 0.868,
+  "control_half": 0.98
+ },
+ "gate_pass": false
+}

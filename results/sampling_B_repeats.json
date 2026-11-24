@@ -1,0 +1,138 @@
+{
+ "smart": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 273.36,
+    "video_embeddings": 1901,
+    "frames_decoded": 40913,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 815.2,
+    "process_read_gb": 14.508,
+    "disk_mb_s": 47.8,
+    "cpu": 35.2,
+    "nvdec": 10.5,
+    "peak_rss_mib": 4181,
+    "errors": {}
+   },
+   {
+    "rc": 0,
+    "wall_s": 271.1,
+    "video_embeddings": 1901,
+    "frames_decoded": 40913,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 841.2,
+    "process_read_gb": 14.508,
+    "disk_mb_s": 56.5,
+    "cpu": 34.3,
+    "nvdec": 11.1,
+    "peak_rss_mib": 4741,
+    "errors": {}
+   }
+  ]
+ },
+ "adaptive0.5": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 253.11,
+    "video_embeddings": 1902,
+    "frames_decoded": 34931,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 761.0,
+    "process_read_gb": 13.895,
+    "disk_mb_s": 55.9,
+    "cpu": 35.8,
+    "nvdec": 9.5,
+    "peak_rss_mib": 3726,
+    "errors": {}
+   },
+   {
+    "rc": 0,
+    "wall_s": 258.74,
+    "video_embeddings": 1902,
+    "frames_decoded": 34931,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 788.5,
+    "process_read_gb": 13.895,
+    "disk_mb_s": 49.4,
+    "cpu": 33.1,
+    "nvdec": 9.4,
+    "peak_rss_mib": 3953,
+    "errors": {}
+   }
+  ]
+ },
+ "smart_prefetch": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 247.17,
+    "video_embeddings": 1901,
+    "frames_decoded": 40913,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 256.8,
+    "process_read_gb": 16.916,
+    "disk_mb_s": 68.6,
+    "cpu": 44.3,
+    "nvdec": 10.5,
+    "peak_rss_mib": 4135,
+    "errors": {}
+   },
+   {
+    "rc": 0,
+    "wall_s": 248.09,
+    "video_embeddings": 1901,
+    "frames_decoded": 40913,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 249.7,
+    "process_read_gb": 16.918,
+    "disk_mb_s": 68.7,
+    "cpu": 42.7,
+    "nvdec": 9.8,
+    "peak_rss_mib": 4305,
+    "errors": {}
+   }
+  ]
+ },
+ "adaptive0.5_prefetch": {
+  "runs": [
+   {
+    "rc": 0,
+    "wall_s": 244.96,
+    "video_embeddings": 1902,
+    "frames_decoded": 34931,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 235.1,
+    "process_read_gb": 16.852,
+    "disk_mb_s": 71.2,
+    "cpu": 41.4,
+    "nvdec": 9.0,
+    "peak_rss_mib": 4203,
+    "errors": {}
+   },
+   {
+    "rc": 0,
+    "wall_s": 252.79,
+    "video_embeddings": 1902,
+    "frames_decoded": 34931,
+    "seeks": 1830,
+    "probes": 1906,
+    "video_decode_s": 226.9,
+    "process_read_gb": 16.854,
+    "disk_mb_s": 67.0,
+    "cpu": 39.5,
+    "nvdec": 7.9,
+    "peak_rss_mib": 4444,
+    "errors": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,119 @@
+{
+ "tag": "AB_hdd_mixed",
+ "wall_s": 332.9,
+ "files_processed": 2861,
+ "files_resumed_skipped": 0,
+ "files_per_s": 8.59,
+ "mb_per_s": 63.3,
+ "photos_per_s": 7.86,
+ "videos_per_s": 0.73,
+ "other_files_skipped": {},
+ "unreadable_dirs": 0,
+ "kinds": {
+  "photo": {
+   "files": 2618,
+   "bytes": 8002753719,
+   "ok": 2618,
+   "errors": 0,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 2618,
+   "by_ext": {
+    ".jpg": 2497,
+    ".heic": 115,
+    ".jpeg": 6
+   },
+   "by_decoder": {
+    "cpu": 2618
+   },
+   "by_strategy": {
+    "draft": 2503,
+    "full": 115
+   },
+   "by_codec": {},
+   "stage_s": {
+    "t_read_ms": 183.0,
+    "t_decode_ms": 437.2,
+    "t_xform_ms": 123.6,
+    "t_write_ms": 10.2
+   },
+   "latency_ms": {
+    "p50": 166.4,
+    "p95": 622.3,
+    "p99": 2960.4
+   }
+  },
+  "video": {
+   "files": 243,
+   "bytes": 13071560487,
+   "ok": 243,
+   "errors": 0,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 2219,
+   "by_ext": {
+    ".mp4": 205,
+    ".mov": 38
+   },
+   "by_decoder": {
+    "cpu": 147,
+    "nvdec": 95,
+    "cpu_fallback": 1
+   },
+   "by_strategy": {
+    "seq": 242,
+    "seek": 1
+   },
+   "by_codec": {
+    "h264": 173,
+    "hevc": 69,
+    "vp9": 1
+   },
+   "stage_s": {
+    "t_read_ms": 9.5,
+    "t_decode_ms": 1041.8,
+    "t_xform_ms": 116.2,
+    "t_write_ms": 0.0
+   },
+   "latency_ms": {
+    "p50": 1779.0,
+    "p95": 17975.1,
+    "p99": 33963.5
+   }
+  }
+ },
+ "errors": {},
+ "config": {
+  "storage": "hdd",
+  "readers": 1,
+  "photo_workers": 12,
+  "video_cpu": 2,
+  "video_nvdec": 2,
+  "nvdec_pct": 40,
+  "schedule": "mixed",
+  "batch": 64,
+  "photo_decode": "draft",
+  "max_frames": 32,
+  "cold": true,
+  "video_strategy": "auto"
+ },
+ "gpu": {
+  "busy_s": 22.26,
+  "wait_s": 309.9,
+  "batches": 193,
+  "rows": 4837,
+  "pad_waste_pct": 60.8
+ },
+ "reader_blocked_on_byte_budget_s": 0.01,
+ "thumbnails_bytes": 84451981,
+ "cpu_mean": 52.2,
+ "gpu_util_mean": 16.6,
+ "nvdec_util_mean": 32.1,
+ "peak_rss_mib": 4173,
+ "peak_vram_mib": 1416,
+ "gpu_max_temp_c": 73,
+ "gpu_sm_clock_mhz_min": 210,
+ "gpu_sm_clock_mhz_max": 1897,
+ "disk_read_bytes": 18928250368,
+ "disk_mb_s": 56.9
+}

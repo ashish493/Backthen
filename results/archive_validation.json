@@ -1,0 +1,497 @@
+{
+ "disk_free_gb_start": 32.3,
+ "inventory": {
+  "rc": 0,
+  "seconds": 1978.9,
+  "roamingest_version": "0.1.0",
+  "discovery_s": 12.9,
+  "media_files": 67512,
+  "media_bytes": 377160477454,
+  "sidecar_files": 24690,
+  "media_with_sidecar": 23705,
+  "other_files": {
+   ".xml": 1044,
+   ".pdf": 645,
+   ".ewc2": 432,
+   "(none)": 369,
+   ".docx": 78,
+   ".modd": 32,
+   ".cst": 9,
+   ".txt": 9,
+   ".apk": 9,
+   ".xlsx": 7,
+   ".m": 6,
+   ".rar": 4,
+   ".dat": 4,
+   ".zip": 3,
+   ".eml": 3,
+   ".epub": 3,
+   ".vcf": 3,
+   ".pptx": 2,
+   ".jar": 2,
+   ".ppt": 2,
+   ".hex": 2,
+   ".ini": 2,
+   ".csv": 2,
+   ".html": 2,
+   ".m4a": 1,
+   ".mp3": 1,
+   ".ipynb": 1,
+   ".kt": 1,
+   ".doc": 1,
+   ".msg": 1,
+   ".rtf": 1,
+   ".py": 1,
+   ".exe": 1,
+   ".db": 1
+  },
+  "unreadable": 0,
+  "by_type": {
+   "photo:.gif": {
+    "files": 15,
+    "bytes": 28784725
+   },
+   "photo:.heic": {
+    "files": 1122,
+    "bytes": 2190159612
+   },
+   "photo:.jpeg": {
+    "files": 1020,
+    "bytes": 1259115106
+   },
+   "photo:.jpg": {
+    "files": 52806,
+    "bytes": 138375374618
+   },
+   "photo:.nef": {
+    "files": 422,
+    "bytes": 12344981063
+   },
+   "photo:.png": {
+    "files": 299,
+    "bytes": 185230974
+   },
+   "photo:.webp": {
+    "files": 5696,
+    "bytes": 509836770
+   },
+   "video:.3gp": {
+    "files": 29,
+    "bytes": 784665822
+   },
+   "video:.mov": {
+    "files": 1409,
+    "bytes": 49031161680
+   },
+   "video:.mp4": {
+    "files": 4694,
+    "bytes": 172451167084
+   }
+  },
+  "size_percentiles_mb": {
+   "photo": {
+    "50": 0.53,
+    "95": 12.09,
+    "99": 27.91,
+    "100": 33.97
+   },
+   "video": {
+    "50": 11.25,
+    "95": 121.64,
+    "99": 356.19,
+    "100": 9865.27
+   }
+  },
+  "headers": {
+   "seconds": 1965.6,
+   "photos": {
+    "files": 61380,
+    "exif_time": 30591,
+    "exif_time_with_offset": 22867,
+    "exif_gps": 6916
+   },
+   "videos": {
+    "files": 6131,
+    "container_time": 6052,
+    "container_gps": 1749,
+    "rotated": 2035,
+    "unreadable": 1
+   },
+   "video_codecs": {
+    "h264": 4143,
+    "hevc": 971,
+    "vp9": 995,
+    "mpeg4": 22
+   },
+   "video_duration_s": {
+    "total": 86494,
+    "p50": 6.8,
+    "max": 6368
+   }
+  }
+ },
+ "run1_killed": {
+  "rc": 137,
+  "seconds": 4483.3,
+  "committed_files": 34036
+ },
+ "resume": {
+  "rc": 0,
+  "seconds": 1524.7,
+  "wall_s": 1413.56,
+  "files_processed": 33476,
+  "files_resumed_skipped": 34036,
+  "files_moved": 0,
+  "files_missing": 0,
+  "unaccounted_files": 0,
+  "files_per_s": 23.68,
+  "mb_per_s": 22.1,
+  "errors": {
+   "photo:OSError": 1
+  },
+  "cpu_mean": 18.2,
+  "gpu_util_mean": 10.1,
+  "nvdec_util_mean": 1.8,
+  "peak_rss_mib": 2933,
+  "peak_vram_mib": 934,
+  "gpu_max_temp_c": 70,
+  "disk_mb_s": 22.5,
+  "process_read_bytes": 32301943370,
+  "reader_blocked_on_byte_budget_s": 0.07,
+  "thumbnails_bytes": 757159584,
+  "gpu": {
+   "busy_s": 121.25,
+   "wait_s": 1292.09,
+   "batches": 813,
+   "rows": 40302,
+   "pad_waste_pct": 22.5
+  },
+  "throttle_off_ok": true,
+  "photo": {
+   "files": 31426,
+   "bytes": 20411046449,
+   "ok": 31425,
+   "errors": 1,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 31425,
+   "by_ext": {
+    ".jpg": 24299,
+    ".gif": 11,
+    ".heic": 473,
+    ".jpeg": 909,
+    ".png": 40,
+    ".webp": 5694
+   },
+   "by_decoder": {
+    "cpu": 31425
+   },
+   "by_strategy": {
+    "draft": 25207,
+    "full": 6218
+   },
+   "by_codec": {},
+   "capture_time_source": {
+    "sidecar": 10260,
+    "exif": 6223,
+    "exif_local": 1012,
+    "none": 13930
+   },
+   "gps_source": {
+    "none": 27728,
+    "exif": 2737,
+    "sidecar_geoData": 960
+   },
+   "stage_s": {
+    "t_read_ms": 1071.4,
+    "t_decode_ms": 417.0,
+    "t_xform_ms": 299.0,
+    "t_write_ms": 32.0
+   },
+   "latency_ms": {
+    "p50": 42.6,
+    "p95": 140.1,
+    "p99": 399.7
+   }
+  },
+  "video": {
+   "files": 2050,
+   "bytes": 10810010340,
+   "ok": 2050,
+   "errors": 0,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 8877,
+   "by_ext": {
+    ".mp4": 2049,
+    ".mov": 1
+   },
+   "by_decoder": {
+    "cpu": 1472,
+    "nvdec": 578
+   },
+   "by_strategy": {
+    "smart": 2050
+   },
+   "by_codec": {
+    "h264": 936,
+    "vp9": 925,
+    "hevc": 189
+   },
+   "capture_time_source": {
+    "container": 1026,
+    "sidecar": 1014,
+    "none": 10
+   },
+   "gps_source": {
+    "none": 1265,
+    "sidecar_geoData": 197,
+    "container": 588
+   },
+   "stage_s": {
+    "t_read_ms": 218.1,
+    "t_decode_ms": 688.2,
+    "t_xform_ms": 163.7,
+    "t_write_ms": 2.4
+   },
+   "latency_ms": {
+    "p50": 290.8,
+    "p95": 1710.9,
+    "p99": 4633.9
+   },
+   "seeks_total": 7500,
+   "frames_decoded_total": 242021,
+   "rotated": 712
+  },
+  "config": {
+   "storage": "hdd",
+   "readers": 1,
+   "video_strategy": "smart",
+   "route": "codec",
+   "video_prefetch_mb": 256,
+   "read_budget_mb": 768,
+   "throttle": "off",
+   "power_plan": "High performance",
+   "model_id": "open_clip/ViT-B-32/laion2b_s34b_b79k/fp16",
+   "device": "cuda"
+  }
+ },
+ "rerun_unchanged": {
+  "rc": 0,
+  "seconds": 60.1,
+  "files_processed": 0,
+  "files_resumed_skipped": 67512,
+  "files_missing": 0
+ },
+ "verify": {
+  "rc": 0,
+  "seconds": 3.0,
+  "checks": {
+   "schema_version": 0,
+   "files_without_asset": 0,
+   "assets_without_file": 0,
+   "frame_count_mismatch": 0,
+   "frames_without_embedding": 0,
+   "embeddings_without_frame": 0,
+   "done_files_without_embeddings": 0,
+   "bad_vectors": 0,
+   "missing_thumbnails": 0
+  },
+  "ok": true
+ },
+ "status": {
+  "files": {
+   "photo:done": 61376,
+   "photo:error": 4,
+   "video:done": 6131,
+   "video:error": 1
+  },
+  "assets": {
+   "photo": 44014,
+   "video": 4555
+  },
+  "duplicate_files": 18938,
+  "frames": 73815,
+  "embeddings": 73815,
+  "full_hash_known": 48485,
+  "coverage": {
+   "capture_time_source": {
+    "photo:none": 16171,
+    "photo:exif": 18776,
+    "photo:exif_local": 3912,
+    "photo:sidecar": 5155,
+    "video:none": 40,
+    "video:container": 3849,
+    "video:sidecar": 666
+   },
+   "gps_source": {
+    "photo:none": 39208,
+    "photo:exif": 4587,
+    "photo:sidecar_geoData": 219,
+    "video:none": 3161,
+    "video:container": 1265,
+    "video:sidecar_geoData": 129
+   }
+  }
+ },
+ "output_gb": 1.6,
+ "disk_free_gb_after_run": 30.5,
+ "reference": {
+  "rc": 0,
+  "seconds": 5898.8,
+  "wall_s": 5890.08,
+  "files_processed": 67512,
+  "files_resumed_skipped": 0,
+  "files_moved": 0,
+  "files_missing": 0,
+  "unaccounted_files": 0,
+  "files_per_s": 11.46,
+  "mb_per_s": 64.0,
+  "errors": {
+   "video:InvalidDataError": 1,
+   "photo:UnidentifiedImageError": 3,
+   "photo:OSError": 1
+  },
+  "cpu_mean": 21.6,
+  "gpu_util_mean": 10.4,
+  "nvdec_util_mean": 8.8,
+  "peak_rss_mib": 4281,
+  "peak_vram_mib": 1122,
+  "gpu_max_temp_c": 77,
+  "disk_mb_s": 57.5,
+  "process_read_bytes": 337000379264,
+  "reader_blocked_on_byte_budget_s": 0.16,
+  "thumbnails_bytes": 1554316665,
+  "gpu": {
+   "busy_s": 465.12,
+   "wait_s": 5424.27,
+   "batches": 3986,
+   "rows": 100477,
+   "pad_waste_pct": 60.6
+  },
+  "throttle_off_ok": true,
+  "photo": {
+   "files": 61380,
+   "bytes": 154893482868,
+   "ok": 61376,
+   "errors": 4,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 61376,
+   "by_ext": {
+    ".jpg": 52806,
+    ".jpeg": 1020,
+    ".gif": 15,
+    ".png": 299,
+    ".nef": 422,
+    ".heic": 1122,
+    ".webp": 5696
+   },
+   "by_decoder": {
+    "cpu": 61376
+   },
+   "by_strategy": {
+    "draft": 53822,
+    "full": 7132,
+    "raw_demosaic_half": 422
+   },
+   "by_codec": {},
+   "capture_time_source": {
+    "exif_local": 5576,
+    "exif": 22988,
+    "none": 16557,
+    "sidecar": 16255
+   },
+   "gps_source": {
+    "none": 53055,
+    "exif": 7109,
+    "sidecar_geoData": 1212
+   },
+   "stage_s": {
+    "t_read_ms": 3433.7,
+    "t_decode_ms": 2149.7,
+    "t_xform_ms": 741.8,
+    "t_write_ms": 63.0
+   },
+   "latency_ms": {
+    "p50": 66.5,
+    "p95": 386.3,
+    "p99": 971.2
+   }
+  },
+  "video": {
+   "files": 6132,
+   "bytes": 222266994586,
+   "ok": 6131,
+   "errors": 1,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 39101,
+   "by_ext": {
+    ".mp4": 4694,
+    ".mov": 1409,
+    ".3gp": 29
+   },
+   "by_decoder": {
+    "cpu": 3521,
+    "nvdec": 2610
+   },
+   "by_strategy": {
+    "smart": 6131
+   },
+   "by_codec": {
+    "h264": 4143,
+    "hevc": 971,
+    "vp9": 995,
+    "mpeg4": 22
+   },
+   "capture_time_source": {
+    "container": 4850,
+    "sidecar": 1235,
+    "none": 46
+   },
+   "gps_source": {
+    "container": 1545,
+    "none": 4381,
+    "sidecar_geoData": 205
+   },
+   "stage_s": {
+    "t_read_ms": 1907.4,
+    "t_decode_ms": 4433.1,
+    "t_xform_ms": 946.9,
+    "t_write_ms": 10.8
+   },
+   "latency_ms": {
+    "p50": 608.4,
+    "p95": 3382.2,
+    "p99": 11532.1
+   },
+   "seeks_total": 36796,
+   "frames_decoded_total": 808013,
+   "rotated": 2035
+  },
+  "config": {
+   "storage": "hdd",
+   "readers": 1,
+   "video_strategy": "smart",
+   "route": "codec",
+   "video_prefetch_mb": 256,
+   "read_budget_mb": 768,
+   "throttle": "off",
+   "power_plan": "High performance",
+   "model_id": "open_clip/ViT-B-32/laion2b_s34b_b79k/fp16",
+   "device": "cuda"
+  }
+ },
+ "resumed_vs_reference": {
+  "files_a": 67512,
+  "files_b": 67512,
+  "file_rows_differ": 0,
+  "frames_a": 73815,
+  "frames_b": 73815,
+  "frames_differ": 0,
+  "embeddings_differ": 0,
+  "assets_metadata_differ": 0,
+  "embeddings_differ_by_media": {}
+ }
+}

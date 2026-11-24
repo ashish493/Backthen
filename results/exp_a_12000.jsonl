@@ -1,0 +1,43 @@
+{"kind": "info", "small_files": 12000, "small_mb": 1537.74225, "bundle_files": 20, "bundle_mb": 1537.64625}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 1.3986540000187233, "mb_s": 1099.4443586329535, "files_s": 8579.677318221204, "phys": 0.16131835357973678}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.0157439000031445, "mb_s": 1513.9074426095392, "files_s": 11814.001541099928, "phys": 1.0019248726501466}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.2543157000036445, "mb_s": 1225.9610957556636, "files_s": 9566.969463879894, "phys": 1.0021326369877657}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.8707465000043157, "mb_s": 1765.894264280567, "files_s": 22.96879746275279, "phys": 0.9983300125110051}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.6237013000063598, "mb_s": 2465.3568142062886, "files_s": 32.066631895421835, "phys": 1.000003219205978}
+{"kind": "read", "rep": 0, "regime": "cold", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.6281141999934334, "mb_s": 2448.036121482487, "files_s": 31.841343501244022, "phys": 1.000045840192437}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 0.7321244000049774, "mb_s": 2100.3838281985213, "files_s": 16390.657106795537, "phys": 0.0001544914305372048}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.215378699998837, "mb_s": 1265.2371232122725, "files_s": 9873.465776561234, "phys": 0.00010121852345541003}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.1519812000042293, "mb_s": 1334.867487415901, "files_s": 10416.836663615642, "phys": 5.0609261727705016e-05}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.19186839999747463, "mb_s": 8014.067194078017, "files_s": 104.23811320813245, "phys": 0.0}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.07678430000669323, "mb_s": 20025.529305677912, "files_s": 260.4699137487301, "phys": 0.0}
+{"kind": "read", "rep": 0, "regime": "warm", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.09118210000451654, "mb_s": 16863.466074194777, "files_s": 219.3412961426567, "phys": 0.0}
+{"kind": "discover", "rep": 0, "n_files": 12000, "seconds": 0.03223069998784922, "us_per_file": 2.685891665654102}
+{"kind": "hash_warm", "rep": 0, "n_files": 12000, "full_s": 0.6243984999891836, "partial_s": 0.5306294999900274, "full_us_per_file": 52.03320833243197, "partial_us_per_file": 44.21912499916895}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 3.0754437999858055, "mb_s": 500.0066169334967, "files_s": 3901.875885378034, "phys": 1.0021885735402016}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.0566619999881368, "mb_s": 1455.2830044207744, "files_s": 11356.517032063919, "phys": 1.001967490975812}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.2074380000121891, "mb_s": 1273.5579383657598, "files_s": 9938.39849323846, "phys": 1.0018636088070025}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.8792815000051633, "mb_s": 1748.7531012434251, "files_s": 22.74584419197101, "phys": 1.000131082165355}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.623608099995181, "mb_s": 2465.7252688216886, "files_s": 32.071424345120846, "phys": 1.000061823062359}
+{"kind": "read", "rep": 1, "regime": "cold", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.6293157000036445, "mb_s": 2443.362290168663, "files_s": 31.780551478191594, "phys": 1.000045840192437}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 0.6973835000244435, "mb_s": 2205.016680128081, "files_s": 17207.175104629514, "phys": 4.5281971019525544e-05}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.2054351000115275, "mb_s": 1275.6740283946392, "files_s": 9954.91171601461, "phys": 0.00013850955841266635}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.2626441000029445, "mb_s": 1217.8746568383078, "files_s": 9503.865736965798, "phys": 0.00012519133164221768}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.194750099995872, "mb_s": 7895.483750881733, "files_s": 102.6957110698476, "phys": 0.0}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.07853880000766367, "mb_s": 19578.173461396906, "files_s": 254.65120422069648, "phys": 0.0}
+{"kind": "read", "rep": 1, "regime": "warm", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.10274030000437051, "mb_s": 14966.339887411166, "files_s": 194.6655791266836, "phys": 0.0}
+{"kind": "discover", "rep": 1, "n_files": 12000, "seconds": 0.03745610002079047, "us_per_file": 3.121341668399206}
+{"kind": "hash_warm", "rep": 1, "n_files": 12000, "full_s": 0.6708846000256017, "partial_s": 0.46261840002262034, "full_us_per_file": 55.907050002133474, "partial_us_per_file": 38.55153333521836}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 2.9990022999991197, "mb_s": 512.7512739821678, "files_s": 4001.3307092173695, "phys": 1.002052727627143}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.0304968999989796, "mb_s": 1492.2337466532142, "files_s": 11644.86763619753, "phys": 1.0020287548189561}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.2081102000083774, "mb_s": 1272.8493228426817, "files_s": 9932.868706775911, "phys": 1.0019275362955007}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.8571057000081055, "mb_s": 1793.9983948134504, "files_s": 23.33434487696309, "phys": 1.000003219205978}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.623965800012229, "mb_s": 2464.3117458839315, "files_s": 32.05303880374216, "phys": 1.0000538316273981}
+{"kind": "read", "rep": 2, "regime": "cold", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.6284827999770641, "mb_s": 2446.6003684685006, "files_s": 31.822668815645997, "phys": 1.000003219205978}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "small", "threads": 1, "n_files": 12000, "seconds": 0.732436799997231, "mb_s": 2099.4879694818906, "files_s": 16383.6661402668, "phys": 0.0}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "small", "threads": 4, "n_files": 12000, "seconds": 1.204930100007914, "mb_s": 1276.2086779887895, "files_s": 9959.083933517126, "phys": 8.390482865382674e-05}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "small", "threads": 16, "n_files": 12000, "seconds": 1.2089921000006143, "mb_s": 1271.9208421620115, "files_s": 9925.623169906488, "phys": 4.2618325665435805e-05}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "bundle", "threads": 1, "n_files": 20, "seconds": 0.20787889999337494, "mb_s": 7396.836571912803, "files_s": 96.20986064789354, "phys": 0.0}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "bundle", "threads": 4, "n_files": 20, "seconds": 0.08014330000150949, "mb_s": 19186.2108244986, "files_s": 249.5529882051688, "phys": 0.0}
+{"kind": "read", "rep": 2, "regime": "warm", "layout": "bundle", "threads": 16, "n_files": 20, "seconds": 0.09477009999682195, "mb_s": 16225.014535719218, "files_s": 211.03702539799667, "phys": 0.0}
+{"kind": "discover", "rep": 2, "n_files": 12000, "seconds": 0.0338904999953229, "us_per_file": 2.824208332943575}
+{"kind": "hash_warm", "rep": 2, "n_files": 12000, "full_s": 0.6351912000100128, "partial_s": 0.5091061000130139, "full_us_per_file": 52.932600000834405, "partial_us_per_file": 42.42550833441783}

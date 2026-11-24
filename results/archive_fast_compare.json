@@ -1,0 +1,81 @@
+{
+ "files": {
+  "new": 67512,
+  "ref": 67512
+ },
+ "file_rows_differ": 0,
+ "files_only_in_one": 0,
+ "assets": {
+  "new": 48569,
+  "ref": 48569
+ },
+ "asset_metadata_differ": 0,
+ "frame_timestamps_differ": 0,
+ "photo_embeddings": {
+  "frames": 44014,
+  "identical": 44014,
+  "differ": 0,
+  "cos_min": 1.0,
+  "cos_p5": 1.0,
+  "cos_median": 1.0,
+  "below_t6_0_98": 0
+ },
+ "video_embeddings": {
+  "frames": 29801,
+  "identical": 29801,
+  "differ": 0,
+  "cos_min": 1.0,
+  "cos_p5": 1.0,
+  "cos_median": 1.0,
+  "below_t6_0_98": 0
+ },
+ "video_assets_with_any_difference": 0,
+ "photo_read_rate_by_size": {
+  "a<1MB": {
+   "new": {
+    "files": 23619,
+    "read_s": 591,
+    "mb_per_s": 7.6,
+    "ms_per_file": 25.0
+   },
+   "ref": {
+    "files": 34937,
+    "read_s": 1018,
+    "mb_per_s": 7.5,
+    "ms_per_file": 29.1
+   }
+  },
+  "b1-10MB": {
+   "new": {
+    "files": 17024,
+    "read_s": 1073,
+    "mb_per_s": 51.4,
+    "ms_per_file": 63.0
+   },
+   "ref": {
+    "files": 22972,
+    "read_s": 1584,
+    "mb_per_s": 45.4,
+    "ms_per_file": 68.9
+   }
+  },
+  "c10-100MB": {
+   "new": {
+    "files": 3425,
+    "read_s": 844,
+    "mb_per_s": 88.5,
+    "ms_per_file": 246.5
+   },
+   "ref": {
+    "files": 3471,
+    "read_s": 836,
+    "mb_per_s": 90.1,
+    "ms_per_file": 240.9
+   }
+  }
+ },
+ "links": {
+  "photo": 17312,
+  "video": 1571
+ }
+}

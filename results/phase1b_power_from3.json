@@ -1,0 +1,108 @@
+{
+ "D_highperf_default_normal": [
+  {
+   "rc": 0,
+   "wall_s": 44.66,
+   "cpu": 81.1,
+   "nvdec": 38.4,
+   "video_decode_s": 89.0,
+   "decoders": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "plan": "High performance",
+   "throttle_off_ok": null,
+   "priority": null,
+   "peak_rss_mib": 2924,
+   "errors": {},
+   "sm_clock_max": 1905
+  },
+  {
+   "rc": 0,
+   "wall_s": 108.99,
+   "cpu": 34.7,
+   "nvdec": 16.0,
+   "video_decode_s": 262.6,
+   "decoders": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "plan": "High performance",
+   "throttle_off_ok": null,
+   "priority": null,
+   "peak_rss_mib": 3051,
+   "errors": {},
+   "sm_clock_max": 1890
+  },
+  {
+   "rc": 0,
+   "wall_s": 109.01,
+   "cpu": 33.1,
+   "nvdec": 15.6,
+   "video_decode_s": 264.7,
+   "decoders": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "plan": "High performance",
+   "throttle_off_ok": null,
+   "priority": null,
+   "peak_rss_mib": 3033,
+   "errors": {},
+   "sm_clock_max": 1897
+  }
+ ],
+ "E_highperf_off_normal": [
+  {
+   "rc": 0,
+   "wall_s": 49.27,
+   "cpu": 82.3,
+   "nvdec": 34.4,
+   "video_decode_s": 97.3,
+   "decoders": {
+    "nvdec": 13,
+    "cpu": 33
+   },
+   "plan": "High performance",
+   "throttle_off_ok": true,
+   "priority": null,
+   "peak_rss_mib": 2952,
+   "errors": {},
+   "sm_clock_max": 1890
+  },
+  {
+   "rc": 0,
+   "wall_s": 48.27,
+   "cpu": 83.2,
+   "nvdec": 34.0,
+   "video_decode_s": 95.1,
+   "decoders": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "plan": "High performance",
+   "throttle_off_ok": true,
+   "priority": null,
+   "peak_rss_mib": 3105,
+   "errors": {},
+   "sm_clock_max": 1890
+  },
+  {
+   "rc": 0,
+   "wall_s": 49.7,
+   "cpu": 84.7,
+   "nvdec": 33.9,
+   "video_decode_s": 98.4,
+   "decoders": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "plan": "High performance",
+   "throttle_off_ok": true,
+   "priority": null,
+   "peak_rss_mib": 3212,
+   "errors": {},
+   "sm_clock_max": 1905
+  }
+ ]
+}

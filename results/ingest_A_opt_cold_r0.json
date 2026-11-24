@@ -1,0 +1,113 @@
+{
+ "tag": "A_opt_cold_r0",
+ "wall_s": 47.77,
+ "files_processed": 170,
+ "files_resumed_skipped": 0,
+ "files_per_s": 3.56,
+ "mb_per_s": 51.6,
+ "photos_per_s": 2.6,
+ "videos_per_s": 0.963,
+ "other_files_skipped": {},
+ "unreadable_dirs": 0,
+ "kinds": {
+  "photo": {
+   "files": 124,
+   "bytes": 379889858,
+   "ok": 124,
+   "errors": 0,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 124,
+   "by_ext": {
+    ".jpg": 124
+   },
+   "by_decoder": {
+    "cpu": 124
+   },
+   "by_strategy": {
+    "draft": 124
+   },
+   "by_codec": {},
+   "stage_s": {
+    "t_read_ms": 1.3,
+    "t_decode_ms": 17.6,
+    "t_xform_ms": 5.0,
+    "t_write_ms": 1.0
+   },
+   "latency_ms": {
+    "p50": 161.2,
+    "p95": 420.3,
+    "p99": 1013.9
+   }
+  },
+  "video": {
+   "files": 46,
+   "bytes": 2083682883,
+   "ok": 46,
+   "errors": 0,
+   "truncated": 0,
+   "timeouts": 0,
+   "embeddings": 318,
+   "by_ext": {
+    ".mp4": 43,
+    ".mov": 3
+   },
+   "by_decoder": {
+    "cpu": 33,
+    "nvdec": 13
+   },
+   "by_strategy": {
+    "seq": 46
+   },
+   "by_codec": {
+    "h264": 45,
+    "hevc": 1
+   },
+   "stage_s": {
+    "t_read_ms": 0.1,
+    "t_decode_ms": 97.4,
+    "t_xform_ms": 27.7,
+    "t_write_ms": 0.0
+   },
+   "latency_ms": {
+    "p50": 1370.8,
+    "p95": 11385.8,
+    "p99": 14059.2
+   }
+  }
+ },
+ "errors": {},
+ "config": {
+  "storage": "ssd",
+  "readers": 4,
+  "photo_workers": 12,
+  "video_cpu": 2,
+  "video_nvdec": 2,
+  "nvdec_pct": 40,
+  "schedule": "mixed",
+  "batch": 64,
+  "photo_decode": "draft",
+  "max_frames": 32,
+  "cold": true,
+  "video_strategy": "auto"
+ },
+ "gpu": {
+  "busy_s": 3.82,
+  "wait_s": 43.79,
+  "batches": 33,
+  "rows": 442,
+  "pad_waste_pct": 79.1
+ },
+ "reader_blocked_on_byte_budget_s": 0.0,
+ "thumbnails_bytes": 4369625,
+ "cpu_mean": 82.0,
+ "gpu_util_mean": 12.8,
+ "nvdec_util_mean": 35.8,
+ "peak_rss_mib": 3080,
+ "peak_vram_mib": 1509,
+ "gpu_max_temp_c": 75,
+ "gpu_sm_clock_mhz_min": 210,
+ "gpu_sm_clock_mhz_max": 1890,
+ "disk_read_bytes": 2299102208,
+ "disk_mb_s": 48.1
+}

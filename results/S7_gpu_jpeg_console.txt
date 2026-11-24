@@ -1,0 +1,35 @@
+124 unique JPEGs, 992 timed decodes (3039 MB)
+{
+ "kind": "quality",
+ "n": 124,
+ "gpu_model_psnr_min": 49.11303468042671,
+ "gpu_model_psnr_median": 51.52956988258407,
+ "gpu_cos_min": 0.9820433259010315,
+ "gpu_cos_median": 0.9987291097640991,
+ "gpu_knn1": 0.9516129032258065,
+ "gpu_knn5": 0.9548387096774194,
+ "cpu_draft_knn1": 0.9838709677419355,
+ "cpu_draft_knn5": 0.970967741935484,
+ "control_knn1": 0.9838709677419355,
+ "control_knn5": 0.9758064516129032,
+ "gate_pass_psnr": true,
+ "gate_pass_knn": false
+}
+rep0 cpu_draft16            113.1 photos/s  (  8.8s)
+rep0 gpu_nvjpeg_B8           18.8 photos/s  ( 52.7s)
+rep0 gpu_nvjpeg_B16          18.9 photos/s  ( 52.5s)
+rep0 gpu_nvjpeg_B32          18.9 photos/s  ( 52.4s)
+rep0 hybrid_B16+W8          102.1 photos/s  (  9.7s) gpu_share=0.11
+rep0 hybrid_B16+W12         113.4 photos/s  (  8.7s) gpu_share=0.10
+rep1 cpu_draft16            115.0 photos/s  (  8.6s)
+rep1 gpu_nvjpeg_B8           18.6 photos/s  ( 53.4s)
+rep1 gpu_nvjpeg_B16          18.9 photos/s  ( 52.6s)
+rep1 gpu_nvjpeg_B32          18.9 photos/s  ( 52.4s)
+rep1 hybrid_B16+W8          103.8 photos/s  (  9.6s) gpu_share=0.13
+rep1 hybrid_B16+W12         112.5 photos/s  (  8.8s) gpu_share=0.09
+rep2 cpu_draft16            117.1 photos/s  (  8.5s)
+rep2 gpu_nvjpeg_B8           18.7 photos/s  ( 53.2s)
+rep2 gpu_nvjpeg_B16          18.8 photos/s  ( 52.7s)
+rep2 gpu_nvjpeg_B32          18.9 photos/s  ( 52.4s)
+rep2 hybrid_B16+W8          101.8 photos/s  (  9.7s) gpu_share=0.11
+rep2 hybrid_B16+W12         115.8 photos/s  (  8.6s) gpu_share=0.10

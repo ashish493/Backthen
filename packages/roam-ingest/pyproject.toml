@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roamingest"
+version = "0.1.1"
+description = "Local, resumable ingestion of mixed photo/video archives into a versioned manifest with CLIP embeddings"
+requires-python = ">=3.11"
+dependencies = [
+  "av>=13",
+  "numpy",
+  "pillow>=10",
+  "pillow-heif",
+  "psutil",
+  "xxhash",
+  "torch",
+  "open_clip_torch",
+]
+
+[project.optional-dependencies]
+raw = ["rawpy"]
+gpu-monitor = ["nvidia-ml-py"]
+test = ["pytest"]
+
+[project.scripts]
+roamingest = "roamingest.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+roamingest = ["manifest_v1.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "gpu: needs CUDA (skipped automatically when unavailable)",
+  "integration: uses a local dataset given by ROAM_IT_DATASET (never personal data in CI)",
+]
