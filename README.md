@@ -131,7 +131,7 @@ Covers are chosen in two stages, so the expensive part runs on very few photos:
    winner, so a pin shows the place, not the people in it.
 2. **Faces, only on the top candidates.** A background pass (OpenCV YuNet + SFace on the library thumbnails) looks
    first at the 20 best photos of the four newest memory cards, then a few people photos per month (to learn who
-   keeps coming back), then the other cards and towns: on a 48,569-item library that is 1,270 photos instead of
+   keeps coming back), then the other cards and towns: on a 48,569-item library that is 1,974 photos instead of
    all of them. Recurring people raise a photo, prominent strangers and crowds lower it; each postcard leads with
    the whole group (the largest headcount that repeats across the memory's photos, so nobody is left out), then
    a photo that defines the place, then one more.
