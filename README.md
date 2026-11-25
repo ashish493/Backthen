@@ -2,7 +2,7 @@
 
 **Find your trips, your people and your moments again, privately, on your own laptop.**
 
-[![CI](https://github.com/ashish493/Backthen/actions/workflows/ci.yml/badge.svg)](https://github.com/ashish493/Backthen/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Backthen turns years of photos and videos into the memories you want to go back to. Search in plain words ("friends on a trip", "waterfall in the mist"), jump to the exact second inside a video, and watch your travels light up on a globe. It all runs on your computer: no uploads, no cloud, no account.
 
