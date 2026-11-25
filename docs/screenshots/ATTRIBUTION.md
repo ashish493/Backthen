@@ -1,89 +1,91 @@
 # Demo library attribution
 
-The screenshots in the README show a demo library built with `bench/demo/fetch_demo.py` and `bench/demo/make_clips.py`.
-Every photo is a **CC0 1.0** (public domain dedication) file from Wikimedia Commons, downscaled to 1600 px. Dates and GPS
-positions were made up for the demo and written into the copies; the trips are fictional. The three videos were assembled
-from these photos (a slow zoom, 4 s per photo). No credit is legally required for CC0 works; the authors are listed with thanks.
+The screenshots and animations in the README show a demo library built with `bench/demo/build_travel_demo.py`.
+Every photo is **CC0 1.0** (public domain dedication), from Flickr, StockSnap or Wikimedia Commons, found through [Openverse](https://openverse.org) and Commons.
+Dates, GPS positions and the grouping into trips are made up and written into the demo copies. The group photos are stock photos that were not taken at those places, and the people in them are not named. The short videos were assembled from these photos.
+No credit is legally required for CC0 works; the authors are listed with thanks.
 
 | Demo file | Source | Author |
 |---|---|---|
-| `alps-2023/alpine-lake-1.jpg` | [Lake Languard.jpg](https://commons.wikimedia.org/wiki/File:Lake_Languard.jpg) | Esb |
-| `alps-2023/alpine-lake-2.jpg` | [Lautersee 2026.jpg](https://commons.wikimedia.org/wiki/File:Lautersee_2026.jpg) | Taubenflieger68 |
-| `alps-2023/alpine-lake-3.jpg` | [Tateyama Kurobe Alpine Route - AlpineRoute6309.jpg](https://commons.wikimedia.org/wiki/File:Tateyama_Kurobe_Alpine_Route_-_AlpineRoute6309.jpg) | lumoplank |
-| `alps-2023/alpine-lake-4.jpg` | [Mossy trees near Lake Alpine (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Mossy_trees_near_Lake_Alpine_(Unsplash).jpg) | Jacob Copus cacobjopus |
-| `alps-2023/alpine-lake-5.jpg` | [Tateyama Kurobe Alpine Route - AlpineRoute6313.jpg](https://commons.wikimedia.org/wiki/File:Tateyama_Kurobe_Alpine_Route_-_AlpineRoute6313.jpg) | lumoplank |
-| `alps-2023/matterhorn-1.jpg` | [Matterhorn sunset 2016 (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Matterhorn_sunset_2016_(Unsplash).jpg) | Sam Ferrara samferrara |
-| `alps-2023/matterhorn-2.jpg` | [Matterhorn (63110).jpg](https://commons.wikimedia.org/wiki/File:Matterhorn_(63110).jpg) | Paasikivi |
-| `alps-2023/matterhorn-3.jpg` | [Matterhorn (87794).jpg](https://commons.wikimedia.org/wiki/File:Matterhorn_(87794).jpg) | Paasikivi |
-| `alps-2023/mountain-hiking-trail-1.jpg` | [Bear Mountain Trail No. 54 (35132080921).jpg](https://commons.wikimedia.org/wiki/File:Bear_Mountain_Trail_No._54_(35132080921).jpg) | Coconino National Forest |
-| `alps-2023/mountain-hiking-trail-2.jpg` | [Begunjscica, mountain trail traversing north face.jpg](https://commons.wikimedia.org/wiki/File:Begunjscica,_mountain_trail_traversing_north_face.jpg) | Ajznponar |
-| `alps-2023/mountain-hiking-trail-3.jpg` | [Red Mountain Trail No. 159 (28775990906).jpg](https://commons.wikimedia.org/wiki/File:Red_Mountain_Trail_No._159_(28775990906).jpg) | Coconino National Forest |
-| `alps-2023/mountain-hiking-trail-4.jpg` | [Springer Mountain - Appalachian approach trail (22189080221).jpg](https://commons.wikimedia.org/wiki/File:Springer_Mountain_-_Appalachian_approach_trail_(22189080221).jpg) | Thomson20192 |
-| `alps-2023/mountain-hiking-trail-5.jpg` | [Mountaineering Man Trail Path Mountains.jpg](https://commons.wikimedia.org/wiki/File:Mountaineering_Man_Trail_Path_Mountains.jpg) | Hermann |
-| `home-2025/birthday-cake-1.jpg` | [Birthday Cake Bloomsburg, Pennsylvania.jpg](https://commons.wikimedia.org/wiki/File:Birthday_Cake_Bloomsburg,_Pennsylvania.jpg) | Tim-desser |
-| `home-2025/birthday-cake-2.jpg` | [Birthday cake..red.jpg](https://commons.wikimedia.org/wiki/File:Birthday_cake..red.jpg) | JAYASHREESATHIYAMOORTHY |
-| `home-2025/birthday-cake-3.jpg` | [Birthday party cake.jpg](https://commons.wikimedia.org/wiki/File:Birthday_party_cake.jpg) | Abinayasekar357 |
-| `home-2025/cat-1.jpg` | [Tabby cat with blue eyes-3336579.jpg](https://commons.wikimedia.org/wiki/File:Tabby_cat_with_blue_eyes-3336579.jpg) | AdinaVoicu |
-| `home-2025/cat-2.jpg` | [Domestic shorthair cat portrait in grass.jpg](https://commons.wikimedia.org/wiki/File:Domestic_shorthair_cat_portrait_in_grass.jpg) | &lt;a href="https://pixnio.com/media/grey-domestic-cat-nose-mouth-whiskers"&gt;Photo&lt;/a&gt; by &lt;a href="https://pi |
-| `home-2025/cat-3.jpg` | [Cat petted.jpg](https://commons.wikimedia.org/wiki/File:Cat_petted.jpg) | Josephguy15 2.0 |
-| `home-2025/cat-4.jpg` | [A mother cat of Meitei domestic cat breed (Meitei house cat variety) suckling her only little newborn baby kitten 06.jpg](https://commons.wikimedia.org/wiki/File:A_mother_cat_of_Meitei_domestic_cat_breed_(Meitei_house_cat_variety)_suckling_her_only_little_newborn_baby_kitten_06.jpg) | Haoreima |
-| `home-2025/cat-5.jpg` | [A mother cat of Meitei domestic cat breed (Meitei house cat variety) suckling her only little newborn baby kitten 04.jpg](https://commons.wikimedia.org/wiki/File:A_mother_cat_of_Meitei_domestic_cat_breed_(Meitei_house_cat_variety)_suckling_her_only_little_newborn_baby_kitten_04.jpg) | Haoreima |
-| `home-2025/dog-1.jpg` | [Mixed-breed dogs in Serles.jpg](https://commons.wikimedia.org/wiki/File:Mixed-breed_dogs_in_Serles.jpg) | Wilfredor |
-| `home-2025/dog-2.jpg` | [Dog in Chacachacare.jpg](https://commons.wikimedia.org/wiki/File:Dog_in_Chacachacare.jpg) | Wilfredor |
-| `home-2025/dog-3.jpg` | [Dog at Nørre Vorupør Strand.jpg](https://commons.wikimedia.org/wiki/File:Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg) | W.carter |
-| `home-2025/dog-4.jpg` | [Smithfield dog, NZ.jpg](https://commons.wikimedia.org/wiki/File:Smithfield_dog,_NZ.jpg) | Jdfraser86 |
-| `home-2025/dog-5.jpg` | [Dog on dirt road.jpg](https://commons.wikimedia.org/wiki/File:Dog_on_dirt_road.jpg) | Arlo Barnes |
-| `home-2025/garden-flowers-1.jpg` | [Bradshaw ^ Blacklock - Garden Flowers - B1977.14.10655 - Yale Center for British Art.jpg](https://commons.wikimedia.org/wiki/File:Bradshaw_%5E_Blacklock_-_Garden_Flowers_-_B1977.14.10655_-_Yale_Center_for_British_Art.jpg) | Bradshaw &amp; Blacklock |
-| `home-2025/garden-flowers-2.jpg` | [Bradshaw ^ Blacklock - Garden Flowers - B1977.14.10656 - Yale Center for British Art.jpg](https://commons.wikimedia.org/wiki/File:Bradshaw_%5E_Blacklock_-_Garden_Flowers_-_B1977.14.10656_-_Yale_Center_for_British_Art.jpg) | Bradshaw &amp; Blacklock |
-| `home-2025/garden-flowers-3.jpg` | [Flowers - Lan Su Chinese Garden - Portland, Oregon - DSC01252.jpg](https://commons.wikimedia.org/wiki/File:Flowers_-_Lan_Su_Chinese_Garden_-_Portland,_Oregon_-_DSC01252.jpg) | Daderot |
-| `home-2025/garden-flowers-4.jpg` | [明 仿陳淳 雜花圖 冊-Garden Flowers MET DP161162.jpg](https://commons.wikimedia.org/wiki/File:%E6%98%8E_%E4%BB%BF%E9%99%B3%E6%B7%B3_%E9%9B%9C%E8%8A%B1%E5%9C%96_%E5%86%8A-Garden_Flowers_MET_DP161162.jpg) | Chen Chun |
-| `home-2025/pizza-2.jpg` | [Pizza 15.jpg](https://commons.wikimedia.org/wiki/File:Pizza_15.jpg) | Kurt Kaiser |
-| `home-2025/pizza-3.jpg` | [Pizza 10.jpg](https://commons.wikimedia.org/wiki/File:Pizza_10.jpg) | Kurt Kaiser |
-| `iceland-2022/black-sand-beach-1.jpg` | [Black Sand Beach Langkawi. (50820020372).jpg](https://commons.wikimedia.org/wiki/File:Black_Sand_Beach_Langkawi._(50820020372).jpg) | Bernard Spragg. NZ from Christchurch, New Zealand |
-| `iceland-2022/black-sand-beach-2.jpg` | [Water hyacinths at Punaluu Black Sand Beach (II).JPG](https://commons.wikimedia.org/wiki/File:Water_hyacinths_at_Punaluu_Black_Sand_Beach_(II).JPG) | Wmpearl |
-| `iceland-2022/black-sand-beach-3.jpg` | [Water hyacinths at Punaluu Black Sand Beach.JPG](https://commons.wikimedia.org/wiki/File:Water_hyacinths_at_Punaluu_Black_Sand_Beach.JPG) | Wmpearl |
-| `iceland-2022/glacier-lagoon-1.jpg` | [The Bøyabreen Glacial melt waters form a reflective glacial lagoon as the sounds of a hundred waterfalls echo in every direction.jpg](https://commons.wikimedia.org/wiki/File:The_B%C3%B8yabreen_Glacial_melt_waters_form_a_reflective_glacial_lagoon_as_the_sounds_of_a_hundred_waterfalls_echo_in_every_direction.jpg) | Stch2022 |
-| `iceland-2022/glacier-lagoon-3.jpg` | [Icebergs at Jökulsárlón 2.jpg](https://commons.wikimedia.org/wiki/File:Icebergs_at_J%C3%B6kuls%C3%A1rl%C3%B3n_2.jpg) | AsleepInTheChapel |
-| `iceland-2022/glacier-lagoon-4.jpg` | [Icebergs at Jökulsárlón 1.jpg](https://commons.wikimedia.org/wiki/File:Icebergs_at_J%C3%B6kuls%C3%A1rl%C3%B3n_1.jpg) | AsleepInTheChapel |
-| `iceland-2022/icelandic-horse-1.jpg` | [Three graceful horses (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Three_graceful_horses_(Unsplash).jpg) | Fabian Burghardt fabuchao |
-| `iceland-2022/icelandic-horse-2.jpg` | [Horses nuzzling on a cold morning (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Horses_nuzzling_on_a_cold_morning_(Unsplash).jpg) | Anders Jildén andersjilden |
-| `iceland-2022/icelandic-horse-3.jpg` | [Palomino horses by a waterfall (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Palomino_horses_by_a_waterfall_(Unsplash).jpg) | Sergi Ferrete sergiferrete |
-| `iceland-2022/road-trip.mp4` | assembled for the demo from these CC0 photos: iceland-2022/waterfall-iceland-2.jpg, iceland-2022/icelandic-horse-1.jpg, iceland-2022/glacier-lagoon-3.jpg, iceland-2022/black-sand-beach-1.jpg, iceland-2022/waterfall-iceland-5.jpg | |
-| `iceland-2022/waterfall-iceland-1.jpg` | [Reykjafoss Waterfall, Iceland 03.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_03.jpg) | Netha Hussain |
-| `iceland-2022/waterfall-iceland-2.jpg` | [Reykjafoss Waterfall, Iceland 12.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_12.jpg) | Netha Hussain |
-| `iceland-2022/waterfall-iceland-3.jpg` | [Reykjafoss Waterfall, Iceland 09.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_09.jpg) | Netha Hussain |
-| `iceland-2022/waterfall-iceland-4.jpg` | [Reykjafoss Waterfall, Iceland 01.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_01.jpg) | Netha Hussain |
-| `iceland-2022/waterfall-iceland-5.jpg` | [Reykjafoss Waterfall, Iceland 05.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_05.jpg) | Netha Hussain |
-| `iceland-2022/waterfall-iceland-6.jpg` | [Reykjafoss Waterfall, Iceland 08.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_08.jpg) | Netha Hussain |
-| `kyoto-2024/autumn-maple-leaves-1.jpg` | [Maple leaves in autumn 1.JPG](https://commons.wikimedia.org/wiki/File:Maple_leaves_in_autumn_1.JPG) | Poliphilo |
-| `kyoto-2024/autumn-maple-leaves-2.jpg` | [Maple leaves in autumn 2.JPG](https://commons.wikimedia.org/wiki/File:Maple_leaves_in_autumn_2.JPG) | Poliphilo |
-| `kyoto-2024/autumn-maple-leaves-4.jpg` | [Sun Through Maple Leaves, South Side, 2019-11-02, 01.jpg](https://commons.wikimedia.org/wiki/File:Sun_Through_Maple_Leaves,_South_Side,_2019-11-02,_01.jpg) | Cbaile19 |
-| `kyoto-2024/bamboo-forest-1.jpg` | [Bamboo Grove Image.jpg](https://commons.wikimedia.org/wiki/File:Bamboo_Grove_Image.jpg) | Anonymous0006 |
-| `kyoto-2024/bamboo-forest-2.jpg` | [Arashiyama Bamboo Grove (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Arashiyama_Bamboo_Grove_(Unsplash).jpg) | Erol Ahmed erol |
-| `kyoto-2024/bamboo-forest-3.jpg` | [Sagano Bamboo forest 2.jpg](https://commons.wikimedia.org/wiki/File:Sagano_Bamboo_forest_2.jpg) | Marco Almbauer |
-| `kyoto-2024/day-walk.mp4` | assembled for the demo from these CC0 photos: kyoto-2024/torii-gate-1.jpg, kyoto-2024/bamboo-forest-2.jpg, kyoto-2024/kyoto-temple-1.jpg, kyoto-2024/ramen-1.jpg, kyoto-2024/autumn-maple-leaves-1.jpg | |
-| `kyoto-2024/kyoto-temple-1.jpg` | [Byōdo-in Temple in Uji, Kyoto, Japan.jpg](https://commons.wikimedia.org/wiki/File:By%C5%8Ddo-in_Temple_in_Uji,_Kyoto,_Japan.jpg) | GiveMeMollusks |
-| `kyoto-2024/kyoto-temple-2.jpg` | [August 2007, underground of a Kyoto temple 2.jpg](https://commons.wikimedia.org/wiki/File:August_2007,_underground_of_a_Kyoto_temple_2.jpg) | Syced |
-| `kyoto-2024/kyoto-temple-3.jpg` | [August 2007, Temple in Kyoto 5.jpg](https://commons.wikimedia.org/wiki/File:August_2007,_Temple_in_Kyoto_5.jpg) | Syced |
-| `kyoto-2024/kyoto-temple-4.jpg` | [August 2007, Temple in Kyoto 15.jpg](https://commons.wikimedia.org/wiki/File:August_2007,_Temple_in_Kyoto_15.jpg) | Syced |
-| `kyoto-2024/kyoto-temple-5.jpg` | [August 2007, Temple in Kyoto 7.jpg](https://commons.wikimedia.org/wiki/File:August_2007,_Temple_in_Kyoto_7.jpg) | Syced |
-| `kyoto-2024/ramen-1.jpg` | [Ramen Jump 002.jpg](https://commons.wikimedia.org/wiki/File:Ramen_Jump_002.jpg) | Ocdp |
-| `kyoto-2024/ramen-2.jpg` | [Soy Milk Ramen and Tonkotsu Miso Ramen by Goemon Ramen Bar.jpg](https://commons.wikimedia.org/wiki/File:Soy_Milk_Ramen_and_Tonkotsu_Miso_Ramen_by_Goemon_Ramen_Bar.jpg) | Andy Li |
-| `kyoto-2024/ramen-3.jpg` | [Ramen stock 24.jpg](https://commons.wikimedia.org/wiki/File:Ramen_stock_24.jpg) | Syced |
-| `kyoto-2024/torii-gate-1.jpg` | [20181111 Itsukushima Shrine torii-2.jpg](https://commons.wikimedia.org/wiki/File:20181111_Itsukushima_Shrine_torii-2.jpg) | Balon Greyjoy |
-| `kyoto-2024/torii-gate-2.jpg` | [20181111 Itsukushima Shrine torii-1.jpg](https://commons.wikimedia.org/wiki/File:20181111_Itsukushima_Shrine_torii-1.jpg) | Balon Greyjoy |
-| `kyoto-2024/torii-gate-3.jpg` | [20181111 Itsukushima Shrine torii-3.jpg](https://commons.wikimedia.org/wiki/File:20181111_Itsukushima_Shrine_torii-3.jpg) | Balon Greyjoy |
-| `lisbon-2024/azulejo-tiles-1.jpg` | [Azulejos Church Mural.jpg](https://commons.wikimedia.org/wiki/File:Azulejos_Church_Mural.jpg) | DanielMichaelPerry |
-| `lisbon-2024/azulejo-tiles-2.jpg` | [Azulejos in Belem.jpg](https://commons.wikimedia.org/wiki/File:Azulejos_in_Belem.jpg) | Terry.grignon |
-| `lisbon-2024/azulejo-tiles-3.jpg` | [Decorated tile visiting the prisoner.jpg](https://commons.wikimedia.org/wiki/File:Decorated_tile_visiting_the_prisoner.jpg) | PatrickIzzy |
-| `lisbon-2024/city-street-night-1.jpg` | [Chateau Frontenac at dusk in Quebec City.jpg](https://commons.wikimedia.org/wiki/File:Chateau_Frontenac_at_dusk_in_Quebec_City.jpg) | Wilfredor |
-| `lisbon-2024/city-street-night-2.jpg` | [Petit Champlain at night, Quebec city.jpg](https://commons.wikimedia.org/wiki/File:Petit_Champlain_at_night,_Quebec_city.jpg) | Wilfredor |
-| `lisbon-2024/city-street-night-3.jpg` | [Széchenyi Chain Bridge in Budapest at night.jpg](https://commons.wikimedia.org/wiki/File:Sz%C3%A9chenyi_Chain_Bridge_in_Budapest_at_night.jpg) | Wilfredor |
-| `lisbon-2024/city-street-night-4.jpg` | [Saint Peter's Basilica, Sant'Angelo bridge, by night, Rome, Italy.jpg](https://commons.wikimedia.org/wiki/File:Saint_Peter%27s_Basilica,_Sant%27Angelo_bridge,_by_night,_Rome,_Italy.jpg) | Jebulon |
-| `lisbon-2024/evening.mp4` | assembled for the demo from these CC0 photos: lisbon-2024/lisbon-tram-2.jpg, lisbon-2024/azulejo-tiles-1.jpg, lisbon-2024/city-street-night-2.jpg, lisbon-2024/seafood-dish-2.jpg | |
-| `lisbon-2024/lisbon-tram-2.jpg` | [Tram on Largo de Santo António da Sé, Lisbon, 2010.jpg](https://commons.wikimedia.org/wiki/File:Tram_on_Largo_de_Santo_Ant%C3%B3nio_da_S%C3%A9,_Lisbon,_2010.jpg) | DimiTalen |
-| `lisbon-2024/lisbon-tram-3.jpg` | [The historical tram line in Lisbon. (52329191119).jpg](https://commons.wikimedia.org/wiki/File:The_historical_tram_line_in_Lisbon._(52329191119).jpg) | Ted Moravec |
-| `lisbon-2024/lisbon-tram-4.jpg` | [The historical tram line in Lisbon. (52562564192).jpg](https://commons.wikimedia.org/wiki/File:The_historical_tram_line_in_Lisbon._(52562564192).jpg) | Ted Moravec |
-| `lisbon-2024/seafood-dish-1.jpg` | [Clam cakes.jpg](https://commons.wikimedia.org/wiki/File:Clam_cakes.jpg) | Waz8 |
-| `lisbon-2024/seafood-dish-2.jpg` | [Restaurant, dish, meal, food, seafood,.jpg](https://commons.wikimedia.org/wiki/File:Restaurant,_dish,_meal,_food,_seafood,.jpg) | pxhere |
-| `lisbon-2024/seafood-dish-3.jpg` | [Meat Dish on Table of Spice Market 20120128.jpg](https://commons.wikimedia.org/wiki/File:Meat_Dish_on_Table_of_Spice_Market_20120128.jpg) | 玄史生 |
+| `iceland-2025/group-1.jpg` | [Friends Hiking](https://stocksnap.io/photo/friends-hiking-WQE4AZ2BPU) | Hiking Adventures |
+| `iceland-2025/group-2.jpg` | [Hiking Couple](https://stocksnap.io/photo/hiking-couple-BF7WW6HVDH) | Hiking Adventures |
+| `iceland-2025/scene-1.jpg` | [Reykjafoss Waterfall, Iceland 12.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_12.jpg) | Netha Hussain |
+| `iceland-2025/scene-2.jpg` | [Reykjafoss Waterfall, Iceland 05.jpg](https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_05.jpg) | Netha Hussain |
+| `iceland-2025/scene-3.jpg` | [Icebergs at Jökulsárlón 2.jpg](https://commons.wikimedia.org/wiki/File:Icebergs_at_J%C3%B6kuls%C3%A1rl%C3%B3n_2.jpg) | AsleepInTheChapel |
+| `iceland-2025/scene-4.jpg` | [Black Sand Beach Langkawi. (50820020372).jpg](https://commons.wikimedia.org/wiki/File:Black_Sand_Beach_Langkawi._(50820020372).jpg) | Bernard Spragg. NZ from Christchurch, New Zealand |
+| `iceland-2025/scene-5.jpg` | [Three graceful horses (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Three_graceful_horses_(Unsplash).jpg) | Fabian Burghardt fabuchao |
+| `iceland-2025/scene-6.jpg` | [Let Me Tell You a Secret...](https://www.flickr.com/photos/37996646802@N01/3034134299) | cogdogblog |
+| `iceland-2025/scene-7.jpg` | [Edge of Reykjavik Winter](https://www.flickr.com/photos/190617241@N02/51675982900) | Kyralovescoffee |
+| `iceland-2025/scene-8.jpg` | [Reykjavik's Street](https://www.flickr.com/photos/85938818@N02/16786199064) | César.Andrés |
+| `japan-2024/group-1.jpg` | [People Men](https://stocksnap.io/photo/people-men-XO53SBWVMF) | Brodie Vissers |
+| `japan-2024/group-2.jpg` | [People Talking](https://stocksnap.io/photo/people-talking-PGSMMXDJCC) | Candace McDaniel |
+| `japan-2024/scene-1.jpg` | [Fushimi Inari-taisha Torii](https://www.flickr.com/photos/147881710@N02/32406214690) | roan.retera |
+| `japan-2024/scene-2.jpg` | [Fushimi Inari-taisha Torii](https://www.flickr.com/photos/147881710@N02/32786430655) | roan.retera |
+| `japan-2024/scene-3.jpg` | [kyoto, fushimi-inari shrine](https://www.flickr.com/photos/133206585@N04/18667273028) | Hatsu Natsu |
+| `japan-2024/scene-4.jpg` | [Kiyomizu-dera Temple.Kyoto. Japan](https://www.flickr.com/photos/88123769@N02/50361443956) | Bernard Spragg |
+| `japan-2024/scene-5.jpg` | [Kinkakuji Temple](https://www.flickr.com/photos/37996646802@N01/2904947974) | cogdogblog |
+| `japan-2024/scene-6.jpg` | [Early Red Maples](https://www.flickr.com/photos/37996646802@N01/2898017071) | cogdogblog |
+| `japan-2024/scene-7.jpg` | [Bamboo grove](https://www.flickr.com/photos/182866455@N04/48418552221) | clvs7 |
+| `japan-2024/scene-8.jpg` | [Tokyo Street Level](https://www.flickr.com/photos/140880057@N04/40143267365) | arnaudmatar |
+| `japan-2024/scene-9.jpg` | [Jiro-style ramen](https://www.flickr.com/photos/182866455@N04/49972313002) | clvs7 |
+| `japan-2024/scene-10.jpg` | [on a bridge in fukushima, osaka](https://www.flickr.com/photos/134651548@N06/20688050740) | a participant |
+| `italy-2023/group-1.jpg` | [Friends Dinner](https://stocksnap.io/photo/friends-dinner-RRSDBIHUMS) | Bruce Mars |
+| `italy-2023/group-2.jpg` | [Man Coffeeshop](https://stocksnap.io/photo/man-coffeeshop-GD5GEZNXX5) | Helena Lopes |
+| `italy-2023/group-3.jpg` | [Selfie Women](https://stocksnap.io/photo/selfie-women-TDLN8CRA4P) | Candace McDaniel |
+| `italy-2023/scene-1.jpg` | [Colosseum Rome.Shenzhen.Theme park.](https://www.flickr.com/photos/88123769@N02/9729702748) | Bernard Spragg |
+| `italy-2023/scene-2.jpg` | [Colosseum](https://www.flickr.com/photos/183980745@N04/49968139216) | Stefania.foto6 |
+| `italy-2023/scene-3.jpg` | [Fontana di Trevi](https://www.flickr.com/photos/11234074@N05/24211431034) | Philippe Vieux-Jeanton |
+| `italy-2023/scene-4.jpg` | [Rome Street](https://www.flickr.com/photos/140880057@N04/26165744677) | arnaudmatar |
+| `italy-2023/scene-5.jpg` | [Florence](https://www.flickr.com/photos/41024343@N00/4507513317) | runJMrun |
+| `italy-2023/scene-6.jpg` | [Duomo of Florence](https://www.flickr.com/photos/63234672@N04/6348160905) | Mustang Joe |
+| `italy-2023/scene-7.jpg` | [Venice canal with gondolas](https://www.flickr.com/photos/136594255@N06/28539231743) | lisafree54 |
+| `italy-2023/scene-8.jpg` | [Gondolas at Hotel Ca' Sagredo - Grand Canal - Rialto - Venice Italy Venezia - Cr](https://www.flickr.com/photos/34409164@N06/4763291323) | gnuckx |
+| `italy-2023/scene-9.jpg` | [Venice canal with bridge](https://www.flickr.com/photos/136594255@N06/29124738396) | lisafree54 |
+| `italy-2023/scene-10.jpg` | [Gelato](https://www.flickr.com/photos/7633518@N08/54221945949) | sarahstierch |
+| `peru-2022/group-1.jpg` | [Group Friends](https://stocksnap.io/photo/group-friends-M16QHPDGYJ) | Helena Lopes |
+| `peru-2022/group-2.jpg` | [Group Friends](https://stocksnap.io/photo/group-friends-YBGQFVYDDC) | Helena Lopes |
+| `peru-2022/group-3.jpg` | [Male Friends](https://stocksnap.io/photo/male-friends-HFWBLKKCXV) | Helena Lopes |
+| `peru-2022/scene-1.jpg` | [Machu Picchu, Peru](https://www.flickr.com/photos/151415985@N06/37435939181) | Wallboat |
+| `peru-2022/scene-2.jpg` | [Machu Picchu Lima Cusco Peru 300](https://www.flickr.com/photos/47644350@N04/44949843144) | WasifMalik |
+| `peru-2022/scene-3.jpg` | [Machu Picchu Lima Cusco Peru 163](https://www.flickr.com/photos/47644350@N04/30734109677) | WasifMalik |
+| `peru-2022/scene-4.jpg` | [Machu Picchu Lima Cusco Peru 204](https://www.flickr.com/photos/47644350@N04/43856737820) | WasifMalik |
+| `peru-2022/scene-5.jpg` | [Machu Picchu Lima Cusco Peru 298](https://www.flickr.com/photos/47644350@N04/44949844454) | WasifMalik |
+| `peru-2022/scene-6.jpg` | [Machu Picchu Lima Cusco Peru 247](https://www.flickr.com/photos/47644350@N04/45624103792) | WasifMalik |
+| `peru-2022/scene-7.jpg` | [Machu Picchu Lima Cusco Peru 267](https://www.flickr.com/photos/47644350@N04/45624084662) | WasifMalik |
+| `peru-2022/scene-8.jpg` | [Machu Picchu Lima Cusco Peru 005](https://www.flickr.com/photos/47644350@N04/44801281894) | WasifMalik |
+| `peru-2022/scene-9.jpg` | [Who Ya Calling Two Headed Llama?](https://www.flickr.com/photos/37996646802@N01/43110383210) | cogdogblog |
+| `peru-2022/scene-10.jpg` | [Machu Picchu Lima Cusco Peru 081](https://www.flickr.com/photos/47644350@N04/44801131624) | WasifMalik |
+| `morocco-2021/group-1.jpg` | [Friends Fun](https://stocksnap.io/photo/friends-fun-TK55STNQN8) | Matt Moloney |
+| `morocco-2021/group-2.jpg` | [Friends Fun](https://stocksnap.io/photo/friends-fun-NPEZGYPUYP) | Matt Moloney |
+| `morocco-2021/scene-1.jpg` | [Morocco CMS CC-BY](https://www.flickr.com/photos/31810462@N07/15744601411) | Carlos ZGZ |
+| `morocco-2021/scene-2.jpg` | [Watching the Sahara Sunset](https://www.flickr.com/photos/63234672@N04/55246315706) | Mustang Joe |
+| `morocco-2021/scene-3.jpg` | [Sitting Camels in a Desert](https://www.flickr.com/photos/132795455@N08/18689730905) | Image Catalog |
+| `morocco-2021/scene-4.jpg` | [Morocco CMS CC-BY](https://www.flickr.com/photos/31810462@N07/15560638589) | Carlos ZGZ |
+| `morocco-2021/scene-5.jpg` | [Marrakech](https://www.flickr.com/photos/48125931@N00/5696893307) | puffin11uk |
+| `morocco-2021/scene-6.jpg` | [Marrakech](https://www.flickr.com/photos/48125931@N00/5697488640) | puffin11uk |
+| `morocco-2021/scene-7.jpg` | [Chefchaouen, Morocco](https://www.flickr.com/photos/31810462@N07/15127131383) | Carlos ZGZ |
+| `morocco-2021/scene-8.jpg` | [Morocco CMS CC-BY](https://www.flickr.com/photos/31810462@N07/15722824536) | Carlos ZGZ |
+| `morocco-2021/scene-9.jpg` | [Morocco CMS CC-BY](https://www.flickr.com/photos/31810462@N07/15744610551) | Carlos ZGZ |
+| `thailand-2020/group-1.jpg` | [Young honeymoon couple swings in the jungle near the waterfall, Bali island, Ind](https://www.flickr.com/photos/157635012@N07/43344032671) | Artem Beliaikin |
+| `thailand-2020/group-2.jpg` | [Young honeymoon couple swings in the jungle near the waterfall, Bali island, Ind](https://www.flickr.com/photos/157635012@N07/30146462078) | Artem Beliaikin |
+| `thailand-2020/group-3.jpg` | [stocks-7168](https://www.flickr.com/photos/157635012@N07/44545119034) | Artem Beliaikin |
+| `thailand-2020/scene-1.jpg` | [Wat Arun Bangkok.](https://www.flickr.com/photos/88123769@N02/48047658306) | Bernard Spragg |
+| `thailand-2020/scene-2.jpg` | [Park 'n' Pray.](https://www.flickr.com/photos/88123769@N02/9725073169) | Bernard Spragg |
+| `thailand-2020/scene-3.jpg` | [Buddha Statues](https://www.flickr.com/photos/63234672@N04/22948142245) | Mustang Joe |
+| `thailand-2020/scene-4.jpg` | [Thai Long-tail Boat](https://www.flickr.com/photos/63234672@N04/22756133480) | Mustang Joe |
+| `thailand-2020/scene-5.jpg` | [Cha Am Beach, Thailand](https://www.flickr.com/photos/63234672@N04/26793374391) | Mustang Joe |
+| `thailand-2020/scene-6.jpg` | [Beach pavilion](https://www.flickr.com/photos/63234672@N04/32405600710) | Mustang Joe |
+| `thailand-2020/scene-7.jpg` | [Sunrise on the Gulf of Thailand](https://www.flickr.com/photos/63234672@N04/26282058113) | Mustang Joe |
+| `thailand-2020/scene-8.jpg` | [fishermen](https://www.flickr.com/photos/148714304@N03/36263938554) | ky0nch3ng |
+| `thailand-2020/scene-9.jpg` | [Lounge chairs on the beach](https://www.flickr.com/photos/63234672@N04/26943970125) | Mustang Joe |
+| `thailand-2020/scene-10.jpg` | [Fresh organic mandarins on the night market. Bali island.](https://www.flickr.com/photos/157635012@N07/30093161307) | Artem Beliaikin |
+| `thailand-2020/scene-11.jpg` | [The Mammoth Pineapple Stuffed with Thai Food](https://www.flickr.com/photos/37996646802@N01/2871852682) | cogdogblog |
+| `home/home-1.jpg` | [Couple Selfie](https://stocksnap.io/photo/couple-selfie-6HSIWKMY2I) | Living Together |
+| `home/home-2.jpg` | [Couple Selfie](https://stocksnap.io/photo/couple-selfie-XNOUUIHJGG) | Living Together |
+| `home/home-3.jpg` | [Birthday cake](https://www.flickr.com/photos/135996425@N04/27628905975) | BillKasman |
+| `home/home-4.jpg` | [Martha Stewart birthday cake](https://www.flickr.com/photos/38883051@N03/54928751476) | willis0664 |
+| `home/home-5.jpg` | [Friendly dogs meet with their pals in the dog park area of David Crombie Park, 2](https://www.flickr.com/photos/55289779@N00/15008633554) | booledozer |
+| `home/home-6.jpg` | [Dog park friend Muesli](https://www.flickr.com/photos/36943025@N07/19557607925) | Lottie's pets & stuff |
+| `home/home-7.jpg` | [Dog park section of David Crombie Park, 2023 08 13](https://www.flickr.com/photos/55289779@N00/53115052459) | booledozer |
+| `home/home-8.jpg` | [Dining Table with Food on Plate and Wine Glasses](https://www.flickr.com/photos/132795455@N08/19606928322) | Image Catalog |
+| `home/home-9.jpg` | [stocks-4102](https://www.flickr.com/photos/157635012@N07/45661139952) | Artem Beliaikin |

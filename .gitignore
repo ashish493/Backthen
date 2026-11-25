@@ -41,3 +41,4 @@ results/_*.json
 !apps/roamindex/src/icon.png
 !apps/roamindex/src-tauri/icons/*.png
 !docs/screenshots/*.png
+!docs/gifs/*.gif

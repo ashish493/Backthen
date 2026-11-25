@@ -1,0 +1,822 @@
+[
+ {
+  "file": "iceland-2025/group-1.jpg",
+  "source": "https://stocksnap.io/photo/friends-hiking-WQE4AZ2BPU",
+  "title": "Friends Hiking",
+  "author": "Hiking Adventures",
+  "url": "https://api.openverse.org/v1/images/df83b6f0-d365-45f8-926f-a6b6b66342ff/thumb/?full_size=true&compressed=false",
+  "taken": "2025-07-07 17:03:00",
+  "lat": 63.53493,
+  "lon": -19.50815
+ },
+ {
+  "file": "iceland-2025/group-2.jpg",
+  "source": "https://stocksnap.io/photo/hiking-couple-BF7WW6HVDH",
+  "title": "Hiking Couple",
+  "author": "Hiking Adventures",
+  "url": "https://api.openverse.org/v1/images/c1b79f28-9148-47f2-9dab-88d4d1de2cf6/thumb/?full_size=true&compressed=false",
+  "taken": "2025-07-09 17:16:00",
+  "lat": 64.01561,
+  "lon": -16.97216
+ },
+ {
+  "file": "iceland-2025/scene-1.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_12.jpg",
+  "title": "Reykjafoss Waterfall, Iceland 12.jpg",
+  "author": "Netha Hussain",
+  "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Reykjafoss%20Waterfall%2C%20Iceland%2012.jpg?width=1280",
+  "taken": "2025-07-06 12:34:00",
+  "lat": 63.61308,
+  "lon": -19.9885
+ },
+ {
+  "file": "iceland-2025/scene-2.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Reykjafoss_Waterfall,_Iceland_05.jpg",
+  "title": "Reykjafoss Waterfall, Iceland 05.jpg",
+  "author": "Netha Hussain",
+  "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Reykjafoss%20Waterfall%2C%20Iceland%2005.jpg?width=1280",
+  "taken": "2025-07-06 12:30:00",
+  "lat": 63.52875,
+  "lon": -19.51257
+ },
+ {
+  "file": "iceland-2025/scene-3.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Icebergs_at_J%C3%B6kuls%C3%A1rl%C3%B3n_2.jpg",
+  "title": "Icebergs at Jökulsárlón 2.jpg",
+  "author": "AsleepInTheChapel",
+  "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Icebergs%20at%20J%C3%B6kuls%C3%A1rl%C3%B3n%202.jpg?width=1280",
+  "taken": "2025-07-07 10:52:00",
+  "lat": 64.07831,
+  "lon": -16.22688
+ },
+ {
+  "file": "iceland-2025/scene-4.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Black_Sand_Beach_Langkawi._(50820020372).jpg",
+  "title": "Black Sand Beach Langkawi. (50820020372).jpg",
+  "author": "Bernard Spragg. NZ from Christchurch, New Zealand",
+  "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Black%20Sand%20Beach%20Langkawi.%20%2850820020372%29.jpg?width=1280",
+  "taken": "2025-07-08 10:02:00",
+  "lat": 63.40476,
+  "lon": -19.04483
+ },
+ {
+  "file": "iceland-2025/scene-5.jpg",
+  "source": "https://commons.wikimedia.org/wiki/File:Three_graceful_horses_(Unsplash).jpg",
+  "title": "Three graceful horses (Unsplash).jpg",
+  "author": "Fabian Burghardt fabuchao",
+  "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Three%20graceful%20horses%20%28Unsplash%29.jpg?width=1280",
+  "taken": "2025-07-09 17:03:00",
+  "lat": 64.25723,
+  "lon": -21.12908
+ },
+ {
+  "file": "iceland-2025/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/37996646802@N01/3034134299",
+  "title": "Let Me Tell You a Secret...",
+  "author": "cogdogblog",
+  "url": "https://live.staticflickr.com/3209/3034134299_a5689a5af6_b.jpg",
+  "taken": "2025-07-09 12:01:00",
+  "lat": 64.25699,
+  "lon": -21.12735
+ },
+ {
+  "file": "iceland-2025/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/190617241@N02/51675982900",
+  "title": "Edge of Reykjavik Winter",
+  "author": "Kyralovescoffee",
+  "url": "https://live.staticflickr.com/65535/51675982900_78e2de67ac_b.jpg",
+  "taken": "2025-07-10 10:24:00",
+  "lat": 64.14308,
+  "lon": -21.94508
+ },
+ {
+  "file": "iceland-2025/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/85938818@N02/16786199064",
+  "title": "Reykjavik's Street",
+  "author": "César.Andrés",
+  "url": "https://live.staticflickr.com/5443/16786199064_b8018be2df_b.jpg",
+  "taken": "2025-07-11 13:27:00",
+  "lat": 64.1474,
+  "lon": -21.94038
+ },
+ {
+  "file": "japan-2024/group-1.jpg",
+  "source": "https://stocksnap.io/photo/people-men-XO53SBWVMF",
+  "title": "People Men",
+  "author": "Brodie Vissers",
+  "url": "https://api.openverse.org/v1/images/663a5ed4-cb65-41f8-acf1-8dc0f09c23ae/thumb/?full_size=true&compressed=false",
+  "taken": "2024-11-15 14:54:00",
+  "lat": 35.00312,
+  "lon": 135.78074
+ },
+ {
+  "file": "japan-2024/group-2.jpg",
+  "source": "https://stocksnap.io/photo/people-talking-PGSMMXDJCC",
+  "title": "People Talking",
+  "author": "Candace McDaniel",
+  "url": "https://api.openverse.org/v1/images/e688e377-6ff0-440c-aacc-4cf955135184/thumb/?full_size=true&compressed=false",
+  "taken": "2024-11-17 13:19:00",
+  "lat": 35.00972,
+  "lon": 135.7641
+ },
+ {
+  "file": "japan-2024/scene-1.jpg",
+  "source": "https://www.flickr.com/photos/147881710@N02/32406214690",
+  "title": "Fushimi Inari-taisha Torii",
+  "author": "roan.retera",
+  "url": "https://live.staticflickr.com/742/32406214690_da16480d87_b.jpg",
+  "taken": "2024-11-14 10:47:00",
+  "lat": 34.96676,
+  "lon": 135.77093
+ },
+ {
+  "file": "japan-2024/scene-2.jpg",
+  "source": "https://www.flickr.com/photos/147881710@N02/32786430655",
+  "title": "Fushimi Inari-taisha Torii",
+  "author": "roan.retera",
+  "url": "https://live.staticflickr.com/441/32786430655_341b8061a4_b.jpg",
+  "taken": "2024-11-14 10:45:00",
+  "lat": 34.96876,
+  "lon": 135.77122
+ },
+ {
+  "file": "japan-2024/scene-3.jpg",
+  "source": "https://www.flickr.com/photos/133206585@N04/18667273028",
+  "title": "kyoto, fushimi-inari shrine",
+  "author": "Hatsu Natsu",
+  "url": "https://live.staticflickr.com/5476/18667273028_14a79eca0c_b.jpg",
+  "taken": "2024-11-15 13:15:00",
+  "lat": 34.9672,
+  "lon": 135.76894
+ },
+ {
+  "file": "japan-2024/scene-4.jpg",
+  "source": "https://www.flickr.com/photos/88123769@N02/50361443956",
+  "title": "Kiyomizu-dera Temple.Kyoto. Japan",
+  "author": "Bernard Spragg",
+  "url": "https://live.staticflickr.com/65535/50361443956_19d9627a84_b.jpg",
+  "taken": "2024-11-15 11:10:00",
+  "lat": 34.9941,
+  "lon": 135.78777
+ },
+ {
+  "file": "japan-2024/scene-5.jpg",
+  "source": "https://www.flickr.com/photos/37996646802@N01/2904947974",
+  "title": "Kinkakuji Temple",
+  "author": "cogdogblog",
+  "url": "https://live.staticflickr.com/3155/2904947974_45d356f4d5_b.jpg",
+  "taken": "2024-11-16 15:55:00",
+  "lat": 35.03593,
+  "lon": 135.72534
+ },
+ {
+  "file": "japan-2024/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/37996646802@N01/2898017071",
+  "title": "Early Red Maples",
+  "author": "cogdogblog",
+  "url": "https://live.staticflickr.com/3242/2898017071_6d963e625a_b.jpg",
+  "taken": "2024-11-17 09:20:00",
+  "lat": 35.02471,
+  "lon": 135.80162
+ },
+ {
+  "file": "japan-2024/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/182866455@N04/48418552221",
+  "title": "Bamboo grove",
+  "author": "clvs7",
+  "url": "https://live.staticflickr.com/65535/48418552221_538ef67546_b.jpg",
+  "taken": "2024-11-17 10:13:00",
+  "lat": 35.01676,
+  "lon": 135.67514
+ },
+ {
+  "file": "japan-2024/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/140880057@N04/40143267365",
+  "title": "Tokyo Street Level",
+  "author": "arnaudmatar",
+  "url": "https://live.staticflickr.com/863/40143267365_0890177d2f_b.jpg",
+  "taken": "2024-11-18 16:06:00",
+  "lat": 35.00296,
+  "lon": 135.77853
+ },
+ {
+  "file": "japan-2024/scene-9.jpg",
+  "source": "https://www.flickr.com/photos/182866455@N04/49972313002",
+  "title": "Jiro-style ramen",
+  "author": "clvs7",
+  "url": "https://live.staticflickr.com/65535/49972313002_554dc9c4ae_b.jpg",
+  "taken": "2024-11-18 12:43:00",
+  "lat": 35.00593,
+  "lon": 135.76626
+ },
+ {
+  "file": "japan-2024/scene-10.jpg",
+  "source": "https://www.flickr.com/photos/134651548@N06/20688050740",
+  "title": "on a bridge in fukushima, osaka",
+  "author": "a participant",
+  "url": "https://live.staticflickr.com/5811/20688050740_f3f665fec6_b.jpg",
+  "taken": "2024-11-19 10:49:00",
+  "lat": 34.69219,
+  "lon": 135.49842
+ },
+ {
+  "file": "italy-2023/group-1.jpg",
+  "source": "https://stocksnap.io/photo/friends-dinner-RRSDBIHUMS",
+  "title": "Friends Dinner",
+  "author": "Bruce Mars",
+  "url": "https://api.openverse.org/v1/images/886114fd-2a93-45e1-8932-2a7e80cf473d/thumb/?full_size=true&compressed=false",
+  "taken": "2023-06-10 16:19:00",
+  "lat": 41.89126,
+  "lon": 12.46764
+ },
+ {
+  "file": "italy-2023/group-2.jpg",
+  "source": "https://stocksnap.io/photo/man-coffeeshop-GD5GEZNXX5",
+  "title": "Man Coffeeshop",
+  "author": "Helena Lopes",
+  "url": "https://api.openverse.org/v1/images/fa24a32a-c1ba-4aa7-abcc-65da405ae5c7/thumb/?full_size=true&compressed=false",
+  "taken": "2023-06-12 13:32:00",
+  "lat": 41.90026,
+  "lon": 12.47299
+ },
+ {
+  "file": "italy-2023/group-3.jpg",
+  "source": "https://stocksnap.io/photo/selfie-women-TDLN8CRA4P",
+  "title": "Selfie Women",
+  "author": "Candace McDaniel",
+  "url": "https://api.openverse.org/v1/images/8bb6ca0f-bd7e-48c1-82b6-83b622cc11d1/thumb/?full_size=true&compressed=false",
+  "taken": "2023-06-14 17:16:00",
+  "lat": 41.90328,
+  "lon": 12.48072
+ },
+ {
+  "file": "italy-2023/scene-1.jpg",
+  "source": "https://www.flickr.com/photos/88123769@N02/9729702748",
+  "title": "Colosseum Rome.Shenzhen.Theme park.",
+  "author": "Bernard Spragg",
+  "url": "https://live.staticflickr.com/5480/9729702748_202ed5b9da_b.jpg",
+  "taken": "2023-06-09 12:32:00",
+  "lat": 41.88978,
+  "lon": 12.48973
+ },
+ {
+  "file": "italy-2023/scene-2.jpg",
+  "source": "https://www.flickr.com/photos/183980745@N04/49968139216",
+  "title": "Colosseum",
+  "author": "Stefania.foto6",
+  "url": "https://live.staticflickr.com/65535/49968139216_5752b78c23_b.jpg",
+  "taken": "2023-06-09 11:34:00",
+  "lat": 41.88955,
+  "lon": 12.49127
+ },
+ {
+  "file": "italy-2023/scene-3.jpg",
+  "source": "https://www.flickr.com/photos/11234074@N05/24211431034",
+  "title": "Fontana di Trevi",
+  "author": "Philippe Vieux-Jeanton",
+  "url": "https://live.staticflickr.com/1578/24211431034_c7cc0f8ac8_b.jpg",
+  "taken": "2023-06-10 16:04:00",
+  "lat": 41.90027,
+  "lon": 12.481
+ },
+ {
+  "file": "italy-2023/scene-4.jpg",
+  "source": "https://www.flickr.com/photos/140880057@N04/26165744677",
+  "title": "Rome Street",
+  "author": "arnaudmatar",
+  "url": "https://live.staticflickr.com/884/26165744677_bc2aeb2c3f_b.jpg",
+  "taken": "2023-06-10 13:56:00",
+  "lat": 41.89211,
+  "lon": 12.4745
+ },
+ {
+  "file": "italy-2023/scene-5.jpg",
+  "source": "https://www.flickr.com/photos/41024343@N00/4507513317",
+  "title": "Florence",
+  "author": "runJMrun",
+  "url": "https://live.staticflickr.com/2391/4507513317_8c88934a0d_b.jpg",
+  "taken": "2023-06-11 14:31:00",
+  "lat": 43.77708,
+  "lon": 11.25216
+ },
+ {
+  "file": "italy-2023/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/6348160905",
+  "title": "Duomo of Florence",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/6045/6348160905_5b132220e8_b.jpg",
+  "taken": "2023-06-12 12:31:00",
+  "lat": 43.77225,
+  "lon": 11.25884
+ },
+ {
+  "file": "italy-2023/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/136594255@N06/28539231743",
+  "title": "Venice canal with gondolas",
+  "author": "lisafree54",
+  "url": "https://live.staticflickr.com/8240/28539231743_457e734029_b.jpg",
+  "taken": "2023-06-12 11:02:00",
+  "lat": 45.43714,
+  "lon": 12.31267
+ },
+ {
+  "file": "italy-2023/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/34409164@N06/4763291323",
+  "title": "Gondolas at Hotel Ca' Sagredo - Grand Canal - Rialto - Venice Italy Venezia - Creative Commons by gnuckx",
+  "author": "gnuckx",
+  "url": "https://live.staticflickr.com/4123/4763291323_f2e862c8f9_b.jpg",
+  "taken": "2023-06-13 16:52:00",
+  "lat": 45.43217,
+  "lon": 12.34098
+ },
+ {
+  "file": "italy-2023/scene-9.jpg",
+  "source": "https://www.flickr.com/photos/136594255@N06/29124738396",
+  "title": "Venice canal with bridge",
+  "author": "lisafree54",
+  "url": "https://live.staticflickr.com/8541/29124738396_23acceaf60_b.jpg",
+  "taken": "2023-06-13 14:56:00",
+  "lat": 45.43424,
+  "lon": 12.32799
+ },
+ {
+  "file": "italy-2023/scene-10.jpg",
+  "source": "https://www.flickr.com/photos/7633518@N08/54221945949",
+  "title": "Gelato",
+  "author": "sarahstierch",
+  "url": "https://live.staticflickr.com/65535/54221945949_4685385c4f_b.jpg",
+  "taken": "2023-06-14 10:36:00",
+  "lat": 41.89532,
+  "lon": 12.47756
+ },
+ {
+  "file": "peru-2022/group-1.jpg",
+  "source": "https://stocksnap.io/photo/group-friends-M16QHPDGYJ",
+  "title": "Group Friends",
+  "author": "Helena Lopes",
+  "url": "https://api.openverse.org/v1/images/a73d3a61-19ee-4043-9d68-1791553c6861/thumb/?full_size=true&compressed=false",
+  "taken": "2022-09-04 13:28:00",
+  "lat": -13.52058,
+  "lon": -71.97965
+ },
+ {
+  "file": "peru-2022/group-2.jpg",
+  "source": "https://stocksnap.io/photo/group-friends-YBGQFVYDDC",
+  "title": "Group Friends",
+  "author": "Helena Lopes",
+  "url": "https://api.openverse.org/v1/images/a17a1902-c656-459c-bb54-64cb13087222/thumb/?full_size=true&compressed=false",
+  "taken": "2022-09-06 17:04:00",
+  "lat": -13.51968,
+  "lon": -71.9779
+ },
+ {
+  "file": "peru-2022/group-3.jpg",
+  "source": "https://stocksnap.io/photo/male-friends-HFWBLKKCXV",
+  "title": "Male Friends",
+  "author": "Helena Lopes",
+  "url": "https://api.openverse.org/v1/images/1c82469a-3b53-4cc1-aedf-c9834f5b6df6/thumb/?full_size=true&compressed=false",
+  "taken": "2022-09-08 11:38:00",
+  "lat": -13.32707,
+  "lon": -71.95254
+ },
+ {
+  "file": "peru-2022/scene-1.jpg",
+  "source": "https://www.flickr.com/photos/151415985@N06/37435939181",
+  "title": "Machu Picchu, Peru",
+  "author": "Wallboat",
+  "url": "https://live.staticflickr.com/4403/37435939181_18fcd92858_b.jpg",
+  "taken": "2022-09-03 11:57:00",
+  "lat": -13.16461,
+  "lon": -72.54717
+ },
+ {
+  "file": "peru-2022/scene-2.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/44949843144",
+  "title": "Machu Picchu Lima Cusco Peru 300",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/4910/44949843144_64d22cd8ce_b.jpg",
+  "taken": "2022-09-03 13:35:00",
+  "lat": -13.1613,
+  "lon": -72.54773
+ },
+ {
+  "file": "peru-2022/scene-3.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/30734109677",
+  "title": "Machu Picchu Lima Cusco Peru 163",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/4891/30734109677_a01165e34d_b.jpg",
+  "taken": "2022-09-04 12:41:00",
+  "lat": -13.1616,
+  "lon": -72.54589
+ },
+ {
+  "file": "peru-2022/scene-4.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/43856737820",
+  "title": "Machu Picchu Lima Cusco Peru 204",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/4887/43856737820_254590ff8a_b.jpg",
+  "taken": "2022-09-05 17:34:00",
+  "lat": -13.16227,
+  "lon": -72.54563
+ },
+ {
+  "file": "peru-2022/scene-5.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/44949844454",
+  "title": "Machu Picchu Lima Cusco Peru 298",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/1919/44949844454_7162fc146e_b.jpg",
+  "taken": "2022-09-05 11:06:00",
+  "lat": -13.16623,
+  "lon": -72.5449
+ },
+ {
+  "file": "peru-2022/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/45624103792",
+  "title": "Machu Picchu Lima Cusco Peru 247",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/1941/45624103792_1169cfc9da_b.jpg",
+  "taken": "2022-09-06 13:41:00",
+  "lat": -13.41879,
+  "lon": -71.84836
+ },
+ {
+  "file": "peru-2022/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/45624084662",
+  "title": "Machu Picchu Lima Cusco Peru 267",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/4916/45624084662_dafa20b486_b.jpg",
+  "taken": "2022-09-07 13:43:00",
+  "lat": -13.25893,
+  "lon": -72.25986
+ },
+ {
+  "file": "peru-2022/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/44801281894",
+  "title": "Machu Picchu Lima Cusco Peru 005",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/1973/44801281894_46f0c19cdf_b.jpg",
+  "taken": "2022-09-07 17:42:00",
+  "lat": -13.51835,
+  "lon": -71.9812
+ },
+ {
+  "file": "peru-2022/scene-9.jpg",
+  "source": "https://www.flickr.com/photos/37996646802@N01/43110383210",
+  "title": "Who Ya Calling Two Headed Llama?",
+  "author": "cogdogblog",
+  "url": "https://live.staticflickr.com/1935/43110383210_9e371e0a59_b.jpg",
+  "taken": "2022-09-08 10:30:00",
+  "lat": -13.51199,
+  "lon": -71.98187
+ },
+ {
+  "file": "peru-2022/scene-10.jpg",
+  "source": "https://www.flickr.com/photos/47644350@N04/44801131624",
+  "title": "Machu Picchu Lima Cusco Peru 081",
+  "author": "WasifMalik",
+  "url": "https://live.staticflickr.com/1947/44801131624_6422028958_b.jpg",
+  "taken": "2022-09-09 10:35:00",
+  "lat": -12.12286,
+  "lon": -77.02676
+ },
+ {
+  "file": "morocco-2021/group-1.jpg",
+  "source": "https://stocksnap.io/photo/friends-fun-TK55STNQN8",
+  "title": "Friends Fun",
+  "author": "Matt Moloney",
+  "url": "https://api.openverse.org/v1/images/bc629205-a072-4efb-a6a7-e87878cc61e0/thumb/?full_size=true&compressed=false",
+  "taken": "2021-03-19 12:48:00",
+  "lat": 31.62779,
+  "lon": -7.99255
+ },
+ {
+  "file": "morocco-2021/group-2.jpg",
+  "source": "https://stocksnap.io/photo/friends-fun-NPEZGYPUYP",
+  "title": "Friends Fun",
+  "author": "Matt Moloney",
+  "url": "https://api.openverse.org/v1/images/b934fecc-f0ae-4ae4-959d-a6d2cb956638/thumb/?full_size=true&compressed=false",
+  "taken": "2021-03-21 16:21:00",
+  "lat": 31.62537,
+  "lon": -7.99262
+ },
+ {
+  "file": "morocco-2021/scene-1.jpg",
+  "source": "https://www.flickr.com/photos/31810462@N07/15744601411",
+  "title": "Morocco CMS CC-BY",
+  "author": "Carlos ZGZ",
+  "url": "https://live.staticflickr.com/5604/15744601411_62a7412e45_b.jpg",
+  "taken": "2021-03-18 12:20:00",
+  "lat": 31.07846,
+  "lon": -4.01305
+ },
+ {
+  "file": "morocco-2021/scene-2.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/55246315706",
+  "title": "Watching the Sahara Sunset",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/65535/55246315706_bca16574b0_b.jpg",
+  "taken": "2021-03-18 11:34:00",
+  "lat": 31.07694,
+  "lon": -4.01619
+ },
+ {
+  "file": "morocco-2021/scene-3.jpg",
+  "source": "https://www.flickr.com/photos/132795455@N08/18689730905",
+  "title": "Sitting Camels in a Desert",
+  "author": "Image Catalog",
+  "url": "https://live.staticflickr.com/409/18689730905_871d784efb_b.jpg",
+  "taken": "2021-03-19 17:01:00",
+  "lat": 31.08404,
+  "lon": -4.01204
+ },
+ {
+  "file": "morocco-2021/scene-4.jpg",
+  "source": "https://www.flickr.com/photos/31810462@N07/15560638589",
+  "title": "Morocco CMS CC-BY",
+  "author": "Carlos ZGZ",
+  "url": "https://live.staticflickr.com/7574/15560638589_508fb893a2_b.jpg",
+  "taken": "2021-03-19 11:43:00",
+  "lat": 31.62652,
+  "lon": -7.98571
+ },
+ {
+  "file": "morocco-2021/scene-5.jpg",
+  "source": "https://www.flickr.com/photos/48125931@N00/5696893307",
+  "title": "Marrakech",
+  "author": "puffin11uk",
+  "url": "https://live.staticflickr.com/3635/5696893307_06b31c161a_b.jpg",
+  "taken": "2021-03-20 17:26:00",
+  "lat": 31.62098,
+  "lon": -7.98509
+ },
+ {
+  "file": "morocco-2021/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/48125931@N00/5697488640",
+  "title": "Marrakech",
+  "author": "puffin11uk",
+  "url": "https://live.staticflickr.com/2459/5697488640_5b1fc1f8b5_b.jpg",
+  "taken": "2021-03-20 09:54:00",
+  "lat": 31.61997,
+  "lon": -7.99241
+ },
+ {
+  "file": "morocco-2021/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/31810462@N07/15127131383",
+  "title": "Chefchaouen, Morocco",
+  "author": "Carlos ZGZ",
+  "url": "https://live.staticflickr.com/7556/15127131383_13b73941d9_b.jpg",
+  "taken": "2021-03-21 17:33:00",
+  "lat": 35.16534,
+  "lon": -5.26511
+ },
+ {
+  "file": "morocco-2021/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/31810462@N07/15722824536",
+  "title": "Morocco CMS CC-BY",
+  "author": "Carlos ZGZ",
+  "url": "https://live.staticflickr.com/5608/15722824536_9515ab368b_b.jpg",
+  "taken": "2021-03-21 11:39:00",
+  "lat": 35.17279,
+  "lon": -5.267
+ },
+ {
+  "file": "morocco-2021/scene-9.jpg",
+  "source": "https://www.flickr.com/photos/31810462@N07/15744610551",
+  "title": "Morocco CMS CC-BY",
+  "author": "Carlos ZGZ",
+  "url": "https://live.staticflickr.com/7545/15744610551_d0e6cde024_b.jpg",
+  "taken": "2021-03-22 15:36:00",
+  "lat": 34.0636,
+  "lon": -4.9804
+ },
+ {
+  "file": "thailand-2020/group-1.jpg",
+  "source": "https://www.flickr.com/photos/157635012@N07/43344032671",
+  "title": "Young honeymoon couple swings in the jungle near the waterfall, Bali island, Indonesia. Ubud.",
+  "author": "Artem Beliaikin",
+  "url": "https://live.staticflickr.com/1804/43344032671_1cdf6960b7_b.jpg",
+  "taken": "2020-01-23 11:32:00",
+  "lat": 7.88275,
+  "lon": 98.39562
+ },
+ {
+  "file": "thailand-2020/group-2.jpg",
+  "source": "https://www.flickr.com/photos/157635012@N07/30146462078",
+  "title": "Young honeymoon couple swings in the jungle near the waterfall, Bali island, Indonesia. Ubud.",
+  "author": "Artem Beliaikin",
+  "url": "https://live.staticflickr.com/1772/30146462078_28049f74f3_b.jpg",
+  "taken": "2020-01-25 15:20:00",
+  "lat": 7.87708,
+  "lon": 98.39209
+ },
+ {
+  "file": "thailand-2020/group-3.jpg",
+  "source": "https://www.flickr.com/photos/157635012@N07/44545119034",
+  "title": "stocks-7168",
+  "author": "Artem Beliaikin",
+  "url": "https://live.staticflickr.com/1973/44545119034_b033d4ea9c_b.jpg",
+  "taken": "2020-01-27 10:39:00",
+  "lat": 7.88337,
+  "lon": 98.39164
+ },
+ {
+  "file": "thailand-2020/scene-1.jpg",
+  "source": "https://www.flickr.com/photos/88123769@N02/48047658306",
+  "title": "Wat Arun Bangkok.",
+  "author": "Bernard Spragg",
+  "url": "https://live.staticflickr.com/65535/48047658306_ebc153484d_b.jpg",
+  "taken": "2020-01-22 09:50:00",
+  "lat": 13.74661,
+  "lon": 100.48938
+ },
+ {
+  "file": "thailand-2020/scene-2.jpg",
+  "source": "https://www.flickr.com/photos/88123769@N02/9725073169",
+  "title": "Park 'n' Pray.",
+  "author": "Bernard Spragg",
+  "url": "https://live.staticflickr.com/7433/9725073169_a02e305ee5_b.jpg",
+  "taken": "2020-01-22 15:51:00",
+  "lat": 13.74553,
+  "lon": 100.4888
+ },
+ {
+  "file": "thailand-2020/scene-3.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/22948142245",
+  "title": "Buddha Statues",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/656/22948142245_0f018466c9_b.jpg",
+  "taken": "2020-01-23 10:33:00",
+  "lat": 13.74314,
+  "lon": 100.49382
+ },
+ {
+  "file": "thailand-2020/scene-4.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/22756133480",
+  "title": "Thai Long-tail Boat",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/637/22756133480_1c630c7156_b.jpg",
+  "taken": "2020-01-23 13:43:00",
+  "lat": 13.74674,
+  "lon": 100.49063
+ },
+ {
+  "file": "thailand-2020/scene-5.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/26793374391",
+  "title": "Cha Am Beach, Thailand",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/7565/26793374391_7d7f3988ff_b.jpg",
+  "taken": "2020-01-24 15:57:00",
+  "lat": 12.80317,
+  "lon": 99.97045
+ },
+ {
+  "file": "thailand-2020/scene-6.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/32405600710",
+  "title": "Beach pavilion",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/605/32405600710_4002cbcfee_b.jpg",
+  "taken": "2020-01-24 17:08:00",
+  "lat": 12.79922,
+  "lon": 99.97161
+ },
+ {
+  "file": "thailand-2020/scene-7.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/26282058113",
+  "title": "Sunrise on the Gulf of Thailand",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/7008/26282058113_0e944440b1_b.jpg",
+  "taken": "2020-01-25 10:45:00",
+  "lat": 12.56855,
+  "lon": 99.95782
+ },
+ {
+  "file": "thailand-2020/scene-8.jpg",
+  "source": "https://www.flickr.com/photos/148714304@N03/36263938554",
+  "title": "fishermen",
+  "author": "ky0nch3ng",
+  "url": "https://live.staticflickr.com/4333/36263938554_c8b138f52b_b.jpg",
+  "taken": "2020-01-25 14:37:00",
+  "lat": 7.20081,
+  "lon": 100.59985
+ },
+ {
+  "file": "thailand-2020/scene-9.jpg",
+  "source": "https://www.flickr.com/photos/63234672@N04/26943970125",
+  "title": "Lounge chairs on the beach",
+  "author": "Mustang Joe",
+  "url": "https://live.staticflickr.com/7185/26943970125_2ea7ee379d_b.jpg",
+  "taken": "2020-01-26 13:15:00",
+  "lat": 7.88406,
+  "lon": 98.3892
+ },
+ {
+  "file": "thailand-2020/scene-10.jpg",
+  "source": "https://www.flickr.com/photos/157635012@N07/30093161307",
+  "title": "Fresh organic mandarins on the night market. Bali island.",
+  "author": "Artem Beliaikin",
+  "url": "https://live.staticflickr.com/1957/30093161307_26f661b0de_b.jpg",
+  "taken": "2020-01-26 17:37:00",
+  "lat": 13.73805,
+  "lon": 100.50609
+ },
+ {
+  "file": "thailand-2020/scene-11.jpg",
+  "source": "https://www.flickr.com/photos/37996646802@N01/2871852682",
+  "title": "The Mammoth Pineapple Stuffed with Thai Food",
+  "author": "cogdogblog",
+  "url": "https://live.staticflickr.com/3104/2871852682_46206cc095_b.jpg",
+  "taken": "2020-01-27 14:28:00",
+  "lat": 13.73715,
+  "lon": 100.51089
+ },
+ {
+  "file": "home/home-1.jpg",
+  "source": "https://stocksnap.io/photo/couple-selfie-6HSIWKMY2I",
+  "title": "Couple Selfie",
+  "author": "Living Together",
+  "url": "https://api.openverse.org/v1/images/def91527-9e25-4ea3-89d9-d5d337fc2eef/thumb/?full_size=true&compressed=false",
+  "taken": "2020-02-05 18:10:00",
+  "lat": 52.36834,
+  "lon": 4.91425
+ },
+ {
+  "file": "home/home-2.jpg",
+  "source": "https://stocksnap.io/photo/couple-selfie-XNOUUIHJGG",
+  "title": "Couple Selfie",
+  "author": "Living Together",
+  "url": "https://api.openverse.org/v1/images/4a9f08fd-07dc-4e8b-be26-9f47c543e979/thumb/?full_size=true&compressed=false",
+  "taken": "2021-04-07 18:10:00",
+  "lat": 52.3613,
+  "lon": 4.92131
+ },
+ {
+  "file": "home/home-3.jpg",
+  "source": "https://www.flickr.com/photos/135996425@N04/27628905975",
+  "title": "Birthday cake",
+  "author": "BillKasman",
+  "url": "https://live.staticflickr.com/7413/27628905975_27f2898fa6_b.jpg",
+  "taken": "2022-05-09 18:10:00",
+  "lat": 52.36753,
+  "lon": 4.89376
+ },
+ {
+  "file": "home/home-4.jpg",
+  "source": "https://www.flickr.com/photos/38883051@N03/54928751476",
+  "title": "Martha Stewart birthday cake",
+  "author": "willis0664",
+  "url": "https://live.staticflickr.com/65535/54928751476_a128881171_b.jpg",
+  "taken": "2023-08-11 18:10:00",
+  "lat": null,
+  "lon": null
+ },
+ {
+  "file": "home/home-5.jpg",
+  "source": "https://www.flickr.com/photos/55289779@N00/15008633554",
+  "title": "Friendly dogs meet with their pals in the dog park area of David Crombie Park, 2014 10 25",
+  "author": "booledozer",
+  "url": "https://live.staticflickr.com/3953/15008633554_4aef3a4687_b.jpg",
+  "taken": "2024-09-13 18:10:00",
+  "lat": 52.36379,
+  "lon": 4.89412
+ },
+ {
+  "file": "home/home-6.jpg",
+  "source": "https://www.flickr.com/photos/36943025@N07/19557607925",
+  "title": "Dog park friend Muesli",
+  "author": "Lottie's pets & stuff",
+  "url": "https://live.staticflickr.com/365/19557607925_e5fe8fe537_b.jpg",
+  "taken": "2025-10-15 18:10:00",
+  "lat": 52.37297,
+  "lon": 4.91625
+ },
+ {
+  "file": "home/home-7.jpg",
+  "source": "https://www.flickr.com/photos/55289779@N00/53115052459",
+  "title": "Dog park section of David Crombie Park, 2023 08 13",
+  "author": "booledozer",
+  "url": "https://live.staticflickr.com/65535/53115052459_c05b85b23e_b.jpg",
+  "taken": "2020-12-17 18:10:00",
+  "lat": 52.37779,
+  "lon": 4.89211
+ },
+ {
+  "file": "home/home-8.jpg",
+  "source": "https://www.flickr.com/photos/132795455@N08/19606928322",
+  "title": "Dining Table with Food on Plate and Wine Glasses",
+  "author": "Image Catalog",
+  "url": "https://live.staticflickr.com/3829/19606928322_9353972688_b.jpg",
+  "taken": "2021-02-19 18:10:00",
+  "lat": 52.35617,
+  "lon": 4.89288
+ },
+ {
+  "file": "home/home-9.jpg",
+  "source": "https://www.flickr.com/photos/157635012@N07/45661139952",
+  "title": "stocks-4102",
+  "author": "Artem Beliaikin",
+  "url": "https://live.staticflickr.com/4863/45661139952_1238c0a8f2_b.jpg",
+  "taken": "2022-04-21 18:10:00",
+  "lat": null,
+  "lon": null
+ }
+]

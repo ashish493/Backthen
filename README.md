@@ -1,30 +1,80 @@
 # Backthen
 
-**Search your own photo and video archive in plain words, privately, on a laptop.**
-Type "waterfall in the mist" or "birthday cake" and get matching photos and the exact moments inside videos, ranked in about 30 ms. Everything (indexing, search, the map) runs on your machine. No uploads, no cloud, no account.
+**Find your trips, your people and your moments again, privately, on your own laptop.**
 
-![Backthen home: search, your world, and trips as postcards](docs/screenshots/home.png)
+Backthen turns years of photos and videos into the memories you want to go back to. Search in plain words ("friends on a trip", "waterfall in the mist"), jump to the exact second inside a video, and watch your travels light up on a globe. It all runs on your computer: no uploads, no cloud, no account.
+
+![Backthen home: search, your world in numbers, and trips as postcards that lead with the group](docs/screenshots/home.png)
+
+## Why we built it
+
+Our phones and hard drives hold years of trips, buried under screenshots, receipts and forty versions of the same sunset. Cloud services can dig the good ones out, but only after scanning your whole life on their servers.
+
+We wanted the remembering without the uploading. We also noticed which photos we actually go back to: hardly ever the prettiest landscape, nearly always the ones with the people we went with, from the few days when we really got away.
+
+So Backthen looks for those. If seeing an old trip makes you message the group and plan the next one, it has done its job.
+
+## Memories worth keeping
+
+![A polaroid camera shoots little travel scenes while the cards load, then the real group photos develop](docs/gifs/memories.gif)
+
+A memory here is more than a good-looking photo. These are the rules:
+
+| Rule | Why |
+|---|---|
+| **A trip is 3 days or more, away from home** | A day or two is a day out. It takes longer than that to escape your routine, and those are the trips that stay with you. |
+| **A memory is shared** | One of its best photos must show two or more people, or it doesn't make the row. |
+| **Nobody is left out** | The postcard leads with the *whole group*: the largest number of people that repeats across the trip's photos. A single photo full of strangers doesn't count. |
+| **Nobody is cropped out** | At least 93% of the big photo's width is always visible, so the friend at the edge stays in. |
+| **No day appears twice** | Each day belongs to one memory, and a postcard's photos come from different days. |
+
+Trips come first, then this month in earlier years, then your busiest months. While Backthen is still looking for the photo with everyone in it (a new library, or new photos), it says so and the better cover develops in place:
+
+![Getting everyone in the picture: a light veil over the memories while the group photos are found](docs/gifs/veil.gif)
+
+## Your travels on a globe
+
+![Replay my travels: the globe flies from trip to trip and a postcard lands at each stop](docs/gifs/replay.gif)
+
+- **Replay my travels** flies trip to trip, oldest first, with a postcard at every stop.
+- **Pins show the place, not the people:** the photo that best defines each town. Zoomed out, places with 100+ photos show their photo and from 21 a count; zoomed into a region, every place with 21+ shows its photo; fewer is a dot.
+- **Your places** lists countries and towns, and a year slider shows where you were over time.
+- It works offline. No map tiles are downloaded.
+
+![The globe with seven countries, flight routes between trips, and the list of places](docs/screenshots/map.png)
+
+## Search in your own words
+
+| | |
+|---|---|
+| ![Search results for "friends on a trip"](docs/screenshots/search.png) **Describe it:** results as you pause typing, recent searches kept on this computer, `Ctrl K` from anywhere. | ![A video opened at the second where the friends appear](docs/screenshots/video.png) **The exact moment in a video:** "friends laughing together" opens the clip at the second where they appear; the strip shows its other best moments. |
+| ![Dark home screen](docs/screenshots/home-dark.png) **Your world:** years, countries, trips, photos and videos, found from dates and GPS alone. Light, dark, or follow Windows. | ![Timeline](docs/screenshots/timeline.png) **Timeline:** items per month on a continuous axis. |
+
+## From a folder to memories
+
+![The first indexing run: photos fade past with a line of travel nostalgia, the percentage and the time left](docs/gifs/indexing.gif)
+
+Point Backthen at a folder or drive. It reads each file once, never changes it, and can be stopped at any time. While it works, the photos it has found fade past with a line of travel nostalgia ("Rewinding the road trip…").
+
+| | |
+|---|---|
+| ![Welcome screen](docs/screenshots/welcome.png) **First run:** choose or drop a folder; the drive type (USB hard drive or SSD) is detected for you. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline, 172k places) or by clicking the globe. Originals and their dates are never modified. |
+
+<sub>**About the pictures:** screenshots and animations use a sample library of 82 hand-picked CC0 photos ([credits](docs/screenshots/ATTRIBUTION.md), built by [`bench/demo`](bench/demo)) arranged into six made-up trips. Dates and places are invented, the group photos are stock photos that were not taken at those places, and the three videos are assembled from the photos. The map uses lower pin thresholds because the library is small, and the indexing animation shows sample progress.</sub>
+
+---
+
+*The rest of this page is for the technically curious: how it works, the models and the benchmarks.*
+
+## How it works
 
 Backthen is three pieces:
 
 | Component | What it does | Code |
 |---|---|---|
 | **RoamIngest** | Reads a large mixed archive once, extracts frames, metadata and CLIP embeddings into a versioned SQLite manifest. Resumable, kill-safe, deterministic. | [`packages/roam-ingest`](packages/roam-ingest) |
-| **RoamEngine** | Local search engine and HTTP API: natural-language search, similar items, time and place filters, video moments, retrieval evaluation. | [`packages/roam-engine`](packages/roam-engine) |
-| **RoamIndex** | The Backthen desktop app (Tauri 2 + React): first-run onboarding, home with trips and Memories, search, viewer, timeline, offline 3D globe, adding places by hand, indexing with a live slideshow. | [`apps/roamindex`](apps/roamindex) |
-
-## Screenshots
-
-All screenshots use a demo library of 77 CC0 photos from Wikimedia Commons, with made-up dates and locations; its three videos are assembled from those photos ([attribution](docs/screenshots/ATTRIBUTION.md), scripts in [`bench/demo`](bench/demo)).
-
-| | |
-|---|---|
-| ![Welcome](docs/screenshots/welcome.png) **First run:** a full-screen welcome with a turning globe; choose or drop a folder, the drive type (USB hard drive or internal SSD) is detected for you. | ![Indexing](docs/screenshots/indexing.png) **Indexing slideshow:** the photos found so far fade past, one travel-nostalgia line per photo ("Collecting postcards…"), with the percentage and time left. |
-| ![Search](docs/screenshots/search.png) **Search in your own words:** results as you pause typing, recent searches kept on this computer, `Ctrl K` from anywhere. | ![Dark mode](docs/screenshots/home-dark.png) **Your world and trips:** trips are found from dates and GPS alone (offline, GeoNames) and shown as postcards; the strip counts years, countries, trips, photos and videos. Light or dark, or follow Windows. |
-| ![Video moments](docs/screenshots/video.png) **Video moments:** "horses in a field" finds the clip and opens it at 0:05, where the horses appear; the strip below lists its other best moments. | ![Map](docs/screenshots/map.png) **Offline globe:** zoomed out, places with 100+ photos show their defining photo and from 21 a count; zoomed into a region, every place with 21+ shows its photo; fewer is a dot (this demo has ~15 per place, so its screenshot uses lower thresholds); your trips as flight routes, "Replay my travels" flies trip to trip with a postcard at each stop, a year slider shows where you were over time, and "Your places" lists countries and towns. No map tiles are downloaded. |
-| ![Timeline](docs/screenshots/timeline.png) **Timeline:** items per month on a continuous axis; undated items listed separately. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline gazetteer of 172k places) or by clicking the globe. Originals and their dates are never modified. |
-
-## How it works
+| **RoamEngine** | Local search engine and HTTP API: natural-language search, trips, memories, faces, time and place filters, video moments, retrieval evaluation. | [`packages/roam-engine`](packages/roam-engine) |
+| **RoamIndex** | The Backthen desktop app (Tauri 2 + React). | [`apps/roamindex`](apps/roamindex) |
 
 ```mermaid
 flowchart LR
@@ -179,5 +229,5 @@ Tests: `pytest packages/roam-ingest` and `pytest packages/roam-engine` (syntheti
 - [GeoNames](https://www.geonames.org/) place data (CC BY 4.0), bundled for offline place search.
 - Face detection and recognition: [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) (Apache-2.0) from the OpenCV model zoo, downloaded on first use.
 - [Natural Earth](https://www.naturalearthdata.com/) via world-atlas for the globe outlines (public domain).
-- Demo images and videos: Wikimedia Commons contributors, CC0 ([list](docs/screenshots/ATTRIBUTION.md)).
+- Demo photos: CC0, by contributors to Flickr, StockSnap and Wikimedia Commons, found through [Openverse](https://openverse.org) ([list](docs/screenshots/ATTRIBUTION.md)).
 - Public benchmarks: Flickr30k, MS-COCO, MSR-VTT (used for evaluation only; not redistributed).
