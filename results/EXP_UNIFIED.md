@@ -13,7 +13,7 @@ CLIP ViT-B/32 embeddings (photos: 1 each; videos: up to 32 frames each) and phot
 | Photo reads bounded by a byte budget (384 MB) | stops RAM growing with archive size |
 | JPEG: reduced-size decode (2× headroom); HEIC/PNG/WebP: full decode | passed the search-level gate (`EXP_IMAGES.md`) |
 | Videos: separate CPU and NVDEC worker pools; decoder chosen by a hash of the file's path and size (default 40% NVDEC), no work stealing | hybrid decode was 1.5× faster than CPU-only, but dynamic routing changes pixels between runs (`EXP_HYBRID.md`) |
-| Long videos: seek instead of decode-everything when total frames > 250 × targets; frame-count budget (20,000) plus a safety timeout | seek is cheaper only for sparse sampling (`EXP_B.md`); a 2-hour film has about 170,000 frames |
+| Long videos: seek instead of decode-everything when total frames > 250 × targets; frame-count budget (20,000) plus a safety timeout | seek is cheaper only for sparse sampling (`EXP_B.md`); a 2-hour video has about 170,000 frames |
 | GPU batches always padded to 64 rows | a row's embedding must not depend on its batch neighbours |
 | File marked done only when its embeddings are committed in the same transaction | crash-safe resume |
 | Optional `--video-prefetch-mb N`: videos up to N MB are read whole by the photo reader and decoded from memory | on the USB drive: 13% faster, decoders stop waiting on the drive (`EXP_HETERO.md`); output bit-identical on the set A |

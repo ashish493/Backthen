@@ -42,3 +42,9 @@ results/_*.json
 !apps/roamindex/src-tauri/icons/*.png
 !docs/screenshots/*.png
 !docs/gifs/*.gif
+
+# Working notes and plans that are not part of the project (kept locally)
+docs/private/
+
+# Python packaging output
+*.egg-info/

@@ -56,7 +56,7 @@ The product scores a video by its best-matching frame, which is also what gives 
 
 - **Mean of frames:** slightly better on MSR-VTT's whole-clip captions. The gap is +1.4 points R@1 over 1,000 queries, about one standard error.
 - **Best frame:** better suited to moment search, finding a shot inside a long personal video.
-- **Possible change:** a blend of the two (for example, max plus mean) could be tested on the user's own labelled set before changing anything.
+- **Possible change:** a blend of the two (for example, max plus mean) could be tested on a labelled set of personal photos before changing anything.
 
 ## Speed
 
@@ -73,5 +73,5 @@ The product scores a video by its best-matching frame, which is also what gives 
 - **Absolute quality** is what ViT-B/32 delivers:
   - Strong on Flickr-style everyday photos: the right photo is first two times in three, and in the top 10 for 93% of queries.
   - Harder on COCO's 5,000 cluttered scenes: the right photo is in the top 10 for 75% of queries.
-- **Larger models:** they score higher on the same benchmarks (see the published table). The GPU was idle 92% of the 355 GB ingest (`BOTTLENECK_ARCHIVE355.md`), so a larger model is the main quality lever. Check it on the user's own labelled set before switching.
-- **Public data is not the user's archive.** These captions describe whole scenes in detail; personal searches are short ("beach", "temple at night"). The labelled `Dataset/` evaluation remains the deciding test.
+- **Larger models:** they score higher on the same benchmarks (see the published table). The GPU was idle 92% of the 355 GB ingest (`BOTTLENECK_ARCHIVE355.md`), so a larger model is the main quality lever. Check it on a labelled set of personal photos before switching.
+- **Public data is not a personal archive.** These captions describe whole scenes in detail; personal searches are short ("beach", "temple at night"). A labelled evaluation of personal photos remains the deciding test.

@@ -14,7 +14,7 @@ Local search over a RoamIngest library (`manifest.sqlite`, schema v1). Nothing l
 ## Use
 ```
 pip install -e packages/roam-engine
-roamengine search "a waterfall in a forest" --library D:\Roam\out\archive355 [--type video] [--from 2019 --to 2020] [--paths]
+roamengine search "a waterfall in a forest" --library D:\backthen_library [--type video] [--from 2019 --to 2020] [--paths]
 roamengine stats  --library ...
 roamengine bench  --library ...          # query latency, aggregate only
 roamengine eval   --library ...          # metrics over the labels made in the app

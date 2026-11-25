@@ -2,6 +2,8 @@
 
 **Find your trips, your people and your moments again, privately, on your own laptop.**
 
+[![CI](https://github.com/ashish493/Backthen/actions/workflows/ci.yml/badge.svg)](https://github.com/ashish493/Backthen/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Backthen turns years of photos and videos into the memories you want to go back to. Search in plain words ("friends on a trip", "waterfall in the mist"), jump to the exact second inside a video, and watch your travels light up on a globe. It all runs on your computer: no uploads, no cloud, no account.
 
 ![Backthen home: search, your world in numbers, and trips as postcards that lead with the group](docs/screenshots/home.png)
@@ -218,10 +220,14 @@ bench/                 benchmark harness, public-benchmark and demo scripts
 results/               benchmark reports (aggregate numbers)
 docs/architecture      architecture overview
 docs/decisions         architecture decision records (ADR-001..011)
-docs/planning          the original problem statement and research plans
+docs/planning          the problem statement and the benchmark plan
 ```
 
 Tests: `pytest packages/roam-ingest` and `pytest packages/roam-engine` (synthetic data generated at test time).
+
+## License
+
+[MIT](LICENSE). Third-party material keeps its own terms: the bundled place names (GeoNames, CC BY 4.0), the face models downloaded on first use (YuNet, MIT; SFace, Apache-2.0) and the demo photos (CC0). See Credits.
 
 ## Credits
 

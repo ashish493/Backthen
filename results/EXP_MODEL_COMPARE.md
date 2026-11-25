@@ -73,7 +73,7 @@ These are projections from the rates above, not measurements.
 | A safe upgrade with no app changes | **ViT-L-14 DFN-2B** | About two thirds of H-14's gain. 61 ms queries on the CPU, 1.8 GB VRAM at ingest, fits every budget. |
 
 In both cases:
-- **Decide on the user's own data.** Confirm on the labelled `Dataset/` evaluation before re-indexing the archive; public captions are long scene descriptions, unlike short personal searches.
+- **Decide on the owner's own data.** Confirm on a labelled evaluation of personal photos before re-indexing the archive; public captions are long scene descriptions, unlike short personal searches.
 - **Existing indexes still load.** A re-index writes a new `model_id`; the manifest records the model per vector, so old indexes stay readable (ADR-009).
 
 **Mean-pooling:** still a small, within-noise gain on MSR-VTT for every model, for example 0.394 vs 0.384 for H-14. The product keeps best-frame scoring for moment search.

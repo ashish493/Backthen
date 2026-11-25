@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python tests (ingest + engine)
+    # Developed and tested on Windows: the ingest package has Windows-only fast paths (power-throttling opt-out,
+    # disk-order reads) that are skipped elsewhere. No GPU on the runner: CUDA tests skip themselves.
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: packages/*/pyproject.toml
+      - name: Cache the CLIP weights the tests index with (about 600 MB)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-open-clip-vit-b-32-laion2b
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e packages/roam-ingest -e packages/roam-engine pytest
+      - name: RoamIngest tests
+        run: python -m pytest packages/roam-ingest -q
+      - name: RoamEngine tests
+        run: python -m pytest packages/roam-engine -q
+
+  app:
+    name: App (typecheck + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/roamindex
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/roamindex/package-lock.json
+      - run: npm ci
+      - name: Typecheck and build
+        run: npm run build

@@ -25,7 +25,7 @@ Order: A–D interleaved per repeat (3 rounds), then D and E interleaved (3 roun
    Experiments compared within the same session and interleaved stay valid, but absolute numbers from single, non-interleaved runs carry this risk.
 
 ### Decision for v0.1
-**Default: opt out of power throttling (`--throttle off`), normal priority.** The user does not have to change the Windows power plan. A flag keeps the Windows default for users who want ingestion to stay in the background.
+**Default: opt out of power throttling (`--throttle off`), normal priority.** Nobody has to change the Windows power plan. A flag keeps the Windows default for users who want ingestion to stay in the background.
 
 ## 2. FFmpeg threads per CPU video decoder (set A, 3 repeats each)
 

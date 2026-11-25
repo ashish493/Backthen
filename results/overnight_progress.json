@@ -95,12 +95,6 @@
   "stderr_tail": "",
   "finished": "2026-11-21 03:02:04"
  },
- "C_movies": {
-  "status": "ok",
-  "seconds": 231,
-  "stderr_tail": "",
-  "finished": "2026-11-21 03:05:55"
- },
  "B_hdd_prefetch_r0": {
   "status": "ok",
   "seconds": 292,

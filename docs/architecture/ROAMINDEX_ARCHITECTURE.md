@@ -53,7 +53,7 @@ RoamEngine (catalogue, vector index, text queries, filters, ranking, incremental
                                     │                                               │
    original media      ┌────────────▼────────────┐   Contract A: dataset   ┌──────────▼──────────┐
    (read-only) ───────►│        RoamIngest       │──── manifest v1 ───────►│      RoamEngine     │
-   E:\, D:\Dataset     │ discover·probe·plan·    │   (SQLite + derived     │ catalogue·indexes·  │
+   folders, drives     │ discover·probe·plan·    │   (SQLite + derived     │ catalogue·indexes·  │
                        │ decode·sample·embed·    │    files, versioned)    │ retrieval·ranking·  │
                        │ persist·validate        │                         │ incremental updates │
                        └─────────────────────────┘                         └─────────────────────┘
@@ -128,7 +128,7 @@ RoamEngine (Stage 2+): `MediaIndex.open(path)`, `.import_dataset(dataset)`, `.se
 
 ## 5. Monorepo structure and migration plan
 
-Target (from `roam-plan-full`, trimmed to what is needed now):
+Target (trimmed to what is needed now):
 ```
 packages/roam-ingest/src/roamingest/{discovery,probing,planning,images,videos,enrichment,persistence,scheduling,validation}/
 packages/roam-ingest/tests/            # pytest, synthetic fixtures generated at test time
@@ -162,7 +162,7 @@ apps/roamindex/                        # Stage 7, not created before then
 | 9 | Deleted, moved, modified files | rerun detects: missing path → `status=missing`; same content at new path → move; size/mtime change → re-process | filesystem watching |
 | 10 | Duplicates and near-duplicates | exact: same content hash → one asset, several file rows. Near: not in MVP | CLIP-similarity clusters |
 | 11 | Index rebuild and migration | engine index is a cache: always rebuildable from manifest v1 | – |
-| 12 | Ranking and evaluation | cosine top-k + metadata filters; Recall@K / nDCG on the labelled Dataset set | learned fusion |
+| 12 | Ranking and evaluation | cosine top-k + metadata filters; Recall@K / nDCG on a labelled evaluation set | learned fusion |
 | 13 | Memory and storage limits | already enforced (byte budget, output cap, free-space guard); FAISS flat index ≈ 0.4 GB for 200k vectors (projection) | IVF/PQ beyond ~1M vectors |
 | 14 | Offline operation and privacy | everything local; no telemetry; reports aggregate-only by default; personal paths never leave the manifest | – |
 | 15 | Cross-platform filesystems and codecs | relative paths, case-insensitive matching on Windows; codec support recorded per asset; NVDEC optional with CPU fallback (exists) | macOS/Linux validation |
@@ -175,7 +175,7 @@ apps/roamindex/                        # Stage 7, not created before then
 |---|---|---|---|---|---|
 | **1. RoamIngest v0.1** ✅ done | package, manifest v1, probing (time/GPS/sidecars), RAW/GIF/3GP, CLI; validated on the 355 GB archive | `bench/ingest.py`, `stages.py`, `verify_ingest.py` | `packages/roam-ingest`, `shared/schemas/manifest_v1.sql`, pytest suite | pytest 38/38; full run of 67,512 files (377 GB) at 4.28 GB RAM / 1.12 GB VRAM peak; interrupt + resume gives a manifest identical to an uninterrupted reference run (0 diffs); unchanged rerun processes 0 files — all measured, `results/EXP_ARCHIVE355.md` | OCR, audio, near-duplicates |
 | **2. Contracts + engine import** ✅ v0.1 (read-only catalogue, schema check, live reload) | RoamEngine reads manifest v1 into a catalogue | manifest v1 | `packages/roam-engine` (`catalogue`, `ingestion`) | import validates schema and model; re-import is idempotent | search |
-| **3. Image semantic search** ✅ built; ⏳ eval needs labels (Evaluate view built). Exact search, query p95 37 ms on the 355 GB index (ADR-009) | text → CLIP text embedding → FAISS top-k → ranked assets | catalogue, embeddings | `embeddings`, `indexing`, `retrieval` | Recall@10 / nDCG@10 on the labelled Dataset queries vs a random baseline; query latency p95 < 200 ms on the 355 GB index (target) | UI |
+| **3. Image semantic search** ✅ built; ⏳ eval needs labels (Evaluate view built). Exact search, query p95 37 ms on the 355 GB index (ADR-009) | text → CLIP text embedding → FAISS top-k → ranked assets | catalogue, embeddings | `embeddings`, `indexing`, `retrieval` | Recall@10 / nDCG@10 on labelled queries vs a random baseline; query latency p95 < 200 ms on the 355 GB index (target) | UI |
 | **4. Video frames + timestamps** ✅ moments with timestamps, playback from the moment | frame-level retrieval, best-frame timestamp per video | `frames` table | frame aggregation in ranking | video queries return correct timestamps on labelled clips | scene detection |
 | **5. Time, place, metadata filters** ✅ partial: dates, type, GPS radius/bbox, offline map (ADR-011); place names pending | date ranges, GPS radius, place names (offline gazetteer), media type | probing fields | R-Tree, FTS5, query parsing | filter correctness tests; combined query evaluation | online geocoding |
 | **6. Ranking, evaluation, incremental updates** | add/update/delete/move without full rebuild | runs, content IDs | `incremental`, evaluation suite | after random edits, an incremental index equals a full rebuild | live file watching |
@@ -190,7 +190,7 @@ ADR-001 no Rust core yet · ADR-002 search-level quality gate for lossy fast pat
 ## 9. Risks and unresolved questions
 | risk / question | impact | mitigation or next step |
 |---|---|---|
-| Retrieval quality unknown: no labelled evaluation yet | engine could look fine and rank badly | Stage 3 evaluation set on `Dataset/` (user labels; confirm whether Claude may view these images) |
+| Retrieval quality unknown: no labelled evaluation yet | engine could look fine and rank badly | Stage 3 evaluation set: labelled queries over a private photo collection (labels made by the owner; the images are not shared) |
 | Sidecar `.json` format assumed to be Google Takeout (not yet inspected) | time/GPS coverage | inspect field names on a sample (aggregate) before writing the parser |
 | Full content hashing on the USB drive costs a full read of 207 GiB of video (about 50 min, projection) | stable IDs | partial ID now, full hash in a low-priority background pass |
 | Intermittent OS throttling (trigger unknown) | benchmark noise, user-visible slowness | default opt-out (done); keep interleaved benchmarks |
@@ -207,9 +207,8 @@ ADR-001 no Rust core yet · ADR-002 search-level quality gate for lossy fast pat
 2. ~~**Write `shared/schemas/manifest_v1.sql` and a v0 → v1 migration**~~ — done, with a migration test on a synthetic dataset and a real-data check against the 170-file set A.
 3. ~~**Probing stage**~~ — done: EXIF capture time/GPS/orientation, video container tags, and a Google-Takeout sidecar parser (five naming rules, matching 23,705/23,468+ media files in the 355 GB archive).
 4. ~~**pytest suite with synthetic fixtures**~~ — done, 38/38 pass, no personal data.
-5. ~~**Inventory-first run of the 355 GB archive**~~ — done; see `results/EXP_ARCHIVE355.md`. Index kept locally on `D:` (1.6 GB), per the user's decision.
+5. ~~**Inventory-first run of the 355 GB archive**~~ — done; see `results/EXP_ARCHIVE355.md`. The index is kept locally (1.6 GB).
 
 **First tasks for Phase 4 (RoamEngine), to be detailed after planning:**
 - `packages/roam-engine` skeleton: manifest-v1 reader, SQLite asset catalogue, FAISS flat index over `embeddings`.
-- CLIP text encoder for natural-language search; a labelled query set on `Dataset/` (the owner's own photos) for Recall@K / nDCG@K.
-- Confirm whether Claude may view `Dataset/` images to help build the labelled query set.
+- CLIP text encoder for natural-language search; a labelled query set (the owner's own photos, kept private) for Recall@K / nDCG@K.

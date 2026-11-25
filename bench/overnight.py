@@ -20,7 +20,6 @@ import time
 PY = sys.executable
 A = os.environ.get("ROAM_SET_A", r"Dataset\set-A")
 B = os.environ.get("ROAM_SET_B", r"E:\set-B")
-C = r"E:\movies_series"
 OUT = os.path.join("out", "overnight")
 PROGRESS = os.path.join("results", "overnight_progress.json")
 SERIAL = ["--photo-decode", "full", "--photo-workers", "1", "--readers", "1", "--video-cpu", "1",
@@ -61,9 +60,6 @@ def plan():
     p.append(ingest("B_hdd_phased_r1", [B], HDD + ["--cold", "--schedule", "phased"], True))
     # ---- Step 6c: both sets together
     p.append(ingest("AB_hdd_mixed", [A, B], HDD + ["--cold"], True))
-    # ---- Step 8: large films / series (stress test; sparse seek sampling, per-video safety timeout)
-    p.append(ingest("C_movies", [C], HDD + ["--cold", "--video-cpu", "4", "--video-nvdec", "0", "--video-timeout", "150"],
-                    True, timeout=5 * 3600))
     # ---- follow-up: single sequential reader also feeds small videos (decode from memory)
     PF = HDD + ["--cold", "--video-prefetch-mb", "256", "--read-budget-mb", "768"]
     p.append(ingest("B_hdd_prefetch_r0", [B], PF, True))

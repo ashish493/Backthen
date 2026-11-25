@@ -41,7 +41,7 @@ Disk throughput during the cold photo runs was 260–307 MB/s (reduced-size deco
 |---|--:|--:|---|
 | photos, reduced-size decode | about 90 photos/s (≈270 MB/s) | 23 photos/s (69 MB/s) | **disk, about 4× below compute** |
 | photos, exact decode | about 25 photos/s (≈75 MB/s) | 23 photos/s | about equal |
-| videos (this dataset's mix, 2 CPU + 2 NVDEC) | 1.08 clips/s (≈54 MB/s) | 90 MB/s | compute, but high-bitrate films would be disk-bound |
+| videos (this dataset's mix, 2 CPU + 2 NVDEC) | 1.08 clips/s (≈54 MB/s) | 90 MB/s | compute, but high-bitrate videos would be disk-bound |
 
 ## 4. A design flaw this exposed
 - The experiment pipeline reads each file twice (full hash, then decode). Cold runs show physical reads of 1.14–1.47× the file bytes (2.0–2.4× for the serial reference),

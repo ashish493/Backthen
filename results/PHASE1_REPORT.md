@@ -1,6 +1,6 @@
 # Phase 1 report: less work, better scheduling (21–22 Nov 2026)
 
-Round goal (`NEXT_PLAN.md`, refined by `next-plan-response`): make ingestion faster without faster decoders, by decoding and reading less, and by removing system-level waste. Measure each lever alone, then together.
+Round goal: make ingestion faster without faster decoders, by decoding and reading less, and by removing system-level waste. Measure each lever alone, then together.
 Details: `EXP_SAMPLING.md` (sampling policies), `EXP_POWER.md` (power, threads, codec routing).
 
 ## What changed and what it gave

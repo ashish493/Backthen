@@ -8,4 +8,4 @@ Status: accepted · 22 Nov 2026
 - **Adaptive** passes only with τ = 0.5 s and is then no faster than smart with prefetch.
 
 **Decision.** Default `--video-strategy smart` with NVDEC allowed for seeks. `--video-sampling keyframe` is a documented lossy fast mode; each frame's method is recorded in the manifest.
-**Revisit** with RoamEngine's labelled video queries, and for film-like libraries where adaptive with a larger τ may pass.
+**Revisit** with RoamEngine's labelled video queries, and for libraries of long static recordings where adaptive with a larger τ may pass.

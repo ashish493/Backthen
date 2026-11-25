@@ -57,7 +57,7 @@ Forward coverage = for each exact frame, the best cosine similarity to any frame
 ## Decision for RoamIngest v0.1
 - **Default video sampling: `--video-strategy smart` with `--nvdec-seek`, plus `--video-prefetch-mb 256` on hard drives.** Exact frames, deterministic (T5 in `verify_ingest.py`).
 - **Opt-in: `--video-sampling keyframe`** for a fast first pass, recorded per frame (`emb.method = 'keyframe'`), not search-equivalent.
-- Adaptive stays in the code for libraries with long static scenes (more films, fewer travel clips), where it may pass with a larger τ. Not the default.
+- Adaptive stays in the code for libraries with long static scenes (long recordings, fewer travel clips), where it may pass with a larger τ. Not the default.
 
 ## Caveats
 - One personal archive and one in-project set; the USB results are 1–4 runs per policy. Keyframe on the USB drive ran once.

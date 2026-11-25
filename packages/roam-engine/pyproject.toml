@@ -7,7 +7,7 @@ name = "roamengine"
 version = "0.1.0"
 description = "Local search engine over RoamIngest manifest v1: natural-language, similar-image, time/place filters, video moments."
 requires-python = ">=3.11"
-dependencies = ["numpy", "roamingest>=0.1.0"]
+dependencies = ["numpy", "roamingest>=0.1.0", "opencv-python-headless"]   # opencv: the face check (YuNet + SFace)
 
 [project.optional-dependencies]
 test = ["pytest"]
