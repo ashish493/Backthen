@@ -1,7 +1,8 @@
 // Screenshots of the RoamIndex UI for the README, driven over the Chrome DevTools Protocol (Node 20+, global WebSocket).
 // Needs: `roamengine serve --library <travel demo lib> --port 8766 --token demo` (build_travel_demo.py), the UI on 127.0.0.1:1420
 // (`npx vite preview --port 1420`), and Edge/Chrome started with --remote-debugging-port=9226 on that URL.
-// usage: node bench/demo/shoot.mjs OUT_DIR
+// For onthisday, run the engine with bench/demo/serve_on_date.py and pass the same date as TODAY=YYYY-MM-DD.
+// usage: [TODAY=2026-11-17] [SHOTS=onthisday,year,relive] node bench/demo/shoot.mjs OUT_DIR
 import fs from "node:fs";
 const out = process.argv[2] ?? "docs/screenshots";
 fs.mkdirSync(out, { recursive: true });
@@ -14,7 +15,15 @@ const send = (method, params = {}) => new Promise((r) => { const i = ++id; pendi
 const js = async (expr) => (await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true })).result?.value;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const W = 1440, H = 900;
+await send("Page.bringToFront");                                                    // a hidden page doesn't advance CSS animations
 await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+if (process.env.TODAY) {   // same date as bench/demo/serve_on_date.py, so "On this day" has something in the demo library
+  await send("Page.enable");
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: `(() => { const R = Date, t0 = R.now(),
+    T = new R(${JSON.stringify(process.env.TODAY + "T12:00:00")}).getTime();
+    class F extends R { constructor(...a) { super(...(a.length ? a : [T + R.now() - t0])); } static now() { return T + R.now() - t0; } }
+    Date = F; })()` });
+}
 await send("Page.reload", { ignoreCache: true });                                   // pick up a fresh build
 await wait(2500);
 
@@ -40,7 +49,7 @@ async function waitFor(expr, ms = 15000) {
   console.log("timeout waiting for", expr); return false;
 }
 
-const steps = (process.env.SHOTS ?? "home,home-dark,search,video,timeline,map,places,welcome,indexing").split(",");
+const steps = (process.env.SHOTS ?? "home,home-dark,onthisday,year,relive,search,video,timeline,map,places,welcome,indexing").split(",");
 await waitFor(`document.querySelector("nav button") !== null`);
 await js(`localStorage.clear()`);                                                   // no recent searches or theme choice
 for (const dark of [false, true]) {
@@ -53,6 +62,45 @@ for (const dark of [false, true]) {
   await shot(dark ? "home-dark" : "home");
 }
 await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: "light" }] });
+const homeSection = (title) => `[...document.querySelectorAll(".memsection")].find(s => s.querySelector("h2")?.textContent.trim() === ${JSON.stringify(title)})`;
+if (steps.some((s) => ["onthisday", "year", "relive"].includes(s))) {
+  await send("Page.reload", { ignoreCache: true });
+  await waitFor(`${homeSection("Year in review")} !== undefined && document.querySelectorAll(".postcard img").length > 3`);
+  await wait(3500);
+}
+if (steps.includes("onthisday")) {
+  await waitFor(`${homeSection("On this day")}?.querySelectorAll("img").length > 0`);
+  await js(`(() => { const s = ${homeSection("On this day")}; s.scrollIntoView({ block: "start" });
+            for (let p = s.parentElement; p; p = p.parentElement) if (p.scrollTop > 0) { p.scrollTop -= 28; break; } })()`);
+  await wait(2500);                                                                 // postcard entrance
+  await shot("onthisday");
+}
+if (steps.includes("year") || steps.includes("relive")) {
+  const year = process.env.YEAR ?? "2024";
+  await js(`[...document.querySelectorAll(".yearchip")].find(b => b.querySelector("b")?.textContent === ${JSON.stringify(year)})?.click()`);
+  await waitFor(`document.querySelectorAll(".yearpage .monthbars .mbar").length === 12 && document.querySelectorAll(".yearpage img").length > 3`);
+  if (steps.includes("year")) {
+    await send("Emulation.setDeviceMetricsOverride", { width: W, height: 1240, deviceScaleFactor: 1, mobile: false });
+    await waitFor(`(() => { const d = [...document.querySelectorAll(".yearpage .develop img")];
+      return document.querySelector(".yearpage .polaroid-loader") === null && d.length > 0 && d.every((i) => i.complete && i.getAnimations().every((a) => a.playState === "finished")); })()`);
+    await wait(1000);
+    await shot("year");
+    await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+  }
+}
+if (steps.includes("relive")) {
+  await js(`document.querySelector(".yearpage .relivebtn")?.click()`);
+  await waitFor(`(() => { const i = document.querySelector(".relive .rlimg"); return i && i.complete && i.naturalWidth > 0; })()`);
+  await wait(Number(process.env.RELIVE_MS ?? 9500));                                // a few slides in, route part-drawn
+  await js(`[...document.querySelectorAll(".relive .rlbtn.wide")].find(b => b.textContent === "Pause")?.click()`);
+  await wait(1500);                                                                 // crossfade settles
+  await shot("relive");
+  await js(`document.querySelector('.relive [aria-label="Close"]')?.click()`);
+  await wait(500);
+  await js(`document.querySelector(".yearpage .backbtn")?.click()`);
+  await wait(800);
+}
+if (steps.includes("year") && !steps.includes("relive")) { await js(`document.querySelector(".yearpage .backbtn")?.click()`); await wait(800); }
 if (steps.includes("search")) {
   await nav("Search");
   await type('input[placeholder^="Describe"]', process.env.Q_SEARCH ?? "waterfall");

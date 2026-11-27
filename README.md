@@ -40,6 +40,12 @@ Below the memories:
 - **Relive a trip:** a full-screen slideshow of the best photos of each day, in order, with the route drawing itself as you go. Start it from a trip postcard or from Year in review.
 - **Year in review:** pick a year from the row of years on the home screen to see it at a glance: photos, days, places (and which ones were new), trips, the busiest day and the best twelve photos. Click a month to open it.
 
+![Relive a trip: a full-screen slideshow, "Day 2 · Kyoto", with the route drawing itself in the corner](docs/screenshots/relive.png)
+
+| | |
+|---|---|
+| ![On this day: a postcard from the same date two years earlier, above the Memories row](docs/screenshots/onthisday.png) **On this day:** today's date in earlier years, one postcard per year. | ![Year in review for 2024: totals, month by month, the year's trip with a Relive button, and new places](docs/screenshots/year.png) **Year in review:** totals, month by month, trips you can relive and the places that were new that year. |
+
 ## Your travels on a globe
 
 ![Replay my travels: the globe flies from trip to trip and a postcard lands at each stop](docs/gifs/replay.gif)
@@ -75,7 +81,7 @@ On a real 48,569-item archive this took dated items from 67% to 98% and located 
 |---|---|
 | ![Welcome screen](docs/screenshots/welcome.png) **First run:** choose or drop a folder; the drive type (USB hard drive or SSD) is detected for you. | ![Add places](docs/screenshots/places.png) **Add places:** give photos without GPS a location by name (offline, 172k places) or by clicking the globe. Originals and their dates are never modified. |
 
-<sub>**About the pictures:** screenshots and animations use a sample library of 82 hand-picked CC0 photos ([credits](docs/screenshots/ATTRIBUTION.md), built by [`bench/demo`](bench/demo)) arranged into six made-up trips. Dates and places are invented, the group photos are stock photos that were not taken at those places, and the three videos are assembled from the photos. The map uses lower pin thresholds because the library is small, and the indexing animation shows sample progress.</sub>
+<sub>**About the pictures:** screenshots and animations use a sample library of 82 hand-picked CC0 photos ([credits](docs/screenshots/ATTRIBUTION.md), built by [`bench/demo`](bench/demo)) arranged into six made-up trips. Dates and places are invented, the group photos are stock photos that were not taken at those places, and the three videos are assembled from the photos. The map uses lower pin thresholds because the library is small, the indexing animation shows sample progress, and the On this day screenshot sets the date to 17 November so a demo trip falls on it.</sub>
 
 ---
 
