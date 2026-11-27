@@ -34,6 +34,12 @@ Trips come first, then this month in earlier years, then your busiest months. Wh
 
 ![Getting everyone in the picture: a light veil over the memories while the group photos are found](docs/gifs/veil.gif)
 
+Below the memories:
+
+- **On this day:** what you were doing on today's date in earlier years (this week, when the exact day has nothing).
+- **Relive a trip:** a full-screen slideshow of the best photos of each day, in order, with the route drawing itself as you go.
+- **Year in review:** any year at a glance: photos, days, places (and which ones were new), trips, the busiest day and the best twelve photos.
+
 ## Your travels on a globe
 
 ![Replay my travels: the globe flies from trip to trip and a postcard lands at each stop](docs/gifs/replay.gif)
@@ -182,9 +188,33 @@ Public benchmarks with the default model: Flickr30k 1,000 photos in 2.5 s, MS-CO
 
 Exact search is fast enough at this scale, so there is no approximate index yet ([ADR-009](docs/decisions/ADR-009-exact-search-before-ann.md)).
 
-## Quick start
+## Install on Windows
 
-Requirements: Windows 10/11 (developed and tested there), Python 3.13, an NVIDIA GPU is optional (CPU works, slower). For the desktop app: Node 20+ and Rust (stable).
+No Python, no command line.
+
+1. **Download** `Backthen_0.1.0_x64-setup.exe` from the [Releases page](https://github.com/ashish493/Backthen/releases).
+2. **Run it.** Windows may show *"Windows protected your PC"*, because the installer isn't code-signed yet (signing costs money; it's on the list). Click **More info → Run anyway**. To check the file first:
+   - VirusTotal scan of v0.1.0: [report](https://www.virustotal.com/gui/file/c3c4d09b3f08d2d84b3da123c520c9d1b77f70adedbc36f7073344fb0d0f867e)
+   - SHA-256 of v0.1.0: `C3C4D09B3F08D2D84B3DA123C520C9D1B77F70ADEDBC36F7073344FB0D0F867E`. Compare it with `Get-FileHash .\Backthen_0.1.0_x64-setup.exe` in PowerShell.
+3. **First start: one-time online setup (about 10 to 30 minutes).** The installer is small (17 MB) because it doesn't include the heavy libraries. On first launch, Backthen downloads and installs them into its own private folder:
+   - a private copy of Python 3.13 (it doesn't touch any Python you already have);
+   - PyTorch, about 2.5 GB with NVIDIA GPU support (picked automatically when an NVIDIA card is found), much smaller without;
+   - the other Python libraries from PyPI (OpenCLIP, NumPy, Pillow, OpenCV, PyAV and others).
+
+   You need a working internet connection and about 5 GB of free disk with a GPU (about 1.5 GB without). Most of the time goes on the PyTorch download, so on a slow connection it takes longer. A progress bar shows each step. If the connection drops, click **Try again** and it carries on. Only these libraries are downloaded. Nothing of yours is uploaded.
+4. **Add a folder** of photos and videos. Backthen indexes it (the first run takes a while for a big archive; you can stop and resume). Then search, browse your trips and memories.
+
+| | |
+|---|---|
+| **Works on** | Windows 10 or 11, 64-bit, 8 GB RAM or more. An NVIDIA GPU is optional and makes indexing faster. |
+| **What it downloads, once** | Python (python-build-standalone, via [uv](https://github.com/astral-sh/uv)), PyTorch from download.pytorch.org, Python packages from PyPI, then on first indexing the CLIP model from Hugging Face and the face models from the OpenCV model zoo. After that it runs offline. |
+| **Where things live** | The app: `%LOCALAPPDATA%\Backthen`. Its runtime: `%LOCALAPPDATA%\app.roamindex.desktop\runtime`. Your index: `%APPDATA%\app.roamindex.desktop\library` (change it in Library → Settings). Your photos are only read, never moved or changed. |
+| **Uninstall** | Settings → Apps → Backthen → Uninstall. Then delete the two `app.roamindex.desktop` folders above to remove the runtime and the index. |
+| **If setup fails** | Usually the connection dropped: click **Try again**, and it resumes. The details are in `%LOCALAPPDATA%\app.roamindex.desktop\logs\setup.log`. |
+
+## Build from source
+
+For developers. Requirements: Windows 10/11 (developed and tested there), Python 3.13, an NVIDIA GPU is optional (CPU works, slower). For the desktop app: Node 20+ and Rust (stable).
 
 ```bash
 python -m venv .venv && .venv\Scripts\activate
@@ -201,6 +231,8 @@ cd apps/roamindex && npm install && npx tauri dev
 ```
 
 In the app, **Library → Settings** points it at the library folder and Python, and **Index folder** runs ingestion with a progress bar.
+
+To build the installer: `python apps/roamindex/tools/prepare_runtime.py` (stages a pinned, checksum-verified uv, the two wheels and the pinned requirements), then `cd apps/roamindex && npx tauri build` (for a release, set `RUSTFLAGS=--remap-path-prefix=%USERPROFILE%\.cargo=cargo` so your user folder isn't compiled into the binary). The installer lands in `apps/roamindex/src-tauri/target/release/bundle/nsis/`.
 
 ## Privacy
 

@@ -106,6 +106,17 @@ export function App() {
               {engine.log && <p className="hint">Details: <span className="mono">{engine.log}</span></p>}
               {inTauri() && <button className="btn primary" onClick={() => restartEngine().then(setEngine)}>Try again</button>}
             </>
+          ) : engine.status === "setup" ? (
+            <>
+              <h1>Getting Backthen ready</h1>
+              <div className="setupbar" role="progressbar" aria-valuemin={0} aria-valuemax={engine.setup_total ?? 4} aria-valuenow={engine.setup_step ?? 0}>
+                <div style={{ width: `${(100 * Math.max(0.3, (engine.setup_step ?? 0) - 0.5)) / (engine.setup_total ?? 4)}%` }} />
+              </div>
+              <p><b>Step {engine.setup_step || 1} of {engine.setup_total ?? 4}:</b> {engine.setup_label}…</p>
+              <p className="hint">This happens once, on the first start. It downloads Python and the search model's runtime,
+                which can take 5 to 20 minutes depending on your connection. Your photos are not uploaded anywhere.</p>
+              {engine.log && <p className="hint">Details: <span className="mono">{engine.log}</span></p>}
+            </>
           ) : (
             <>
               <div className="loadbar"><div /></div>

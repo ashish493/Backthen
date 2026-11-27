@@ -15,6 +15,7 @@ import time
 import numpy as np
 
 from .catalog import Catalog
+from .inference import infer_locations
 from .places import Places
 
 EARTH_KM = 6371.0088
@@ -90,8 +91,9 @@ def parse_query(q, filters=None):
 
 
 class Engine:
-    def __init__(self, library, model_id=None, text_device="cpu", reload_check_s=5.0):
+    def __init__(self, library, model_id=None, text_device="cpu", reload_check_s=5.0, infer_places=True):
         t0 = time.perf_counter()
+        self.infer_places = infer_places
         self.places = Places(library)
         self.cat = self._overlay(Catalog.open(library, model_id))
         self.load_s = time.perf_counter() - t0
@@ -101,6 +103,8 @@ class Engine:
         self._text_lock = threading.Lock()
         self._last_check = time.monotonic()
         self.reload_check_s = reload_check_s
+        self.auto_warm_text = False                    # serve: load the text model whenever a model first appears
+        self._warming = None
 
     # ------------------------------------------------------------------ lifecycle
     @property
@@ -113,6 +117,25 @@ class Engine:
                     from .text import TextEncoder
                     t = self._text = TextEncoder(self.cat.model_id, device=self.text_device)
         return t
+
+    def text_ready(self):
+        t = self._text
+        return t is not None and t.model_id == self.cat.model_id
+
+    def warm_text(self):
+        """Load the text model in the background, once per model, so neither a first search nor a first home build
+        waits for it. Called at start and when a reload brings a new model (a new library's first indexing run)."""
+        mid = self.cat.model_id
+        if mid is None or self.text_ready() or self._warming == mid:
+            return
+        self._warming = mid
+
+        def load():
+            try:
+                self.text
+            except Exception:  # noqa: BLE001         # no weights offline, etc.: loaded (or reported) on first use
+                pass
+        threading.Thread(target=load, daemon=True, name="warm-text").start()
 
     def maybe_reload(self, force=False):
         """Reload the catalogue when the manifest changed (an ingest committed). Cheap stat() check."""
@@ -128,6 +151,8 @@ class Engine:
             with self._lock:
                 self.cat = cat
             self.load_s = time.perf_counter() - t0
+            if self.auto_warm_text:
+                self.warm_text()
             return True
         return False
 
@@ -146,6 +171,19 @@ class Engine:
             cat.lat[i], cat.lon[i], cat.gps_source[i], cat.manual[i] = la, lo, "manual", True
             if name:
                 cat.place_name[aid] = name
+        cat.inferred = np.zeros(len(cat.lat), dtype=bool)
+        cat.inferred_dt = np.full(len(cat.lat), np.nan)
+        if self.infer_places and len(cat.lat):
+            located = np.isfinite(cat.lat)
+            is_utc = np.array([u is not None for u in cat.time_utc], dtype=bool)
+            real_time = np.array([s not in (None, "filename") for s in cat.time_source], dtype=bool)
+            src, dts = infer_locations(cat.t, is_utc, cat.lat, cat.lon, ~located & real_time, located)
+            for i in np.flatnonzero(src >= 0):
+                j = src[i]
+                cat.lat[i], cat.lon[i], cat.gps_source[i] = cat.lat[j], cat.lon[j], "inferred"
+                cat.inferred[i], cat.inferred_dt[i] = True, dts[i]
+                if cat.asset_ids[j] in cat.place_name:
+                    cat.place_name[cat.asset_ids[i]] = cat.place_name[cat.asset_ids[j]]
         return cat
 
     def set_place(self, asset_ids, lat, lon, name=None):
@@ -170,7 +208,7 @@ class Engine:
             i = c.index[asset_id]
             if not np.isfinite(c.t[i]):
                 return []
-            ok = np.isfinite(c.lat) & np.isfinite(c.t)
+            ok = np.isfinite(c.lat) & np.isfinite(c.t) & ~c.inferred
             ok[i] = False
             idx = np.flatnonzero(ok)
             d = c.t[idx] - c.t[i]
@@ -287,14 +325,18 @@ class Engine:
     def text_vector(self, text):
         return self.text.encode([text])[0]
 
-    def fixed(self, texts):
-        """Vectors for the app's fixed prompts, from the on-disk prompt cache (encoded once per model, ever)."""
+    def fixed(self, texts, wait=True):
+        """Vectors for the app's fixed prompts, from the shipped and on-disk prompt caches (encoded once per model,
+        ever). wait=False returns None rather than wait for the text model to load when some text is not cached."""
         c = self.cat
         pc = getattr(self, "_prompts", None)
         if pc is None or pc[0] != c.model_id:
             from .text import PromptCache
             pc = self._prompts = (c.model_id, PromptCache(os.path.join(c.library, "cache"), c.model_id))
-        return pc[1].get(list(texts), lambda t: self.text.encode(t))
+        texts = list(texts)
+        if not wait and not self.text_ready() and pc[1].missing(texts):
+            return None
+        return pc[1].get(texts, lambda t: self.text.encode(t))
 
     def suggestions(self, n=12):
         """Queries from SUGGESTION_POOL that match this library best: ranked by the mean score of each query's 10 best
@@ -472,22 +514,29 @@ class Engine:
             score -= 1.0 * (faces > 0) + 0.5 * np.minimum(faces, 2)
         return int(top[int(np.argmax(score))])
 
-    def town_vectors(self, keys):
+    def town_vectors(self, keys, wait=True):
         """CLIP text vectors describing each place itself: 'a famous landmark in {town}, {country}' and 'the scenery
-        of {town}, {country}', averaged (cached on disk, so ~0 ms after the first time)."""
+        of {town}, {country}', averaged (cached on disk, so ~0 ms after the first time). wait=False: None if that
+        would mean waiting for the text model."""
         if not keys:
             return None
-        V = self.fixed([p for t, ctry in keys for p in (f"a famous landmark in {t}, {ctry}", f"the scenery of {t}, {ctry}")])
+        V = self.fixed([p for t, ctry in keys for p in (f"a famous landmark in {t}, {ctry}", f"the scenery of {t}, {ctry}")],
+                       wait=wait)
+        if V is None:
+            return None
         T = V.reshape(len(keys), 2, -1).mean(1)
         return (T / (np.linalg.norm(T, axis=1, keepdims=True) + 1e-9)).astype(np.float32)
 
-    def town_covers(self, towns):
-        """towns: {(town, country): asset indices} -> {(town, country): cover asset index or None}."""
+    def town_covers(self, towns, wait=True):
+        """towns: {(town, country): asset indices} -> {(town, country): cover asset index or None}.
+        wait=False: plain covers (no place prompts) instead of waiting for the text model."""
         c = self.cat
         keys = list(towns)
-        if not keys or c.model_id is None or not len(c.emb_idx):
+        T = None
+        if keys and c.model_id is not None and len(c.emb_idx):
+            T = self.town_vectors(keys, wait=wait)
+        if T is None:
             return {k: (self.pick_covers(towns[k], 1) or [None])[0] for k in keys}
-        T = self.town_vectors(keys)
         lib_mean = c.vectors[c.f_start[c.emb_idx]].mean(0)
         out = {}
         for j, key in enumerate(keys):
@@ -620,6 +669,7 @@ class Engine:
                        original_lat=None if not manual or np.isnan(c.lat0[i]) else round(float(c.lat0[i]), 6),
                        original_lon=None if not manual or np.isnan(c.lon0[i]) else round(float(c.lon0[i]), 6),
                        capture_time_utc=c.time_utc[i], capture_time_local=c.time_local[i],
+                       inferred_dt_s=round(float(c.inferred_dt[i])) if c.inferred[i] else None,
                        frames=c.frames_of(asset_id), files=c.files_of(asset_id))
             return out
 
@@ -679,3 +729,9 @@ SUGGESTION_POOL = [
     "a wedding", "a concert", "fireworks", "a swimming pool", "a hotel room", "a sunrise", "the night sky",
     "a screenshot", "a document or receipt",
 ]
+
+
+def constant_prompts():
+    """Every fixed prompt whose vectors ship with the app (tools/build_prompt_seed.py; BOTTLENECKS.md #8)."""
+    sets = [COVER_GOOD, COVER_BAD, PEOPLE_POSED, PEOPLE_CROWD, PEOPLE_NONE, PLACE_GOOD, PLACE_BAD, SUGGESTION_POOL]
+    return list(dict.fromkeys(t for st in sets for t in st))

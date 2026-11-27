@@ -2,13 +2,16 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 
 export type EngineInfo = {
-  status: "starting" | "ready" | "failed" | "stopped" | "";
+  status: "setup" | "starting" | "ready" | "failed" | "stopped" | "";
   port?: number | null;
   token?: string | null;
   library: string;
   python: string;
   error?: string | null;
   log?: string | null;
+  setup_step?: number | null;
+  setup_total?: number | null;
+  setup_label?: string | null;
 };
 
 export type AppConfig = { python: string; library: string };
@@ -42,6 +45,7 @@ export type AssetDetail = Asset & {
   place_name?: string | null;
   original_lat?: number | null;
   original_lon?: number | null;
+  inferred_dt_s?: number | null;
   capture_time_utc: string | null;
   capture_time_local: string | null;
   frames: { frame_index: number; timestamp_s: number | null }[];
@@ -162,6 +166,10 @@ export const api = {
   ingestStart: (roots: string[], storage: "ssd" | "hdd") => call<IngestStatus>("POST", "/api/ingest", {}, { roots, storage }),
   journeys: () => call<Journeys>("GET", "/api/journeys"),
   memories: () => call<Memories>("GET", "/api/memories"),
+  onThisDay: () => call<OnThisDay>("GET", "/api/onthisday"),
+  years: () => call<{ years: { year: number; count: number }[] }>("GET", "/api/years"),
+  year: (y: number) => call<YearReview>("GET", `/api/year/${y}`),
+  relive: (start: string) => call<Relive>("GET", "/api/relive", { start }),
   facesStatus: () => call<{ state: string; done: number; total: number; faces: number; people: number; error?: string }>("GET", "/api/faces/status"),
   storageGuess: (path: string) => call<{ storage: "ssd" | "hdd"; reason: string }>("GET", "/api/storage-guess", { path }),
   glimpses: (n = 24) => call<{ items: { asset_id: string; media_type: string; capture_time: string | null; capture_time_is_utc: boolean }[] }>("GET", "/api/ingest/glimpses", { n }),
@@ -188,6 +196,15 @@ export type World = { countries_list?: { name: string; count: number; towns: Tow
 export type Journeys = { trips: Trip[]; world: World };
 export type MemoryCard = { key: string; kind: "trip" | "ago" | "month"; from: string; to: string; count: number; cover: string[];
   title?: string; country?: string | null; days?: number; years_ago?: number; month?: string };
+export type OnThisDay = { window: number; cards: { year: number; years_ago: number; from: string; to: string; count: number; cover: string[] }[] };
+export type YearReview = {
+  year: number; photos: number; videos: number; days: number; months: number[]; busiest: { day: string; count: number };
+  trips: Trip[]; places: { name: string; country: string; count: number; new: boolean; cover: string | null }[];
+  n_places: number; new_places: number; countries: string[]; new_countries: string[]; best: string[];
+};
+export type ReliveSlide = Asset & { day: number; place: string | null };
+export type Relive = { title: string; country: string | null; start: string; end: string; days: number; count: number;
+  slides: ReliveSlide[]; route: [number, number][] };
 export type Memories = { cards: MemoryCard[]; version: number; refining: boolean; provisional?: boolean; checked?: number; total?: number };
 export type GeoResult = { name: string; label: string; lat: number; lon: number; population: number | null; source: "geonames" | "osm" };
 export type RecentPlace = { name: string | null; lat: number; lon: number; count: number };

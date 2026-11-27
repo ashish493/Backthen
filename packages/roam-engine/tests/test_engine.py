@@ -160,7 +160,9 @@ def test_reload_after_new_ingest(library, tmp_path):
 # ------------------------------------------------------------------ evaluation
 def test_metrics_known_values():
     m = metrics_for(["a", "x", "b", "y"], {"a": 2, "b": 1, "c": 1, "x": 0}, ks=(1, 2, 4))
-    assert m["recall@1"] == pytest.approx(1 / 3) and m["recall@4"] == pytest.approx(2 / 3)
+    assert m["recall@1"] == 1.0 and m["recall@2"] == 0.5 and m["recall@4"] == pytest.approx(2 / 3)   # hits/min(k,R)
+    perfect = metrics_for([f"r{i}" for i in range(40)], {f"r{i}": 1 for i in range(40)}, ks=(1, 20))
+    assert perfect["recall@1"] == perfect["recall@20"] == 1.0           # R > K no longer caps the score at K/R
     assert m["precision@2"] == 0.5 and m["rr"] == 1.0
     dcg = 3 / 1 + 1 / np.log2(4)
     idcg = 3 / 1 + 1 / np.log2(3) + 1 / np.log2(4)
@@ -349,3 +351,44 @@ def test_cover_scores_and_picks(engine):
     best = engine.browse(None, k=500, order="best")
     assert best["total"] == len(c.asset_ids) and len(best["items"]) == len(c.asset_ids)
     assert engine.points(None)["cover"] and max(engine.points(None)["cover"]) <= 100
+
+
+def test_labels_concurrent_writes_lose_nothing(tmp_path):
+    """BOTTLENECKS.md #27: the API serves requests on several threads that share one connection. Without the lock,
+    two writers lost 437-597 of 2,000 operations and 35-56 reads were wrong."""
+    import threading
+    lab = Labels(str(tmp_path))
+    n_threads, n_ops = 4, 500
+    errors, wrong = [], []
+
+    def work(w):
+        try:
+            qid = lab.add_query(f"thread {w} query")
+            mine = {}
+            for i in range(n_ops):
+                aid = f"w{w}-a{i % 50}"
+                grade = None if i % 7 == 0 else i % 3
+                lab.judge(qid, aid, grade)
+                if grade is None:
+                    mine.pop(aid, None)
+                else:
+                    mine[aid] = grade
+                if i % 10 == 0 and lab.judgments(qid) != mine:
+                    wrong.append((w, i))
+                if i % 25 == 0:
+                    lab.queries()
+                    lab.delete_query(lab.add_query(f"thread {w} scratch {i}"))
+            if lab.judgments(qid) != mine:
+                wrong.append((w, "final"))
+        except Exception as e:  # noqa: BLE001
+            errors.append(repr(e))
+
+    ts = [threading.Thread(target=work, args=(w,)) for w in range(n_threads)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert errors == [] and wrong == []
+    assert sorted(q["text"] for q in lab.queries()) == sorted(f"thread {w} query" for w in range(n_threads))
+    assert lab.con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+    lab.close()

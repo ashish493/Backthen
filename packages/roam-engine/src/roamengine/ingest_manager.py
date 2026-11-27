@@ -1,10 +1,13 @@
 """Starts, watches and stops one RoamIngest subprocess per library. Progress is aggregate counts only."""
+import collections
 import json
 import os
 import subprocess
 import sys
 import threading
 import time
+
+STDERR_LINES = 20
 
 
 class IngestManager:
@@ -34,14 +37,26 @@ class IngestManager:
             cfg = dict(roots=roots, out_dir=self.library, storage=storage, **(extra or {}))
             flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
             self.proc = subprocess.Popen([self.python, "-m", "roamengine.ingest_worker", json.dumps(cfg)],
-                                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1,
+                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1,
                                          creationflags=flags)
             self.state = dict(running=True, started=time.time(), roots=len(roots), storage=storage, committed=0,
                               total=None, phase="starting")
-            threading.Thread(target=self._pump, args=(self.proc,), daemon=True).start()
+            tail = collections.deque(maxlen=STDERR_LINES)
+            t_err = threading.Thread(target=self._drain_stderr, args=(self.proc, tail), daemon=True)
+            t_err.start()
+            threading.Thread(target=self._pump, args=(self.proc, tail, t_err), daemon=True).start()
             return self.status()
 
-    def _pump(self, proc):
+    @staticmethod
+    def _drain_stderr(proc, tail):
+        """Keep the last lines of stderr (always drained, so the child can never block on a full pipe). Used only as
+        the error text when the worker dies without reporting one (an import error, a native crash)."""
+        for line in proc.stderr:
+            line = line.rstrip()
+            if line:
+                tail.append(line)
+
+    def _pump(self, proc, tail=(), t_err=None):
         for line in proc.stdout:
             try:
                 ev = json.loads(line)
@@ -59,12 +74,21 @@ class IngestManager:
                     s.update(phase="done", report={k: v for k, v in ev.items() if k not in ("event", "t")})
                 elif kind == "failed":
                     s.update(phase="failed", error=ev.get("error"))
+                    if ev.get("report"):
+                        s["report"] = ev["report"]
         rc = proc.wait()
+        if t_err is not None:
+            t_err.join(timeout=2)                        # the last stderr lines, read to EOF
         with self.lock:
             if self.proc is proc:
                 self.state.update(running=False, rc=rc, finished=time.time())
                 if self.state.get("phase") not in ("done", "failed"):
-                    self.state["phase"] = "stopped" if self.state.get("cancelled") else "failed"
+                    if self.state.get("cancelled"):
+                        self.state["phase"] = "stopped"
+                    else:
+                        last = list(tail)
+                        self.state.update(phase="failed",
+                                          error=last[-1] if last else f"the indexing process exited with code {rc}")
 
     def cancel(self):
         with self.lock:

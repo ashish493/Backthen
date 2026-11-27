@@ -112,6 +112,7 @@ export function Onboarding({ library, onDone, onSkip }: { library: string; onDon
             <p className="lede">Point Backthen at your photos and videos. It looks at each one once, on this computer, so you can later
               search for <i>"a birthday cake"</i> or <i>"waterfall in the mist"</i> and jump to the exact moment in a video.</p>
             {stopped && <p className="warnline">{ing?.phase === "failed" ? "Indexing stopped with an error." : "Indexing was stopped."} Start again to continue where it left off.</p>}
+            {stopped && ing?.phase === "failed" && ing.error && <p className="error">{ing.error}</p>}
             {!folder ? (
               <div className="dropzone">
                 {typing

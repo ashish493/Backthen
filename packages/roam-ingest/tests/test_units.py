@@ -46,6 +46,56 @@ def test_sidecar_rules(media, jsons, expected):
     assert match_sidecar(media, {j.lower(): j for j in jsons}) == expected
 
 
+def _match_sidecar_scan(name, jsons):
+    """The original O(media x sidecars) matcher, kept as the reference for the indexed one."""
+    import re
+    dup = re.compile(r"^(.*)\((\d+)\)$")
+    ml = name.lower()
+    if ml + ".json" in jsons:
+        return jsons[ml + ".json"]
+    pref = [j for j in jsons if j.startswith(ml + ".")]
+    if pref:
+        return jsons[min(pref, key=len)]
+    stem, ext = os.path.splitext(ml)
+    m = dup.match(stem)
+    if m:
+        base, n = m.group(1) + ext, m.group(2)
+        if f"{base}({n}).json" in jsons:
+            return jsons[f"{base}({n}).json"]
+        cand = [j for j in jsons if j.startswith(base + ".") and j.endswith(f"({n}).json")]
+        if cand:
+            return jsons[min(cand, key=len)]
+    if stem.endswith("-edited"):
+        return _match_sidecar_scan(stem[:-7] + ext, jsons)
+    trunc = [j for j in jsons if len(j) >= 25 and ml.startswith(j[:-5]) and not dup.match(j[:-5])]
+    if trunc:
+        return jsons[max(trunc, key=len)]
+    return None
+
+
+def test_sidecar_index_matches_the_scan():
+    """Random Takeout-like directories, including equal-length ties: the indexed matcher picks what the scan picked."""
+    import random
+    from roamingest.discovery import sidecar_index
+    rng = random.Random(0)
+    stems = ["IMG_0001", "IMG_0002", "a", "PXL_20230101_101010123", "Screenshot_20190101-101010_Long_Application"]
+    tails = ["", ".supplemental-metadata", ".supplemental-metad", ".suppl", ".xx", ".yy"]
+    checked = 0
+    for _ in range(400):
+        media, jsons = [], {}
+        for _ in range(rng.randint(1, 12)):
+            s, e = rng.choice(stems), rng.choice([".jpg", ".heic", ".mp4"])
+            n = rng.choice(["", "", "(1)", "(2)"])
+            media.append(rng.choice([f"{s}{n}{e}", f"{s}-edited{e}", f"{s}{e}"]))
+            j = rng.choice([f"{s}{e}{rng.choice(tails)}{n}.json", f"{s}{e}{n}.json", f"{(s + e)[:rng.randint(18, 40)]}.json"])
+            jsons[j.lower()] = j
+        idx = sidecar_index(jsons)
+        for mf in media:
+            assert match_sidecar(mf, jsons, idx) == _match_sidecar_scan(mf, jsons), (mf, list(jsons))
+            checked += 1
+    assert checked > 1000
+
+
 def test_exif_probe_roundtrip(tmp_path):
     rng = np.random.default_rng(0)
     p = tmp_path / "x.jpg"

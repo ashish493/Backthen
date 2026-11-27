@@ -120,9 +120,15 @@ def test_shared_and_covers_from_different_days(engine):
 
 
 def test_api_memories(server):
+    import time
     port, _ = server
-    st, _, b = req(port, "/api/memories")
-    d = json.loads(b)
+    deadline = time.monotonic() + 60                      # the first answer may be provisional while the text model
+    while True:                                           # loads (BOTTLENECKS.md #8); the app polls the same way
+        st, _, b = req(port, "/api/memories")
+        d = json.loads(b)
+        if not d.get("refining") or time.monotonic() > deadline:
+            break
+        time.sleep(0.5)
     assert st == 200 and {"cards", "version", "refining", "checked", "total", "provisional"} <= set(d) and d["refining"] is False
     assert all("cover" in c for c in d["cards"])
     st, _, b = req(port, "/api/points")

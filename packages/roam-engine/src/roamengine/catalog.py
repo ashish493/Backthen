@@ -10,6 +10,8 @@ import sqlite3
 
 import numpy as np
 
+from .filedates import date_from_name
+
 SUPPORTED_SCHEMA = 1
 
 
@@ -127,7 +129,9 @@ class Catalog:
             self.time_utc = [r[5] for r in rows]
             self.time_local = [r[6] for r in rows]
             self.time_source = [r[7] for r in rows]
-            self.t = np.array([_epoch(r[5] or r[6]) for r in rows], dtype=np.float64)   # sort/filter key
+            self._dates_from_names(con, live)
+            self.t = np.array([_epoch(u or loc) for u, loc in zip(self.time_utc, self.time_local)],
+                              dtype=np.float64)                                    # sort/filter key
             self.lat = np.array([np.nan if r[8] is None else r[8] for r in rows], dtype=np.float64)
             self.lon = np.array([np.nan if r[9] is None else r[9] for r in rows], dtype=np.float64)
             self.gps_source = [r[10] for r in rows]
@@ -169,6 +173,19 @@ class Catalog:
             con.close()
         self.stamp = stamp
         return self
+
+    def _dates_from_names(self, con, live):
+        """Undated items get a day from a file name (source 'filename'); the first parseable copy in path order wins."""
+        rows = con.execute(
+            live + "SELECT f.asset_id, f.rel_path FROM asset_files f JOIN live USING(asset_id) "
+            "JOIN assets a USING(asset_id) WHERE f.status='done' AND a.capture_time_utc IS NULL "
+            "AND a.capture_time_local IS NULL ORDER BY f.asset_id, f.source_id, f.rel_path").fetchall()
+        for aid, rel in rows:
+            i = self.index[aid]
+            if self.time_local[i] is None:
+                day = date_from_name(rel)
+                if day:
+                    self.time_local[i], self.time_source[i] = day, "filename"
 
     # ------------------------------------------------------------------ per-asset detail (queried on demand)
     def files_of(self, asset_id):

@@ -5,8 +5,13 @@ import { Icon } from "../components";
 
 const TIME_SOURCE: Record<string, string> = {
   exif: "camera (EXIF, with time zone)", exif_local: "camera clock (EXIF, no time zone)", sidecar: "Google Takeout sidecar",
-  container: "video file",
+  container: "video file", filename: "file name (day only; for WhatsApp, the day it was sent)",
 };
+const inferredText = (dt?: number | null) => {
+  const m = Math.max(1, Math.round(Math.abs(dt || 0) / 60));
+  return `estimated: no GPS here, so taken from a photo ${m} min ${(dt || 0) < 0 ? "earlier" : "later"}`;
+};
+const fmtDay =(iso: string) => new Date(iso + "Z").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 const GPS_SOURCE: Record<string, string> = {
   exif: "camera (EXIF GPS)", container: "video file", sidecar_geoData: "Google Takeout sidecar",
   sidecar_geoDataExif: "Google Takeout sidecar (EXIF copy)", manual: "added by you in Backthen",
@@ -93,7 +98,7 @@ export function Viewer({ list, index, onIndex, onClose, onSimilar, onShowOnMap }
 
       <aside className="info">
         <button className="btn close" onClick={onClose} aria-label="Close"><Icon.close /></button>
-        <div style={{ fontWeight: 650, fontSize: 16 }}>{fmtDate(a.capture_time, a.capture_time_is_utc)}</div>
+        <div style={{ fontWeight: 650, fontSize: 16 }}>{a.capture_time_source === "filename" && a.capture_time ? fmtDay(a.capture_time) : fmtDate(a.capture_time, a.capture_time_is_utc)}</div>
         <div className="hint">{index + 1} of {list.length}{a.score !== undefined && ` · match ${a.score.toFixed(3)}`}</div>
         {err && <p className="error">{err}</p>}
         {d && (
@@ -102,11 +107,11 @@ export function Viewer({ list, index, onIndex, onClose, onSimilar, onShowOnMap }
               <dt>Type</dt><dd>{isVideo ? "Video" : "Photo"} · {d.format?.toUpperCase()}</dd>
               <dt>Size</dt><dd>{d.width && d.height ? `${d.width} × ${d.height}` : "—"} · {fmtBytes(d.size)}</dd>
               {isVideo && <><dt>Length</dt><dd>{fmtDuration(d.duration_s)} · {d.codec?.toUpperCase()}</dd></>}
-              <dt>Date</dt><dd>{d.capture_time_utc ? fmtDate(d.capture_time_utc) : d.capture_time_local ? `${fmtDate(d.capture_time_local, false)} (camera clock)` : "Unknown"}
+              <dt>Date</dt><dd>{d.capture_time_utc ? fmtDate(d.capture_time_utc) : d.capture_time_local && d.capture_time_source === "filename" ? fmtDay(d.capture_time_local) : d.capture_time_local ? `${fmtDate(d.capture_time_local, false)} (camera clock)` : "Unknown"}
                 {d.capture_time_source && <div className="hint">from {TIME_SOURCE[d.capture_time_source] || d.capture_time_source}</div>}</dd>
               <dt>Place</dt><dd>{d.lat != null && d.lon != null
                 ? <>{d.place_name && <b>{d.place_name} · </b>}{d.lat.toFixed(5)}, {d.lon.toFixed(5)}
-                  {d.gps_source && <div className="hint">{d.gps_source === "manual" ? GPS_SOURCE.manual : `from ${GPS_SOURCE[d.gps_source] || d.gps_source}`}</div>}
+                  {d.gps_source && <div className="hint">{d.gps_source === "manual" ? GPS_SOURCE.manual : d.gps_source === "inferred" ? inferredText(d.inferred_dt_s) : `from ${GPS_SOURCE[d.gps_source] || d.gps_source}`}</div>}
                   {d.original_lat != null && <div className="hint">camera/file location: {d.original_lat.toFixed(5)}, {d.original_lon!.toFixed(5)}</div>}</>
                 : "No location"}
                 <div style={{ marginTop: 4, display: "flex", gap: 6, flexWrap: "wrap" }}>

@@ -18,6 +18,9 @@ roamengine = "roamengine.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+roamengine = ["data/*.gz", "data/prompts/*.npz"]   # gazetteer; shipped prompt vectors (#8)
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["gpu: needs CUDA"]

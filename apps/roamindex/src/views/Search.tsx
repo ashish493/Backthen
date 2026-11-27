@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { api, fmtInt, mediaUrl, type Asset, type Filters } from "../api";
 import { Grid, Icon, Sentinel, SkeletonGrid, usePaged } from "../components";
-import { Memories, WorldStrip, useJourneys, type MemoryOpen } from "./Memories";
+import { Memories, OnThisDay, WorldStrip, YearsStrip, useJourneys, type MemoryOpen } from "./Memories";
+import { Relive } from "./Relive";
+import { YearReview } from "./YearReview";
 import { Viewer } from "./Viewer";
 
 export type SimilarReq = { asset: Asset; frame?: number } | null;
@@ -146,6 +149,9 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
 
   const journeys = useJourneys();
   const [opened, setOpened] = useState<MemoryOpen | null>(null);
+  const [yearView, setYearView] = useState<{ year: number; all: number[] } | null>(null);
+  const [relive, setRelive] = useState<string | null>(null);
+  const openMemory = (m: MemoryOpen) => { setYearView(null); setOpened(m); setFilters({ from: m.from, to: m.to }); };
   const [moreChips, setMoreChips] = useState(false);
   const mode = similar ? "similar" : q.trim() ? "search" : "browse";
   const filtered = Object.values(filters).some((v) => v !== undefined && v !== "" && v !== false);
@@ -237,7 +243,9 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
             {chips}
           </section>
           <WorldStrip journeys={journeys} />
-          <Memories onOpen={(m) => { setOpened(m); setFilters({ from: m.from, to: m.to }); }} />
+          <OnThisDay onOpen={openMemory} />
+          <Memories onOpen={openMemory} />
+          <YearsStrip onPick={(y, all) => setYearView({ year: y, all })} />
           <div className="sectionhead">
             <h2 className="display">All photos and videos</h2>
             <FilterBar f={filters} setF={setFilters} />
@@ -250,6 +258,8 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
             <div className="backrow">
               <button className="backbtn" onClick={onHome}><span aria-hidden>←</span> Home</button>
               {memoryLabel && <span className="backtitle">Memories · <b>{memoryLabel}</b></span>}
+              {memoryLabel && opened?.trip && opened.from === filters.from &&
+                <button className="btn primary" onClick={() => setRelive(opened.trip!)}><Icon.play /> Relive this trip</button>}
             </div>
           )}
           {searchbar}
@@ -267,6 +277,10 @@ export function SearchView({ similar, setSimilar, filters, setFilters, onShowOnM
           {results}
         </>
       )}
+      {yearView && createPortal(
+        <YearReview year={yearView.year} years={yearView.all} onYear={(y) => setYearView({ ...yearView, year: y })}
+          onClose={() => setYearView(null)} onOpen={openMemory} onRelive={setRelive} />, document.body)}
+      {relive && createPortal(<Relive start={relive} onClose={() => setRelive(null)} />, document.body)}
       {open !== null && (
         <Viewer list={items} index={open} onIndex={(i) => { setOpen(i); if (i > items.length - 10) more(); }}
           onClose={() => setOpen(null)} onSimilar={(a, frame) => { setOpen(null); setSimilar({ asset: a, frame }); }}

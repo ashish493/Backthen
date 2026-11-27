@@ -177,7 +177,8 @@ function Settings({ engine, onEngine }: { engine: EngineInfo; onEngine: (e: Engi
             <input className="input mono" value={cfg.library} onChange={(e) => setCfg({ ...cfg, library: e.target.value })} />
             <button className="btn" onClick={pickLib}><Icon.folder /></button>
             <span>Python</span>
-            <input className="input mono" value={cfg.python} onChange={(e) => setCfg({ ...cfg, python: e.target.value })} />
+            <input className="input mono" value={cfg.python} placeholder="Built in (set up by Backthen); or a python.exe with roamengine installed"
+              onChange={(e) => setCfg({ ...cfg, python: e.target.value })} />
             <span />
           </div>
         )}

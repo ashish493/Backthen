@@ -32,18 +32,36 @@ from .videos import probe_codec, video_emits
 
 MANIFEST_NAME = "manifest.sqlite"
 THUMB_DIR = "thumbnails"
+POLL_S = 0.2                                              # how often a blocked stage checks for an abort
+
+
+class IngestError(RuntimeError):
+    """The run did not complete: a stage failed, or files were dispatched but never written. `report` is the
+    aggregate report of what did happen (files committed before the failure are kept; a rerun resumes)."""
+
+    def __init__(self, msg, report=None):
+        super().__init__(msg)
+        self.report = report
+
+
+class _Abort(BaseException):
+    """Raised inside a stage once another stage has failed. BaseException, so the per-file `except Exception`
+    handlers do not record it as a file error; the stage wrapper swallows it."""
 
 
 class ByteBudget:
-    def __init__(self, limit):
+    def __init__(self, limit, abort=None):
         self.limit, self.used, self.cv, self.blocked_s = limit, 0, threading.Condition(), 0.0
+        self.abort = abort
 
     def acquire(self, n):
         n = min(n, self.limit)
         t = time.perf_counter()
         with self.cv:
             while self.used + n > self.limit:
-                self.cv.wait()
+                if self.abort is not None and self.abort.is_set():
+                    raise _Abort
+                self.cv.wait(POLL_S)
             self.used += n
         self.blocked_s += time.perf_counter() - t
         return n
@@ -184,22 +202,39 @@ class Ingestor:
         throttle_off, priority_set = set_power(a.throttle, a.priority)
         io0 = psutil.Process().io_counters()
 
-        from .embedder import ClipEmbedder
         arch, pre = a.model.split("/", 1)
-        reuse = self._embedder and self._embedder.batch == a.batch and (self._embedder.info["name"], self._embedder.info["pretrained"]) == (arch, pre)
-        self.emb = self._embedder if reuse else ClipEmbedder(a.batch, a.device, arch, pre)
-        self.m.ensure_model(self.emb.info)
-        self.model_id = self.emb.info["model_id"]
+        if todo:
+            from .embedder import ClipEmbedder
+            reuse = self._embedder and self._embedder.batch == a.batch and (self._embedder.info["name"], self._embedder.info["pretrained"]) == (arch, pre)
+            self.emb = self._embedder if reuse else ClipEmbedder(a.batch, a.device, arch, pre)
+            self.m.ensure_model(self.emb.info)
+            self.model_id = self.emb.info["model_id"]
+        else:                                             # nothing to embed: skip torch, CUDA and the model (~4 s)
+            self.emb = None
+            self.model_id = self.m.model_id_for(arch, pre)
 
         wall, mon = self._execute()
+        if self.m.con.in_transaction:                     # a writer failure leaves its open transaction behind
+            try:
+                self.m.con.rollback()
+            except Exception:  # noqa: BLE001
+                pass
         rep = self._report(wall, mon, counts, n_resumed, n_moved, n_missing)
         rep["throttle_off_ok"], rep["priority_set"] = throttle_off, priority_set
         io1 = psutil.Process().io_counters()
         rep["process_read_bytes"] = io1.read_bytes - io0.read_bytes
         rep["process_read_ops"] = io1.read_count - io0.read_count
+        failure = self._failure(rep)
+        rep["failed"] = failure is not None
+        if failure:                                       # aggregate only: stage and exception type, never a path
+            rep["failure"] = {k: v for k, v in failure.items() if k != "message"}
         if a.timeline:
             rep["timeline"] = mon.timeline
-        self.m.finish_run(self.run_id, {k: v for k, v in rep.items() if k != "timeline"})
+        try:
+            self.m.finish_run(self.run_id, {k: v for k, v in rep.items() if k != "timeline"})
+        except Exception:  # noqa: BLE001
+            if not failure:
+                raise                                     # after a database failure the run row may not be writable
         with open(os.path.join(a.out_dir, "report.json"), "w", encoding="utf-8") as f:
             json.dump(rep, f, indent=1)
         if a.report:
@@ -207,9 +242,30 @@ class Ingestor:
             with open(a.report, "w", encoding="utf-8") as f:
                 json.dump(rep, f, indent=1)
         self._log(json.dumps(rep, indent=1))
-        self._event("finished", wall_s=rep["wall_s"], files=rep["files_processed"], errors=sum(rep["errors"].values()))
         self.m.close()
+        if failure:
+            raise IngestError(failure["message"], rep)
+        self._event("finished", wall_s=rep["wall_s"], files=rep["files_processed"], errors=sum(rep["errors"].values()))
         return rep
+
+    def _failure(self, rep):
+        """None if the run completed (or was cancelled); otherwise what went wrong. A non-zero unaccounted_files
+        without a cancel is a failure even when no stage raised: the run must never report success it didn't have."""
+        if self.fatal:
+            stage, e = self.fatal
+            msg = str(e).strip().splitlines()[0][:300] if str(e).strip() else ""
+            return dict(stage=stage, error=type(e).__name__,
+                        message=f"indexing failed in the {stage} stage: {type(e).__name__}" + (f": {msg}" if msg else "")
+                                + f" ({rep['files_processed']} files saved; run again to resume)")
+        if rep["unaccounted_files"] and not self.cancel.is_set():
+            n = rep["unaccounted_files"]
+            if self.guard_stopped:
+                return dict(stage="disk_guard", error="LowDiskSpace",
+                            message=f"indexing stopped: the output disk has less than {self.a.min_free_gb:g} GB free "
+                                    f"({n} files not processed; free some space and run again)")
+            return dict(stage="pipeline", error="Unaccounted",
+                        message=f"indexing did not finish: {n} files were dispatched but never written")
+        return None
 
     # ------------------------------------------------------------------ execution
     def _execute(self):
@@ -221,8 +277,12 @@ class Ingestor:
         self.wq = queue.Queue()
         self.vq_cpu = queue.Queue(maxsize=max(2, 2 * a.video_cpu))
         self.vq_nv = queue.Queue(maxsize=max(2, 2 * a.video_nvdec))
-        self.budget = ByteBudget(a.read_budget_mb * 2**20)
         self.stop = threading.Event()
+        self.abort = threading.Event()                    # set when any stage fails: every blocked stage unwinds
+        self.fatal = None                                 # (stage, exception) of the first failure
+        self.flock = threading.Lock()
+        self.guard_stopped = False
+        self.budget = ByteBudget(a.read_budget_mb * 2**20, self.abort)
         self.photos_complete = threading.Event()
         if not self.photos:
             self.photos_complete.set()
@@ -241,15 +301,16 @@ class Ingestor:
         if a.video_nvdec == 0:
             a.nvdec_pct = 0
 
+        S = self._stage
         threads = {
-            "readers": [threading.Thread(target=self._reader) for _ in range(self.readers_n)],
-            "photo": [threading.Thread(target=self._photo_worker) for _ in range(a.photo_workers)],
-            "vcpu": [threading.Thread(target=self._video_worker, args=(self.vq_cpu, False)) for _ in range(a.video_cpu)],
-            "vnv": [threading.Thread(target=self._video_worker, args=(self.vq_nv, True)) for _ in range(a.video_nvdec)],
+            "readers": [S("reader", self._reader) for _ in range(self.readers_n)],
+            "photo": [S("photo", self._photo_worker) for _ in range(a.photo_workers)],
+            "vcpu": [S("video", self._video_worker, self.vq_cpu, False) for _ in range(a.video_cpu)],
+            "vnv": [S("video", self._video_worker, self.vq_nv, True) for _ in range(a.video_nvdec)],
         }
-        t_gpu, t_wr = threading.Thread(target=self._gpu), threading.Thread(target=self._writer)
-        t_guard = threading.Thread(target=self._disk_guard, daemon=True)
-        d_ph, d_vd = threading.Thread(target=self._dispatch_photos), threading.Thread(target=self._dispatch_videos)
+        t_gpu, t_wr = S("embedding", self._gpu), S("database write", self._writer)
+        t_guard = S("disk guard", self._disk_guard, daemon=True)
+        d_ph, d_vd = S("dispatch", self._dispatch_photos), S("dispatch", self._dispatch_videos)
 
         def probe():
             return dict(q_read=self.rq.qsize(), q_photo=self.dq.qsize(), q_gpu=self.gq.qsize(),
@@ -263,31 +324,76 @@ class Ingestor:
                     t.start()
             for t in (t_gpu, t_wr, t_guard, d_ph, d_vd):
                 t.start()
-            d_ph.join()                                   # shutdown in dependency order
-            for _ in threads["readers"]:
-                self.rq.put(None)
-            for t in threads["readers"]:
+            try:                                          # shutdown in dependency order
+                d_ph.join()
+                for _ in threads["readers"]:
+                    self._put(self.rq, None)
+                for t in threads["readers"]:
+                    t.join()
+                for _ in threads["photo"]:
+                    self._put(self.dq, None)
+                for t in threads["photo"]:
+                    t.join()
+                d_vd.join()
+                for _ in threads["vcpu"]:
+                    self._put(self.vq_cpu, None)
+                for _ in threads["vnv"]:
+                    self._put(self.vq_nv, None)
+                for t in threads["vcpu"] + threads["vnv"]:
+                    t.join()
+                self._put(self.gq, None)
+            except _Abort:
+                pass                                      # a stage failed: every other stage is unwinding on its own
+            for grp in threads.values():
+                for t in grp:
+                    t.join()
+            for t in (d_ph, d_vd, t_gpu, t_wr):
                 t.join()
-            for _ in threads["photo"]:
-                self.dq.put(None)
-            for t in threads["photo"]:
-                t.join()
-            d_vd.join()
-            for _ in threads["vcpu"]:
-                self.vq_cpu.put(None)
-            for _ in threads["vnv"]:
-                self.vq_nv.put(None)
-            for t in threads["vcpu"] + threads["vnv"]:
-                t.join()
-            self.gq.put(None)
-            t_gpu.join()
-            t_wr.join()
             wall = time.perf_counter() - t0
         self.stop.set()
         return wall, mon
 
     def _halted(self):
         return self.stop.is_set() or self.cancel.is_set()
+
+    # ------------------------------------------------------------------ failure handling
+    def _stage(self, name, fn, *args, daemon=False):
+        """A pipeline thread. The first exception that escapes any stage is recorded and aborts the whole run, so a
+        dead stage can never leave the others blocked on its queue (bottleneck #24/#25)."""
+        def run():
+            try:
+                fn(*args)
+            except _Abort:
+                pass
+            except BaseException as e:  # noqa: BLE001
+                with self.flock:
+                    if self.fatal is None:
+                        self.fatal = (name, e)
+                self._log(f"[error] {name} stage failed: {type(e).__name__}")
+                self.abort.set()
+                self.stop.set()
+        return threading.Thread(target=run, name=f"ingest-{name}", daemon=daemon)
+
+    def _put(self, q, item):
+        """q.put that gives up (raises _Abort) once the run is aborting: the consumer may be dead."""
+        while True:
+            if self.abort.is_set():
+                raise _Abort
+            try:
+                q.put(item, timeout=POLL_S)
+                return
+            except queue.Full:
+                pass
+
+    def _get(self, q):
+        """q.get that gives up (raises _Abort) once the run is aborting: the producer may be dead."""
+        while True:
+            if self.abort.is_set():
+                raise _Abort
+            try:
+                return q.get(timeout=POLL_S)
+            except queue.Empty:
+                pass
 
     # ------------------------------------------------------------------ dispatch and routing
     def _route_value(self, it, data=None, cid=None):
@@ -326,12 +432,14 @@ class Ingestor:
             if self._halted():
                 break
             if it["kind"] == "photo" or it["size"] <= self.prefetch_bytes:
-                self.rq.put(it)
+                self._put(self.rq, it)
 
     def _dispatch_videos(self):
         a = self.a
-        if a.schedule == "phased":
-            self.photos_complete.wait()
+        if a.schedule == "phased":                        # photos first; a cancel stops photos early (#26)
+            while not self.photos_complete.wait(POLL_S):
+                if self._halted():
+                    return
         for it in self.videos:
             if self._halted():
                 break
@@ -347,7 +455,7 @@ class Ingestor:
                 if cid and a.dedup == "skip" and self._linkable(it, cid):
                     self._link(it, cid, (time.perf_counter() - t) * 1000)
                     continue
-            self._video_queue(it, cid=cid).put((it, None, 0.0, 0, None))
+            self._put(self._video_queue(it, cid=cid), (it, None, 0.0, 0, None))
 
     # ------------------------------------------------------------------ workers
     def _read_sidecar(self, it):
@@ -361,7 +469,7 @@ class Ingestor:
 
     def _reader(self):
         while True:
-            it = self.rq.get()
+            it = self._get(self.rq)
             if it is None:
                 return
             n = 0
@@ -390,7 +498,7 @@ class Ingestor:
                 if it["kind"] == "photo":
                     self.dq.put(msg)
                 else:                                     # prefetched video: same single sequential reader
-                    self._video_queue(it, data).put(msg)
+                    self._put(self._video_queue(it, data), msg)
             except Exception as e:  # noqa: BLE001
                 if n:
                     self.budget.release(n)
@@ -430,7 +538,7 @@ class Ingestor:
     def _photo_worker(self):
         a = self.a
         while True:
-            m = self.dq.get()
+            m = self._get(self.dq)
             if m is None:
                 return
             it, data, t_read, held, side = m
@@ -450,7 +558,7 @@ class Ingestor:
                 rec["thumbnail_ref"] = self._save_thumb(thumb, rec["cid"])
                 rec["t_write_ms"] = (time.perf_counter() - t3) * 1000
                 rec["n_emb"] = 1
-                self.gq.put(("f", it["key"], 0, 0.0, arr))
+                self._put(self.gq, ("f", it["key"], 0, 0.0, arr))
             except Exception as e:  # noqa: BLE001
                 rec.update(status="error", error=type(e).__name__, n_emb=0)
             finally:
@@ -461,7 +569,7 @@ class Ingestor:
     def _video_worker(self, q, use_nvdec):
         a = self.a
         while True:
-            m = q.get()
+            m = self._get(q)
             if m is None:
                 return
             it, data, t_read, held, side = m             # data: whole file (prefetched) or None
@@ -498,7 +606,7 @@ class Ingestor:
                     info["thumbnail_ref"] = self._save_thumb(thumb, info["cid"])
                 info["t_write_ms"] = (time.perf_counter() - tw) * 1000
                 for idx, pts, arr in emits:
-                    self.gq.put(("f", it["key"], idx, pts, arr))
+                    self._put(self.gq, ("f", it["key"], idx, pts, arr))
                 info["n_emb"] = len(emits)
             except Exception as e:  # noqa: BLE001
                 info.update(status="error", error=type(e).__name__, n_emb=0)
@@ -525,6 +633,8 @@ class Ingestor:
             buf.clear()
 
         while True:
+            if self.abort.is_set():
+                raise _Abort
             t = time.perf_counter()
             try:
                 m = self.gq.get(timeout=0.3)
@@ -596,8 +706,10 @@ class Ingestor:
                     os._exit(137)
 
         while True:
+            if self.abort.is_set():                       # another stage failed: keep the files already complete
+                break
             try:
-                m = self.wq.get(timeout=1.0)
+                m = self.wq.get(timeout=POLL_S)
             except queue.Empty:
                 commit()
                 continue
@@ -623,6 +735,7 @@ class Ingestor:
                 self.stop.set()
             if shutil.disk_usage(self.a.out_dir).free < self.a.min_free_gb * 2**30:
                 self.written["thumbs_ok"] = False
+                self.guard_stopped = True
                 self._log(f"[guard] output disk below {self.a.min_free_gb:g} GB free: stopping dispatch")
                 self.stop.set()
 
@@ -659,7 +772,8 @@ class Ingestor:
                               rotated=sum(1 for r in v if r.get("rotation")))
         tot_bytes = sum(k["bytes"] for k in kinds.values())
         cfg = a.public()
-        cfg.update(readers=self.readers_n, power_plan=power_plan_name(), model_id=self.model_id, device=self.emb.device)
+        cfg.update(readers=self.readers_n, power_plan=power_plan_name(), model_id=self.model_id,
+                   device=self.emb.device if self.emb else None)
         rep = dict(
             tag=a.tag, roamingest_version=__version__, run_id=self.run_id, wall_s=round(wall, 2),
             files_processed=len(recs), files_resumed_skipped=n_resumed, files_moved=n_moved, files_missing=n_missing,

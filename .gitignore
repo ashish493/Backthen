@@ -48,3 +48,9 @@ docs/private/
 
 # Python packaging output
 *.egg-info/
+
+# Installer staging (apps/roamindex/tools/prepare_runtime.py): uv.exe and wheels built from this checkout
+apps/roamindex/src-tauri/resources/runtime/
+
+# Wheel build leftovers (prepare_runtime.py)
+packages/*/build/

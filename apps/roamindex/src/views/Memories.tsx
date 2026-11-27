@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { api, fmtInt, inTauri, type Journeys, type MemoryCard, type Memories, type World } from "../api";
+import { api, fmtInt, inTauri, type Journeys, type MemoryCard, type Memories, type OnThisDay as OnThisDayData, type World } from "../api";
 import { SpinGlobe } from "../SpinGlobe";
 import { MemoryPhotos, PolaroidLoader } from "./Polaroid";
 
-export type MemoryOpen = { from: string; to: string; label: string };
+export type MemoryOpen = { from: string; to: string; label: string; trip?: string };   // trip: its start day (Relive)
 type Card = { key: string; kind: "trip" | "ago" | "month"; title: string; sub: string; stamp: [string, string];
   open: MemoryOpen; cover: string[] };
 
@@ -41,7 +41,7 @@ function present(c: MemoryCard): Card {
     const days = c.days ?? 1;
     return { key: c.key, kind: c.kind, title: c.title ?? "A trip", cover: c.cover, stamp: stampOf(c.from),
       sub: `${c.country && c.country !== c.title ? c.country + " · " : ""}${days} ${days === 1 ? "day" : "days"} · ${fmtInt(c.count)} items`,
-      open: { from: c.from, to: c.to, label: c.title ?? "A trip" } };
+      open: { from: c.from, to: c.to, label: c.title ?? "A trip", trip: c.from } };
   }
   const m = c.month ?? c.from;
   const n = c.years_ago ?? 0;
@@ -115,6 +115,59 @@ export function Memories({ onOpen }: { onOpen: (m: MemoryOpen) => void }) {
         ))}
       </div>
       <RefineVeil on={veil} checked={data?.checked} total={data?.total} />
+      </div>
+    </section>
+  );
+}
+
+/** On this day: today's date in earlier years, one postcard per year (this week when the exact day has nothing). */
+export function OnThisDay({ onOpen }: { onOpen: (m: MemoryOpen) => void }) {
+  const [d, setD] = useState<OnThisDayData | null>(null);
+  useEffect(() => { api.onThisDay().then(setD).catch(() => {}); }, []);
+  if (!d || !d.cards.length) return null;
+  const today = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" });
+  return (
+    <section className="memsection">
+      <div className="memhead">
+        <h2 className="display">{d.window ? "This week" : "On this day"}</h2>
+        <span className="hint">{d.window ? `around ${today}` : today}, in earlier years</span>
+      </div>
+      <div className="memories">
+        {d.cards.map((c, i) => {
+          const label = `${d.window ? "This week" : "On this day"} ${c.year}`;
+          return (
+            <button key={c.year} className="postcard ago" style={{ ["--tilt" as string]: `${[1.2, -1.4, 0.8, -1][i % 4]}deg`, ["--i" as string]: i }}
+              onClick={() => onOpen({ from: c.from, to: c.to, label })} title={`Show ${label}`}>
+              <MemoryPhotos ids={c.cover} index={i} />
+              <div className="stamp" aria-hidden><b>{c.year}</b></div>
+              <div className="postmeta">
+                <span className="memtag ago">{c.years_ago === 1 ? "A year ago" : `${c.years_ago} years ago`}</span>
+                <b className="posttitle">{c.year}</b>
+                <small>{fmtInt(c.count)} {c.count === 1 ? "item" : "items"}</small>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/** Your years: one chip per year with photos, each opening its Year in review. */
+export function YearsStrip({ onPick }: { onPick: (year: number, all: number[]) => void }) {
+  const [ys, setYs] = useState<{ year: number; count: number }[]>([]);
+  useEffect(() => { api.years().then((r) => setYs(r.years)).catch(() => {}); }, []);
+  if (!ys.length) return null;
+  const all = ys.map((y) => y.year);
+  return (
+    <section className="memsection">
+      <div className="memhead"><h2 className="display">Year in review</h2></div>
+      <div className="yearchips">
+        {ys.map((y) => (
+          <button key={y.year} className="yearchip" onClick={() => onPick(y.year, all)}>
+            <b>{y.year}</b><small>{fmtInt(y.count)}</small>
+          </button>
+        ))}
       </div>
     </section>
   );

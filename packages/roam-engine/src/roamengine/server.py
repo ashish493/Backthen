@@ -23,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import numpy as np
 
-from . import __version__, journeys, memories
+from . import __version__, journeys, memories, nostalgia
 from .engine import Engine, SearchFilters
 from .evaluation import Labels, evaluate
 from .ingest_manager import IngestManager
@@ -32,7 +32,7 @@ from .media import PHOTO_MIME, VIDEO_MIME, frame_jpeg, preview_jpeg
 ALLOWED_ORIGINS = {"http://tauri.localhost", "https://tauri.localhost", "tauri://localhost",
                    "http://localhost:1420", "http://127.0.0.1:1420"}
 ASSET_RE = r"([0-9a-f]{8,64})"
-HOME_RULES = 2        # bump when the rules for trips or memory cards change: an older disk copy is then not shown
+HOME_RULES = 3       # bump when the rules for trips or memory cards change: an older disk copy is then not shown
 
 
 def guess_storage(path):
@@ -62,9 +62,9 @@ def guess_storage(path):
 class Api:
     """Routing table and handlers; independent of the HTTP plumbing so tests can call it directly."""
 
-    def __init__(self, library, text_device="cpu", python=None):
+    def __init__(self, library, text_device="cpu", python=None, infer_places=True):
         self.library = os.path.abspath(library)
-        self.engine = Engine(self.library, text_device=text_device)
+        self.engine = Engine(self.library, text_device=text_device, infer_places=infer_places)
         self.labels = Labels(self.library)
         self._gazetteer = None
         self._home = None                                # see home(): trips, memory cards, town covers
@@ -88,6 +88,10 @@ class Api:
             ("POST", r"/api/ingest/cancel$", lambda p, b: self.ingest.cancel()),
             ("GET", r"/api/journeys$", lambda p, b: self.journeys()),
             ("GET", r"/api/memories$", lambda p, b: self.memories()),
+            ("GET", r"/api/onthisday$", lambda p, b: self.on_this_day()),
+            ("GET", r"/api/years$", lambda p, b: dict(years=nostalgia.years(self.engine.cat))),
+            ("GET", r"/api/year/(\d{4})$", self.year_review),
+            ("GET", r"/api/relive$", self.relive),
             ("GET", r"/api/faces/status$", lambda p, b: self.faces_status()),
             ("GET", r"/api/storage-guess$", lambda p, b: guess_storage(p.get("path", ""))),
             ("GET", r"/api/ingest/glimpses$", lambda p, b: dict(items=self.glimpses(_int(p, "n", 24, 100)))),
@@ -209,6 +213,7 @@ class Api:
                 h = self._home
                 if h is None or h["key"] != key:
                     h = self._home = self._build_home(key)
+        self._refill_towns(h)
         w = self._faces()
         fv = w.version if w is not None else 0
         if h["fv"] != fv:
@@ -216,28 +221,48 @@ class Api:
                 if h["fv"] != fv:
                     self._fill_covers(h)
                     h["fv"] = fv
-                    if w is None or (w.ready and not w.busy()):
+                    if not h.get("towns_pending") and (w is None or (w.ready and not w.busy())):
                         self._save_disk(h)
         return h
 
     def _build_home(self, key):
         e, cat = self.engine, self.engine.cat
         st = journeys.structure(cat, self.gazetteer())
+        # town prompts are library-specific, so a new library has none cached: rather than wait for the text model
+        # (seconds; BOTTLENECKS.md #8), build with plain covers now and refill when it is loaded (see _refill_towns)
+        want = bool(st["town_keys"] and cat.model_id)
+        tv = e.town_vectors(st["town_keys"], wait=False) if want else None
         h = dict(key=key, st=st, cands=memories.candidates(cat, st["trips"]), cards=[], fv=None,
                  day_of=np.where(np.isfinite(cat.t), cat.t // 86400, -1).astype(np.int64),
-                 town_vec=dict(zip(st["town_keys"], e.town_vectors(st["town_keys"])))
-                 if st["town_keys"] and cat.model_id else {})
+                 town_vec=dict(zip(st["town_keys"], tv)) if tv is not None else {}, towns_pending=want and tv is None)
+        if h["towns_pending"]:
+            e.warm_text()
         w = self._faces()
         self._fill_covers(h)
         h["fv"] = w.version if w is not None else 0
         self._request_faces(h)
-        if w is None or w.ready:                         # never replace a good disk copy with CLIP-only covers
+        if not h["towns_pending"] and (w is None or w.ready):   # never replace a good disk copy with provisional covers
             self._save_disk(h)
         return h
 
+    def _refill_towns(self, h):
+        """Once the text model is loaded: the town vectors a provisional home was built without, then the covers."""
+        if not (h.get("towns_pending") and self.engine.text_ready()):
+            return
+        with self._home_lock:
+            if not h.get("towns_pending"):
+                return
+            keys = h["st"]["town_keys"]
+            h["town_vec"] = dict(zip(keys, self.engine.town_vectors(keys)))
+            h["towns_pending"] = False
+            self._fill_covers(h)
+            w = self._faces()
+            if w is None or (w.ready and not w.busy()):
+                self._save_disk(h)
+
     def _fill_covers(self, h):
         e, cat, st = self.engine, self.engine.cat, h["st"]
-        town_covers = e.town_covers(st["towns"])
+        town_covers = e.town_covers(st["towns"], wait=not h.get("towns_pending"))
         trip_cov = [e.trip_covers(t["_members"], h["town_vec"].get(t["_town"])) for t in st["trips"]]
         # the row: shared memories only (unless --memories-solo-ok), and never the same day on two cards
         shared = (lambda m: True) if self.memories_solo_ok else e.shared
@@ -276,7 +301,8 @@ class Api:
     def _disk_key(self):
         cat, pl = self.engine.cat, os.path.join(self.library, "places.sqlite")
         return json.loads(json.dumps([cat.stamp, os.path.getmtime(pl) if os.path.exists(pl) else 0, cat.model_id,
-                                      dt.date.today().strftime("%Y-%m"), HOME_RULES, self.memories_solo_ok]))
+                                      dt.date.today().strftime("%Y-%m"), HOME_RULES, self.memories_solo_ok,
+                                      self.engine.infer_places]))
 
     def _save_disk(self, h):
         try:
@@ -311,7 +337,29 @@ class Api:
             return dict(cards=self._disk["cards"], version=-1, checked=n, total=n, refining=False, provisional=True)
         checked = sum(1 for c in h["cards"] if c["_checked"])
         return dict(cards=memories.public(h["cards"]), version=h["fv"], checked=checked, total=len(h["cards"]), provisional=False,
-                    refining=bool(w is not None and (w.busy() or checked < len(h["cards"]) or not w.ready)))
+                    refining=bool(h.get("towns_pending") or
+                                  (w is not None and (w.busy() or checked < len(h["cards"]) or not w.ready))))
+
+    def on_this_day(self):
+        h = self.home()
+        key = dt.date.today().isoformat()
+        if h.get("otd_key") != key:
+            h["otd"], h["otd_key"] = nostalgia.on_this_day(self.engine), key
+        return h["otd"]
+
+    def year_review(self, p, b, year):
+        h = self.home()
+        covers = {(t["name"], t["country"]): t["cover"] for t in h["towns"]}
+        r = nostalgia.year_review(self.engine, h["st"], h["journeys"]["trips"], covers, int(year))
+        if r is None:
+            raise KeyError(f"year {year}")
+        return r
+
+    def relive(self, p, b):
+        r = nostalgia.relive(self.engine, self.home()["st"], p.get("start", ""))
+        if r is None:
+            raise KeyError("trip")
+        return r
 
     def points(self, p, b):
         h = self.home()
@@ -543,8 +591,8 @@ class _Server(ThreadingHTTPServer):
 
 
 def serve(library, port=0, token=None, text_device="cpu", python=None, ready=print, faces=False,
-          memories_solo_ok=False):
-    api = Api(library, text_device=text_device, python=python)
+          memories_solo_ok=False, infer_places=True):
+    api = Api(library, text_device=text_device, python=python, infer_places=infer_places)
     api.memories_solo_ok = memories_solo_ok
     if faces:                                            # background face pass for people-aware covers
         from .faces import FaceWorker
@@ -553,15 +601,18 @@ def serve(library, port=0, token=None, text_device="cpu", python=None, ready=pri
     def warm_home():                                     # home screen ready before the user gets there
         api.load_disk_home()
         try:
-            api.home()
+            h = api.home()
+            if h.get("towns_pending"):                   # built before the text model loaded: refill once it has
+                api.engine.text
+                api.home()
         except Exception:                                # an empty library or no model yet: built on demand
             pass
     threading.Thread(target=warm_home, daemon=True, name="warm-home").start()
     token = token or secrets.token_urlsafe(24)
     httpd = _Server(("127.0.0.1", port), Handler)
     Handler.api, Handler.token, Handler.port = api, token, httpd.server_address[1]
-    if api.engine.cat.model_id:
-        threading.Thread(target=lambda: api.engine.text, daemon=True).start()  # warm the text model
+    api.engine.auto_warm_text = True                     # also when a new library's first indexing adds a model
+    api.engine.warm_text()
     ready(json.dumps(dict(event="ready", port=Handler.port, token=token, library=api.library)))
     sys.stdout.flush()
     return httpd
@@ -577,12 +628,14 @@ def main(argv=None):
                     help="do not look for faces (people-aware covers); faces are found on thumbnails and stay local")
     ap.add_argument("--memories-solo-ok", action="store_true",
                     help="keep memories without a photo of two or more people (the CC0 demo library has almost none)")
+    ap.add_argument("--no-infer-places", action="store_true",
+                    help="do not give photos without GPS the location of one taken close in time")
     ap.add_argument("--exit-with-parent", action="store_true",
                     help="exit when stdin closes (the desktop app holds our stdin open while it runs)")
     a = ap.parse_args(argv)
     os.makedirs(a.library, exist_ok=True)
     httpd = serve(a.library, a.port, a.token, a.text_device, faces=not a.no_faces,
-                  memories_solo_ok=a.memories_solo_ok)
+                  memories_solo_ok=a.memories_solo_ok, infer_places=not a.no_infer_places)
     if a.exit_with_parent:
         threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start()
     try:

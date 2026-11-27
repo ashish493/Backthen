@@ -93,7 +93,8 @@ export function EvaluateView() {
             {qs.map((q) => (
               <div key={q.query_id} className={`q ${cur?.query_id === q.query_id ? "on" : ""}`} role="button" tabIndex={0} onClick={() => setCur(q)}>
                 <span>{q.text}</span>
-                <small>{q.relevant}/{q.judged} <button className="btn" style={{ padding: "0 6px", border: 0 }} onClick={(e) => { e.stopPropagation(); remove(q); }}>×</button></small>
+                <small title={`${q.relevant} marked relevant; ${q.judged} of the top ${POOL} labelled. Unlabelled results count as not relevant.`}>
+                  {q.relevant} relevant · {q.judged}/{POOL} judged <button className="btn" style={{ padding: "0 6px", border: 0 }} onClick={(e) => { e.stopPropagation(); remove(q); }}>×</button></small>
               </div>
             ))}
             {!qs.length && <div className="hint">No queries yet.</div>}
@@ -101,7 +102,7 @@ export function EvaluateView() {
           <div className="panel">
             <b>Scores</b> <span className="hint">({rep ? `${rep.queries} labelled queries, ${fmtInt(rep.assets)} items` : "—"})</span>
             <table className="table" style={{ marginTop: 6 }}>
-              <thead><tr><th>K</th><th className="num">Recall</th><th className="num">Precision</th><th className="num">nDCG</th><th className="num" title="Expected recall of a random ranking">Random</th></tr></thead>
+              <thead><tr><th>K</th><th className="num" title="Capped recall: relevant found in the top K ÷ min(K, relevant labelled). A perfect ranking scores 1.0">Recall</th><th className="num">Precision</th><th className="num">nDCG</th><th className="num" title="Expected recall of a random ranking">Random</th></tr></thead>
               <tbody>
                 {[1, 5, 10, 20].map((k) => (
                   <tr key={k}><td>@{k}</td><td className="num">{cell(`recall@${k}`)}</td><td className="num">{cell(`precision@${k}`)}</td>

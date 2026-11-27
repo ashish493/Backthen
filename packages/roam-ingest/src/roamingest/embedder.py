@@ -39,10 +39,24 @@ class ClipEmbedder:
         x[:] = 0
         for i, r in enumerate(rows):
             x[i] = r
+        oom = getattr(torch.cuda, "OutOfMemoryError", RuntimeError)
+        try:
+            e = self._run(x)
+        except oom:
+            if self.device != "cuda":
+                raise
+            # One retry after freeing the allocator cache: same padded shape, so the vectors are unchanged. Splitting
+            # the batch would change the shape and is not guaranteed bit-identical, so a second failure is fatal.
+            torch.cuda.empty_cache()
+            e = self._run(x)
+        return e[:len(rows)]
+
+    def _run(self, x):
+        torch = self.torch
         with torch.no_grad():
             t = torch.from_numpy(x).to(self.device)
             e = self.model.encode_image(t.half() if self.half else t).float()
             e = torch.nn.functional.normalize(e, dim=-1).half().cpu().numpy()
         if self.device == "cuda":
             torch.cuda.synchronize()
-        return e[:len(rows)]
+        return e

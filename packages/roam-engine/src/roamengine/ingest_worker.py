@@ -19,12 +19,16 @@ def main():
         out.write(json.dumps(ev) + "\n")
         out.flush()
 
+    from roamingest.pipeline import IngestError
+    keep = ("files_processed", "files_resumed_skipped", "files_moved", "files_missing", "unaccounted_files",
+            "wall_s", "errors", "peak_rss_mib", "peak_vram_mib", "cancelled", "failure")
     emit(dict(event="starting"))
     try:
         rep = Ingestor(IngestConfig(**cfg, quiet=True), on_progress=emit).run()
-        keep = ("files_processed", "files_resumed_skipped", "files_moved", "files_missing", "unaccounted_files",
-                "wall_s", "errors", "peak_rss_mib", "peak_vram_mib")
         emit(dict(event="report", **{k: rep.get(k) for k in keep}))
+    except IngestError as e:                              # did not complete; what was saved is kept, a rerun resumes
+        emit(dict(event="failed", error=str(e), report={k: (e.report or {}).get(k) for k in keep}))
+        sys.exit(1)
     except Exception as e:  # noqa: BLE001
         emit(dict(event="failed", error=f"{type(e).__name__}: {e}"))
         sys.exit(1)

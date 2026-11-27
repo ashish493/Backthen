@@ -103,10 +103,14 @@ def _inventory_headers(items, a):
 # ---------------------------------------------------------------------------------------------- run
 def cmd_run(a):
     from .config import IngestConfig
-    from .pipeline import Ingestor
+    from .pipeline import IngestError, Ingestor
     a.__dict__.pop("cmd", None)
     a.__dict__.pop("func", None)
-    rep = Ingestor(IngestConfig.from_namespace(a)).run()
+    try:
+        rep = Ingestor(IngestConfig.from_namespace(a)).run()
+    except IngestError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
     return 0 if not rep.get("cancelled") else 2
 
 

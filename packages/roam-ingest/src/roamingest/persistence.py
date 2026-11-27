@@ -91,6 +91,12 @@ class Manifest:
                                (root, _root_prefix(root), label, storage))
         return cur.lastrowid
 
+    def model_id_for(self, name, pretrained):
+        """The recorded model_id of an architecture and pretrained tag (any dtype), or None."""
+        row = self.con.execute("SELECT model_id FROM models WHERE name=? AND pretrained=? ORDER BY model_id",
+                               (name, pretrained)).fetchone()
+        return row[0] if row else None
+
     def ensure_model(self, m):
         self.con.execute("INSERT OR IGNORE INTO models(model_id,name,pretrained,dim,dtype,preprocess) VALUES (?,?,?,?,?,?)",
                          (m["model_id"], m["name"], m.get("pretrained"), m["dim"], m["dtype"], m["preprocess"]))
