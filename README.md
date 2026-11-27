@@ -37,8 +37,8 @@ Trips come first, then this month in earlier years, then your busiest months. Wh
 Below the memories:
 
 - **On this day:** what you were doing on today's date in earlier years (this week, when the exact day has nothing).
-- **Relive a trip:** a full-screen slideshow of the best photos of each day, in order, with the route drawing itself as you go.
-- **Year in review:** any year at a glance: photos, days, places (and which ones were new), trips, the busiest day and the best twelve photos.
+- **Relive a trip:** a full-screen slideshow of the best photos of each day, in order, with the route drawing itself as you go. Start it from a trip postcard or from Year in review.
+- **Year in review:** pick a year from the row of years on the home screen to see it at a glance: photos, days, places (and which ones were new), trips, the busiest day and the best twelve photos. Click a month to open it.
 
 ## Your travels on a globe
 
@@ -63,6 +63,13 @@ Below the memories:
 ![The first indexing run: photos fade past with a line of travel nostalgia, the percentage and the time left](docs/gifs/indexing.gif)
 
 Point Backthen at a folder or drive. It reads each file once, never changes it, and can be stopped at any time. While it works, the photos it has found fade past with a line of travel nostalgia ("Rewinding the road trip…").
+
+**Dates and places fill themselves in.** Many photos have no camera date (WhatsApp images, downloads, copies) or no GPS, so they would drop out of trips, the timeline and the map. Backthen fills the gaps without touching the files:
+
+- **Dates from file names.** `IMG-20190704-WA0012.jpg` or `PXL_20230115_093012.jpg` gives the day. For WhatsApp, that's the day the photo was sent. Only items with no other date use this, and the viewer shows it as a day, not a time.
+- **Places from nearby photos.** A photo with no GPS takes the place of a photo with GPS taken up to 30 minutes before or after, or up to 2 hours when the photos before and after agree. The viewer marks it as *estimated* ("taken from a photo 12 min earlier"), and a place you add by hand always wins.
+
+On a real 48,569-item archive this took dated items from 67% to 98% and located items from 13% to 32%. When we hid real GPS and estimated it this way, 98% of guesses landed within 1 km. Run the engine with `--no-infer-places` to turn estimated places off.
 
 | | |
 |---|---|
